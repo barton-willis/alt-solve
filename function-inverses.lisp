@@ -1,6 +1,6 @@
 ;; Author: Barton Willis
 ;; 2020
-;; Common Lisp/Maxima code for symbolic solutions of equations.
+;; Common Lisp/Maxima code for symbolic solutions of equations and systems of equations.
 
 ;; This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 
