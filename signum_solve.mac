@@ -1,0 +1,64 @@
+map('load, ["opsubst", 'fourier_elim, 'to_poly_solve, 'unwind_protect, simplifying]);
+
+logical_p(e) := block([],
+  e : subst(['notequal = "#", 'equal = "="],e),
+  not mapatom(e) and member(inpart(e,0),["%or", "%and"]))$
+
+is_x(e) := if logical_p(e) then map('is, e) else is(e)$
+
+
+/* Define a conditional expression cond(pred, a, b) as a simplifying function. */
+
+simp_cond(pred, a, b) := block([prederror : false, p : is_x(pred)],
+   if p = true then a else if p = false then b else simpfuncall('cond,pred,a,b));
+   
+simplifying('cond, 'simp_cond);
+
+/* is e an inequation? */
+inequation_p(e) := not mapatom(e) and member(inpart(e,0),["=", "<", ">", "<=", ">=", "#"]);
+
+/* Resimplify an expression e using the current fact database and option variable settings. */
+resimplify(e) := expand(e,0,0); 
+
+/* Convert signum, unit_step, and abs functions to a cond form. The conversion is supressed when 
+   the predicate is free of the members of the list X.*/
+
+convert_to_cond(e,X) := block([],
+    e : subst('signum = lambda([s], block([sr : realpart(s), si : imagpart(s)],
+       if lfreeof(X,s) then signum(s) else cond(sr < 0 and (equal(si,0)),  -1, cond(equal(s,0), 0, 1)))), e),
+    e : subst('unit_step = lambda([s], block([sr : realpart(s),si : imagpart(s)],
+        if lfreeof(X,s) then unit_step(s) else cond(sr <= 0 and equal(si,0), 0, 1))),e),
+    subst('abs = lambda([s], if lfreeof(X,s) then abs(s) else cond(s < 0, -s, s)),e));
+
+equation_convert(e,X) := block([ee, L, eqs : set(),cntx],
+   e : if listp(e) then e else [e],
+   e : convert_to_cond(e,X),
+   L : setify(map('first, gatherargs(e, 'cond))),
+   L : subset(L, lambda([q], not lfreeof(X,q))),
+   L : map(lambda([q], set(q, not q)),L),
+   L : apply('cartesian_product, listify(L)),
+   for cnds in L do (
+      unwind_protect(
+        (cntx : newcontext(),
+        if not (member('inconsistent, apply('assume, listify(cnds)))) then (   
+          ee : resimplify(e),
+          eqs : adjoin([xreduce("%and",cnds), ee], eqs))),
+        killcontext(cntx))),
+    eqs);
+    
+filter_solution(cnd, sol) := block([s, acc : %union()],
+  for s in sol do (
+    acc : %union(acc, cond(simp_inequality(subst(s, cnd)), s, %union()))),
+ acc);   
+ 
+ /* Attempt to solve an equation or list of equations e for the variables in the list X.
+   The equations can involve the abs, unit_step, and signum function. */
+
+extra_solve(e,X) := block([s, q, sol : %union()],
+    e : if listp(e) then e else [e],
+    X : if listp(X) then X else [X],
+    e : equation_convert(e,X),
+    for q in e do (
+      s : filter_solution(first(q),%solve(second(q),X)),
+      sol : %union(sol, s)),
+    sol);

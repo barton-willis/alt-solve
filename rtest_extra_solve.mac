@@ -1,0 +1,45 @@
+extra_solve(abs(x) = -1,[x]);
+%union()$
+
+extra_solve(abs(x) = 0,[x]);
+%union([x=0])$
+
+extra_solve(abs(x) = 1,[x]);
+%union([x=-1], [x=1])$
+
+extra_solve(abs(x) + abs(1-x) = 6,x);
+%union([x=-5/2],[x=7/2])$
+
+extra_solve(abs(x  - abs(1-x)) = 1/2,x);
+%union([x=1/4],[x=3/4])$
+
+extra_solve(abs(x) = abs(a),x);
+%union([x=-abs(a)], [x=abs(a)])$
+
+nicedummies(extra_solve(abs(x)=x,x));
+%union(cond(%r0>=0,%union([x=%r0]),%union()))$
+
+nicedummies(extra_solve(abs(x)=-x,x));
+%union(cond(%r0 >= 0, %union([x=%r0]),%union()))$
+
+block([cntx : newcontext()],
+   assume(a < 0), unwind_protect(extra_solve(abs(x)=a,x), killcontext(cntx)));
+%union()$
+
+nicedummies(extra_solve(unit_step(x)=1,x));
+%union(cond(%r0 > 0,[x=%r0],%union()))$
+
+nicedummies(extra_solve(unit_step(x)=0,x));
+%union(cond(%r0<=0,[x=%r0],%union()))$
+
+nicedummies(extra_solve(unit_step(x)=sqrt(2),x));
+%union()$
+
+nicedummies(extra_solve(unit_step(x)=unit_step(a),x));
+%union([x=a])$
+
+
+
+
+   
+
