@@ -19,11 +19,11 @@
 (eval-when
 	(:compile-toplevel :load-toplevel :execute)
 	($load "to_poly_solve")
-	($load "C:/Users/Barton/Downloads/function-inverses.lisp")
+	($load "function-inverses.lisp")
 	(setq $solve_inverse_package $multivalued_inverse)
-	(load "C:/Users/Barton/Downloads/trig_identities.lisp")
-	($load "C:/Users/Barton/Downloads/polynomial-solve.lisp")
-	(load "C:/Users/Barton/Downloads/in-domain.lisp")
+	(load "trig_identities.lisp")
+	($load "polynomial-solve.lisp")
+	(load "in-domain.lisp")
 	($load "grobner"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
@@ -654,7 +654,7 @@
 			  (setq e (triangularize-eqs e v))
 			  (setq sol (solve-triangular-system (cdr e) (cdr v)))
 			  (if sol sol ee)))))
-			 
+
 ;;; This is the entry-level function for system level calls to solve. Solutions are pushed into the
 ;;; special variable *roots. Maybe this should call solve-single-equation instead of the top-level $solve?
 ;;; Skipping $solve and going directly to solve-single-equation would sidestep the call to supercontext--that
