@@ -97,14 +97,14 @@
 ;;   (g) dispatches appropriate lower level solve function
 ;;   (h) reverts gensym substitutions for nonatom solve
 
-(defun $solve (eql &optional (varl nil))
+(defun $solve (eqlist &optional (varl nil))
   (mfuncall '$reset $multiplicities)
 
   (let ((cntx ($supcontext)) ;make asksign and friends data vanishes after exiting $solve.
 		(nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
-	   ;; Allow sets for eql and varl.
-	   (when (and (consp eql) (consp (car eql)) (eql '$set (caar eql)))
-		   (setq eql ($listify eql)))
+	   ;; Allow sets for eqlist and varl.
+	   (when (and (consp eqlist) (consp (car eqlist)) (eql '$set (caar eqlist)))
+		   (setq eqlist ($listify eqlist)))
 
 	   (when (and (consp varl) (consp (car varl)) (eql '$set (caar varl)))
 		   (setq varl ($listify varl)))
@@ -115,31 +115,31 @@
 	   (setq varl
 			 (remove-duplicates
 			 	(cond
-					((null varl) (let (($listconstvars nil)) (cdr ($listofvars eql))))
+					((null varl) (let (($listconstvars nil)) (cdr ($listofvars eqlist))))
 					(($listp varl) (cdr varl))
 					(t (list varl)))
 			  :from-end t))
 
 	 ;; Create the equation list (this is a CL list, not Maxima list). For a inequation that isn't equality,
 	 ;; throw an error.
-	 (setq eql (if ($listp eql) (cdr eql) (list eql)))
+	 (setq eqlist (if ($listp eqlist) (cdr eqlist) (list eqlist)))
 
-	 (setq eql (mapcar #'$ratdisrep eql)) ;new--fixes bugs in rtest_matrixexp.
+	 (setq eqlist (mapcar #'$ratdisrep eqlist)) ;new--fixes bugs in rtest_matrixexp.
 
 	 (when (some #'(lambda (q) (and (consp q) (consp (car q))
-									(member (caar q) (list 'mnotequal 'mgreaterp 'mlessp 'mgeqp 'mleqp) :test #'eq))) eql)
+									(member (caar q) (list 'mnotequal 'mgreaterp 'mlessp 'mgeqp 'mleqp) :test #'eq))) eqlist)
 		 (merror (intl:gettext "Solve:cannot solve inequalities.")))
 
 	 ;; Some sanity checks and warning messages.
-	 (when (and (null eql) $solvenullwarn)
+	 (when (and (null eqlist) $solvenullwarn)
 	   (mtell (intl:gettext "~&solve: equation list is empty, continuing anyway.~%")))
 
 	 (when (some #'mnump varl)
 	   (merror (intl:gettext "solve: all variables must not be numbers.~%")))
 
-	 ;; (setq eql (remove-if #'zerop1 eql))
+	 ;; (setq eqlist (remove-if #'zerop1 eqlist))
 	 ;;Eliminate duplicate equations.
-	 ;;;(setq eql (cdr (simplifya (cons '($set) eql) t)))
+	 ;;;(setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
 
 	 ;; stuff for solving for nonatoms. Should check for problems such as solve([xxx,yyy],[f(x),x])
 	 (dolist (xxx varl)
@@ -148,9 +148,9 @@
 		       (t
 			    (setq g (gensym))
 			    (push (take '(mequal) xxx g) nonatom-subst)
-			    (setq eql (mapcar #'(lambda (q) ($ratsubst g xxx q)) eql))
+			    (setq eqlist (mapcar #'(lambda (q) ($ratsubst g xxx q)) eqlist))
 			    ;; is freeof xxx sufficiently strong?
-			    (when (some #'(lambda (q) (not ($freeof xxx q))) eql)
+			    (when (some #'(lambda (q) (not ($freeof xxx q))) eqlist)
 			 	 (merror (intl:gettext "solve: Cannot solve for non-atom"))))))
 
 	 (setq nonatom-subst (reverse nonatom-subst))
@@ -166,20 +166,20 @@
 			  ((null varl)
 			   (when $solvenullwarn
 				   (mtell (intl:gettext "solve: variable list is empty, continuing anyway.~%")))
-			   (if (every #'zerop1 eql) '$all (take '(mlist))))
+			   (if (every #'zerop1 eqlist) '$all (take '(mlist))))
 
-			  ((and (null (cdr varl)) (null (cdr eql))) ; one equation, one unknown
-			   (setq eql (keep-float (car eql)))
-			   (setq sol ($substitute nonatom-subst (solve-single-equation eql (car varl))))
-			   (setq eql (unkeep-float eql))
+			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation, one unknown
+			   (setq eqlist (keep-float (car eqlist)))
+			   (setq sol ($substitute nonatom-subst (solve-single-equation eqlist (car varl))))
+			   (setq eqlist (unkeep-float eqlist))
 		 	   (setq sol (unkeep-float sol)))
 
 			  ((null (cdr varl)) ;one unknown, more than one equation
-			   (redundant-equation-solve (cons '(mlist) eql) (car varl)))
+			   (redundant-equation-solve (cons '(mlist) eqlist) (car varl)))
 
 			  ;; Multiple equations: SOLVEX.
 			  (t
-			   (setq sol (solvex eql varl nil nil))
+			   (setq sol (solvex eqlist varl nil nil))
 			   (when (not (every #'$listp (cdr sol))) ;;this is unfortunate?
 				   (setq sol `((mlist) ,sol)))
 				(setq sol ($substitute nonatom-subst sol))
@@ -321,8 +321,7 @@
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
 			($solveexplicit ;give up & return empty set
-			  (print "no method" t)
-			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning empty list.") e x)
+			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.") e x)
 			  (push (list '(mlist) e x) $the_unsolved)
 
 			  (setq $multiplicities (take '(mlist)))
@@ -333,7 +332,6 @@
 			  ;; laplace(exp(-8*exp(u)),u,v) after changing the return value to 0 = e.
 			  ;; Standard Maxima chooses to solve for some equation kernel, but I don't know
 			  ;; how it chooses the kernel--so use a silly huersitic for choosing a kernel.
-			  (print "no method" t)
 			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning an implicit solution.") e x)
 			  (push (list '(mlist) e x) $the_unsolved)
 			  (let ((ker))
