@@ -199,7 +199,7 @@
 (defun equation-simplify (e &optional (m 1))
 	(setq e ($ratdisrep (meqhk e))) ;do a=b -->a-b & convert to general form
 
-	(when $solveradcan ;unsure when is the best time to do thid...let's get it done.
+	(when $solveradcan ;unsure when is the best time to do this...let's get it done.
 		(setq e ($radcan e)))
 
 	(cond
@@ -286,7 +286,7 @@
 			  (setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr sol)) t))
 			  (simplifya (cons '(mlist) (mapcar #'car sol)) t)))))
 
-(defvar $the_unsolved nil)
+(defvar $the_unsolved nil) ;;this is purely for debugging 
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve t))
 	(let ((cnd)) ;did have ($assume_pos nil), but why?
