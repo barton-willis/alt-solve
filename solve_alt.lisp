@@ -304,8 +304,6 @@
 			  (setq $multiplicities (simplifya (list '(mlist) '$inf) t))
 			  (take '(mlist) (take '(mequal) x ($new_variable (if ($featurep x '$complex) '$complex '$real)))))
 
-			;;;((solve-mexpt-equation e x m use-trigsolve)) ;;;oops--lots of bugs
-
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (polynomial-solve e x m))
 
