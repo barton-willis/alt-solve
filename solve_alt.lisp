@@ -21,9 +21,9 @@
 	($load "to_poly_solve")
 	($load "function-inverses.lisp")
 	(setq $solve_inverse_package $multivalued_inverse)
-	(load "trig_identities.lisp")
+	($load "trig_identities.lisp")
 	($load "polynomial-solve.lisp")
-	(load "in-domain.lisp")
+	($load "in-domain.lisp")
 	($load "grobner"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
