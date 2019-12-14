@@ -32,7 +32,7 @@
 					 (take '(mequal) x (try-to-crunch-to-zero (div (sub d b) (mul 2 a)))))
 				  (list 1 1))))))
 
-;;; Return a CL list of the solutions to the cubic equation a x^3 + b x^2 + c x + d= 0 and a CL list of the 
+;;; Return a CL list of the solutions to the cubic equation a x^3 + b x^2 + c x + d= 0 and a CL list of the
 ;;; multiplicities.
 (defun my-solve-cubic (x a b c d) "Return solutions and multiplicities of ax^3+bx^2+cx+d=0."
 	(let ((d0) (discr) (d1) (K) (xi) (xii) (sol nil) (n))
@@ -246,7 +246,6 @@
 		 ;; Factoring isn't a universal win; for example x^105-1=0. So before we factor, look for equations of the
 		 ;; form ax^n+b with n > 4. We could allow n to be any positive integer, but this causes more testsuite
 		 ;; failures.
-		 (displa `((mlist) e ,e))
 		 (setq sol (solve-poly-x^n+b e x mx))
 		 ;(setq sol nil)
 		 (cond (sol
