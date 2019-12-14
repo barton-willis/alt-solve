@@ -286,7 +286,7 @@
 			  (setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr sol)) t))
 			  (simplifya (cons '(mlist) (mapcar #'car sol)) t)))))
 
-(defvar $the_unsolved nil) ;;this is purely for debugging 
+(defvar $the_unsolved nil) ;;this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve t))
 	(let ((cnd)) ;did have ($assume_pos nil), but why?
@@ -318,7 +318,7 @@
 
 		    ;;;;((and use-trigsolve (trigsolve e x)))
 
-			((solve-by-match e x))
+			((lambert-w-solve e x m))
 
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
@@ -719,10 +719,17 @@
 		   (rootsort *failures)
 		 nil))
 
-(defun solve-by-match (e x)
-	(cond ((alike e (add x (take '(mexpt) '$%e x)))
-		   (mul -1 (take '(%generalized_lambert_w) ($new_variable '$integer) 1)))
-		  (t nil)))
+;; This function solves x*exp(x) = constant. The match to x*exp(x) must be explicit; for example,
+;;  lambert-w-solve is unable to solve x*exp(x)/2 = 10. When no solution is found, return nil. Of course,
+;; this function could be extended to solve more equations in terms of the Lambert W function.
+(defun lambert-w-solve (e x m) "solve x exp(x) = constant where m is the multiplicity so far"
+  (let ((cnst (sratsimp (sub (mult x (take '(mexpt) '$%e x)) e))))
+		(cond (($freeof x cnst) ;match with x*exp(x) = cnst
+			       (setq $multiplicities (take '(mlist) m))
+			       (cond ((eql $solve_inverse_package $multivalued_inverse)
+		   	         		(take '(%generalized_lambert_w) ($new_variable '$integer) cnst))
+							    	(t (take '(%lambert_w) cnst))))
+		    	(t nil))))
 
 (defun solvecubic (x) (declare (ignore x)) (merror "solvecubic"))
 (defun solvequartic (x) (declare (ignore x)) (merror "solvequartic"))

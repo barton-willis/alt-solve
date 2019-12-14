@@ -1,0 +1,17 @@
+/* Regression file for alt_solve. */
+
+/* To check if the Lambert W solve code sets the multiplicities, set it to [28]*/
+solve(x^28=0,x);
+[x=0]$
+
+block([solve_inverse_package : multivalued_inverse], nicedummies(solve(x * exp(x)= 107,x)));
+generalized_lambert_w(%z0,107)$
+
+multiplicities;
+[1]$
+
+block([solve_inverse_package : single_valued_inverse], nicedummies(solve(x * exp(x)=8,x)));
+lambert_w(8)$
+
+multiplicities;
+[1]$
