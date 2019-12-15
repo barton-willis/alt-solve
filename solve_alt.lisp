@@ -304,8 +304,8 @@
 
 			((solve-mexpt-equation e x m use-trigsolve))
 
-			((mtimesp e)
-			  (product-solver e x m use-trigsolve cnd))
+			((mtimesp ($factor e))
+			  (product-solver ($factor e) x m use-trigsolve cnd))
 
 			((solve-by-blobify e x m))
 

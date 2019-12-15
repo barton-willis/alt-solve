@@ -1,5 +1,8 @@
 /* Additional tests for alt_solve. */
 
+(load("unwind_protect"),0);
+0$
+
 nicedummies(solve(0.0,x));
 [x=%r0]$
 
@@ -44,3 +47,17 @@ block([solve_inverse_package : single_valued_inverse], nicedummies(solve(x * ex
 lambert_w(8)$
 multiplicities;
 [1]$
+
+/* expunge spurious solution x=0 */
+solve(x*(log(x) - 1)=0,x);
+[x=%e]$
+
+/* make sure find both solutions */
+solve(x*(log(x+107) - 1)=0,x);
+[x=%e-107,x=0]$
+
+block([cntx :newcontext()], unwind_protect((assume(a > -107), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
+[x=%e-107,x=a,x=-8]$
+
+block([cntx :newcontext()], unwind_protect((assume(a < -107), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
+[x=%e-107,x=a,x=-8]$
