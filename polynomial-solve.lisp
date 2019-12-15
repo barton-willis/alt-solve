@@ -156,7 +156,7 @@
 		 (zerop1 ($ratcoef e x 3))
 		 (zerop1 ($ratcoef e x 1))))
 
-;;; Solve the degree six cyclotomic polynomials. When the input isn't cyclotomic, return nil. Special caseing all
+;;; Solve the degree six cyclotomic polynomials. When the input isn't cyclotomic, return nil. Special casing all
 ;;; this is somewhat error prone--a general cyclotomic polynomial detector and solver might be more robust.
 (defun solve-cyclotomic-polynomial-degree-6 (cfs) "Solve the degree six cyclotomic polynomials."
 	(let ((x) (lc) (sol nil))
@@ -222,7 +222,7 @@
 ;;; The silly option variable *solve-factors-biquadratic* is explained in solve_alt.lisp. This mechanism could be
 ;;; expunged, resulting in a handful of correct, but failed testsuite tests.
 
-;;; Incidently: gfactor(2+(-sqrt(a^2+4)+a)*x) --> ((a-sqrt(a^2+4))*(2*x-sqrt(a^2+4)-a))/2.
+;;; Incidentally: gfactor(2+(-sqrt(a^2+4)+a)*x) --> ((a-sqrt(a^2+4))*(2*x-sqrt(a^2+4)-a))/2.
 
 ;;; I'm not sure why domain is set to complex. It's my understanding that algsys eliminates spurious solutions by
 ;;; explicitly checking the putative solutions. It seems that some so-called simplifications such as sqrt(x^2) --> |x|

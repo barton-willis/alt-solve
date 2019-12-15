@@ -9,7 +9,7 @@
 (dolist (e (list '$max '%acosh '%cos '%cosh '%lambert_w '%log '%sin '%sinh 'mabs 'rat))
 	(setf (get e 'msimpind) (list e 'simp)))
 
-;;; When $use_to_poly is true, dispatch the to_poly_solver after atempting other methods;
+;;; When $use_to_poly is true, dispatch the to_poly_solver after attempting other methods;
 ;;; when $use_to_poly is false, never dispatch the to_poly_solver.
 (defmvar $use_to_poly t)
 
@@ -38,7 +38,7 @@
 
 (declare-top (special
 			  *var
-		      *roots ;alternating list of solutions and multiplicitices
+		      *roots ;alternating list of solutions and multiplicities
 		      *failures
 			  xm* xn* mul*))
 
@@ -181,11 +181,11 @@
 
 ;;; We return a CL list of both the simplified expression and the modified multiplicity.
 
-;;; Extracting the numertor can, of course, introduce spurious solutions.
+;;; Extracting the numerator can, of course, introduce spurious solutions.
 
 ;;; Factoring an equation isn't an automatic win--for example, factoring x^107-1 is a loser.
 ;;; The option variable solvefactors controls factoring, but it's uncertain when the factoring
-;;; happens. This function does not factor. It's unclear to me exactly when in theh solve
+;;; happens. This function does not factor. It's unclear to me exactly when in the solve
 ;;; process that radcan should be applied.
 
 ;;; Additionally, we could remove factors from e that don't depend on the solve variable(s). But
@@ -248,7 +248,7 @@
 ;; m is the multiplicity so far in the solving process. The list cnd has conditions on the solution.
 
 ;; When e = e1*e2* ... * en, solve e1=0, e2=0, ... en = 0.  Remove the duplicates from the union of the solutions, and
-;; remove those solutions that do not satisify cnd. One problem is when one of the solutions is all, but there is a condition
+;; remove those solutions that do not satisfy cnd. One problem is when one of the solutions is all, but there is a condition
 ;; on the solution--something like solve ((sin(x)^2 + cos(x)^2-1)*(1/x),x). I'm not sure how to fix this.
 
 (defun product-solver (e x m use-trigsolve cnd) "Solve e=e1*e2*...*en for x"
@@ -325,7 +325,7 @@
 			  ;; Integration is sensitive to what happens for unsolved equations. Try
 			  ;; laplace(exp(-8*exp(u)),u,v) after changing the return value to 0 = e.
 			  ;; Standard Maxima chooses to solve for some equation kernel, but I don't know
-			  ;; how it chooses the kernel--so use a silly huersitic for choosing a kernel.
+			  ;; how it chooses the kernel--so use a silly heuristic for choosing a kernel.
 			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning an implicit solution.~%") e x)
 			  (push (list '(mlist) e x) $the_unsolved)
 			  (let ((ker))
@@ -561,7 +561,7 @@
 				 (setq eqset ($disjoin 0 eqset))
 				 (setq eqset ($adjoin ek eqset))))
 
-		 (setq eqset (sort (cdr eqset) #'equation-complexity-guess)) ;effort to find simpliest equation
+		 (setq eqset (sort (cdr eqset) #'equation-complexity-guess)) ;effort to find simplest equation
 		 (setq sol (let (($solveexplicit t)) ($solve (first eqset) x)))
 		 ;;include only solutions that can be verified--likely this will sometimes miss legitimate solutions.
 		 (push '(mlist) eqs) ;restore eqs to a Maxima list
@@ -661,9 +661,9 @@
 
 ;;; The non-user level option variable *solve-factors-biquadratic* is a silly workaround.  The testsuite has a handful
 ;;; of definite integration problems of the form integrate(1/(a + b*sin(x)^2,x, c,d). These lead to solving
-;;; biquadratics. Standard Maxima doesn't factor the biquadrtic--that results in pairs of solutions of the
-;;; form +/-sqrt(XXX). For such definite integrals, factoring the biquadratic and solving yeilds solutions that are
-;;; argublly more complex than not factoring.
+;;; biquadratics. Standard Maxima doesn't factor the biquadratic--that results in pairs of solutions of the
+;;; form +/-sqrt(XXX). For such definite integrals, factoring the biquadratic and solving yields solutions that are
+;;; arguably more complex than not factoring.
 
 ;;; I think solve isn't supposed to alter $multiplicities--it's a mess.
 
