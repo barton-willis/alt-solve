@@ -42,15 +42,13 @@
 		      *failures
 			  xm* xn* mul*))
 
-;; Rationalize floats (binary64) and protect them inside a labeled box (label = *float-box-label*); and simiarly
-;; for big floats.
+;; In expression e, convert all floats (binary64) and bigfloats to their exact rational value
+;; and put that value inside a labeled box. Doing this allows solve to preserve the exact
+;; value of floats.
 
 (defmvar *float-box-label* (gensym))
 (defmvar *big-float-box-label* (gensym))
 
-;; In expression e, convert all floats and bigfloats to their exact rational value
-;; and put that value inside a labeled box. Doing this allows solve to preserve the exact
-;; value of floats
 (defun keep-float (e) "Convert floats and big floats to rational form and put them inside labeled boxes."
     (cond
         (($mapatom e)
@@ -71,8 +69,7 @@
               (t e)))
         (t (simplifya (cons (list (caar e)) (mapcar #'unkeep-float (cdr e))) t))))
 
-;; various flags that  I've possibly ignored: $solveexplicit (not entirely), $dispflag,
-;; $programmode, and $breakup.
+;; Flags that I've ignored: $solveexplicit (not entirely), $dispflag, $programmode, and $breakup.
 
 ;; The top level function solve function:
 ;;   (a) reset multiplicative to default
@@ -115,14 +112,14 @@
 
 	 (when (some #'(lambda (q) (and (consp q) (consp (car q))
 									(member (caar q) (list 'mnotequal 'mgreaterp 'mlessp 'mgeqp 'mleqp) :test #'eq))) eqlist)
-		 (merror (intl:gettext "Solve:cannot solve inequalities.")))
+		 (merror (intl:gettext "Solve: cannot solve inequalities.~%")))
 
 	 ;; Some sanity checks and warning messages.
 	 (when (and (null eqlist) $solvenullwarn)
 	   (mtell (intl:gettext "Solve: equation list is empty, continuing anyway.~%")))
 
 	 (when (some #'mnump varl)
-	   (merror (intl:gettext "solve: all variables must not be numbers.~%")))
+	   (merror (intl:gettext "Solve: all variables must not be numbers.~%")))
 
 	 ;; (setq eqlist (remove-if #'zerop1 eqlist))
 	 ;;Eliminate duplicate equations.
@@ -138,7 +135,7 @@
 			    (setq eqlist (mapcar #'(lambda (q) ($ratsubst g xxx q)) eqlist))
 			    ;; is freeof xxx sufficiently strong?
 			    (when (some #'(lambda (q) (not ($freeof xxx q))) eqlist)
-			 	 (merror (intl:gettext "solve: Cannot solve for non-atom"))))))
+			 	 (merror (intl:gettext "Solve: Cannot solve for non-atom.~%"))))))
 
 	 (setq nonatom-subst (reverse nonatom-subst))
 	 (setq varl (mapcar #'third nonatom-subst))  ;was $rhs
@@ -174,15 +171,26 @@
 
 	  ($killcontext cntx))))
 
-;;; Do basic simplifications of an equation. The optional variable m is the multiplicity so far.
-;;; The simplification z^n --> z when n is a positive integer alters the multiplicitiy.
+;;; Do basic simplifications of an equation. In particular:
+;;;    (i) convert a=b to a-b
+;;;    (ii) convert to general form
+;;;    (iii) when solveradcan is true, apply radcan
+;;;    (iv) when n is a positive integer, convert e^n --> e and modify the multiplicity
+;;;    (v) ratsimp and extract the numerator
+;;;    (vi) apply the Pythagorean identities (things like sin(x)^2 + cos(x)^2 --> 1).
+
+;;; We return a CL list of both the simplified expression and the modified multiplicity.
+
+;;; Extracting the numertor can, of course, introduce spurious solutions.
 
 ;;; Factoring an equation isn't an automatic win--for example, factoring x^107-1 is a loser.
 ;;; The option variable solvefactors controls factoring, but it's uncertain when the factoring
-;;; happens. The same for solveradcan.
+;;; happens. This function does not factor. It's unclear to me exactly when in theh solve
+;;; process that radcan should be applied.
 
+;;; Additionally, we could remove factors from e that don't depend on the solve variable(s). But
+;;; to do that, the solve variables would need to be an argument.
 
-;;; Additionally, we could remove factors from e that don't depend on the solve variable(s).
 (defun equation-simplify (e &optional (m 1))
 	(setq e ($ratdisrep (meqhk e))) ;do a=b -->a-b & convert to general form
 
@@ -262,7 +270,7 @@
 								   (mapcar #'(lambda (q) (declare (ignore q)) '$not_yet_set) solx)))
 
 
-					(dolist (sx solx) ;build association list of solution.multiplicity
+					(dolist (sx solx) ;build an association list of the form solution.multiplicity
 						(push (cons sx (pop wmul)) sol))))
 		 (cond
 			 ((eql sol '$all)
@@ -676,7 +684,7 @@
 				($use_to_poly t)
 				($realonly nil)
 				($negdistrib t) ;not sure about this?
-				(*solve-factors-biquadratic* t)
+				(*solve-factors-biquadratic* nil)
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
@@ -764,7 +772,7 @@
      (return varl)))
 
 ;;;;;;;;;;;;;broken code!
-;;; Attempt to solve equations that are rational funcitons of trig functions of the same argument. When the equation
+;;; Attempt to solve equations that are rational functions of trig functions with identical arguments. When the equation
 ;;; e doesn't have the required form, return nil. Steps: (#1) convert all trig functions to sine or cosine (#2) gather
 ;;; the arguments of sine and cosine (#3) check that the arguments of sine and cosine are identical, and when they are
 ;;; replace cos(X) --> gc and sin(X) --> gs (#4) append gc^2 + gs^2-1 to the equation and solve.
