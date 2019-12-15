@@ -10,7 +10,7 @@
 ;;; Make an extra effort to simplify the expression e to zero, but respect the principal branch
 ;;; cuts (don't use radcan).
 (defun try-to-crunch-to-zero (e) "Ratsimp with algebraic = true and domain = complex."
-	(let (($algebraic t) ($domain '$complex)) (fullratsimp e))) ; was (sratsimp e)))
+	(let (($algebraic t) ($domain '$complex)) (sratsimp e))) ; was (fullratsimp e)))
 
 ;; Solve a*x + b = 0 for x. Return both the solution (-b/a) and a CL list of the multiplicity.
 (defun my-solve-linear (x a b) "Return solution and multiplicity of ax+b=0."
