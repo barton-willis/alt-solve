@@ -1,6 +1,33 @@
-/* Regression file for alt_solve. */
+/* Additional tests for alt_solve. */
 
-/* To check if the Lambert W solve code sets the multiplicities, set it to [28]*/
+nicedummies(solve(0.0,x));
+[x=%r0]$
+
+errcatch(solve([x>0],x));
+[]$
+
+solve([x=1,x=1]);
+[x=1]$
+
+solve(x^a = 5,x);
+[x=5^(1/a)]$
+
+(a : b, b : c, c : d, d : e, x : y, y: z ,0);
+0$
+
+solve([a*x - b],[x]);
+[y=c/b]$
+
+(remvalue(a,b,c,d,x,y),0);
+0$
+
+solve([0],[]);
+all$
+
+solve([0,0],[]);
+all$
+
+/* To check if the Lambert W solve code sets the multiplicities correctly, set it to [28]*/
 solve(x^28=0,x);
 [x=0]$
 
@@ -12,6 +39,5 @@ multiplicities;
 
 block([solve_inverse_package : single_valued_inverse], nicedummies(solve(x * exp(x)=8,x)));
 lambert_w(8)$
-
 multiplicities;
 [1]$

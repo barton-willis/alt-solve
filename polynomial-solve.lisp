@@ -22,7 +22,7 @@
 	(let ((d (sub (mul b b) (mul 4 a c))))
 		 (setq d (try-to-crunch-to-zero d))
 		  (cond ((zerop1 d)
-			  	 (mtell "Found multiple root of quadratic ~%")
+			  	 ;(mtell "Found multiple root of quadratic ~%")
 				 (values (list (take '(mequal) x (div b (mul -2 a)))) (list 2)))
 		  	    (t
 				 (setq d (simpnrt d 2)) ;any branch is OK
@@ -85,8 +85,8 @@
 ;;; Solve the quartic p4 x^4 + p3 x^3 + p2 x^2 + p1 x + p0=0. Return both a CL list of the solutions and the
 ;;; list of the multiplicities.
 (defun my-solve-quartic (v p4 p3 p2 p1 p0) "Return solutions and multiplicities of p4 v^4+p3 v^3+p2 v^2+ p1 v + p0=0."
-	(mtell "solving quartic ~%")
-	(displa `((mlist) ,p4 ,p3 ,p2 ,p1 ,p0))
+	;(mtell "solving quartic ~%")
+	;(displa `((mlist) ,p4 ,p3 ,p2 ,p1 ,p0))
 	; (print "solving quartic" t)
 	(let ((pp4) (pp3) (pp2) (pp1) (pp0) (m) (g (gensym)) (x) (mm) (shift))
 
@@ -165,19 +165,19 @@
 		 (setq cfs (mapcar #'(lambda (q) (div q lc)) cfs))
 
 		 (cond ((every #'alike1 cfs (list 1 1 1 1 1 1 1))
-				 (mtell "solved 6th cyclotomic~%")
+				 ;(mtell "solved 6th cyclotomic~%")
 			 	 (setq sol (mapcar #'(lambda (s) (div s 7)) (list 2 4 6 8 10 12))))
 
 				((every #'alike1 cfs (list 1 -1 1 -1 1 -1 1))
-				 (mtell "solved 6th cyclotomic~%")
+				 ;(mtell "solved 6th cyclotomic~%")
 				 (setq sol (mapcar #'(lambda (s) (div s 7)) (list 1 3 5 9 11 13))))
 
 			 	((every #'alike1 cfs (list 1 0 0 -1 0 0 1))
-				  (mtell "solved 6th cyclotomic~%")
+				  ;(mtell "solved 6th cyclotomic~%")
 				 (setq sol (mapcar #'(lambda (s) (div s 9)) (list 1 11 13 5 7 17))))
 
 	            ((every #'alike1 cfs (list 1 0 0 1 0 0 1))
-				  (mtell "solved 6th cyclotomic~%")
+				  ;(mtell "solved 6th cyclotomic~%")
 				  (setq sol (mapcar #'(lambda (s) (div s 9)) (list 2 4 5 7 10)))))
 
 			(values  (mapcar #'(lambda (q) (take '(mequal) x (power '$%e (mul '$%i '$%pi q)))) sol)

@@ -42,21 +42,6 @@
 		      *failures
 			  xm* xn* mul*))
 
-
-;; bugs with standard $solve include
-;;
-;;  (a) solve(0.0,x) ---> [x=x]
-;;  (b) solve([x>0],x) ---> [x>0=0]
-;;  (c) solve([x=1,x=1]) --->  error, but  solve([x=1,x=1]) --> [[x=1]]
-;;  (d) solve(x^a = 5) ---> ask if a is integer, but that fact is appended to global fact database.
-
-;;  (e) Multiple evalutions:
-;; (%i1)    (a : b, b : c, c : d, d : e,x : y, y: z)$
-;; (%i2)    solve([a*x - b],[x]);
-;; (%o2)    [z=d/c]
-;; (%i3)    solve(a*x - b,x);
-;; (%o3)    [y=c/b]
-
 ;; Rationalize floats (binary64) and protect them inside a labeled box (label = *float-box-label*); and simiarly
 ;; for big floats.
 
@@ -84,8 +69,8 @@
         (t (simplifya (cons (list (caar e)) (mapcar #'unkeep-float (cdr e))) t))))
 
 
-;; There are some tricky cases: solve([0],[]), solve([0,0],[]), and ...
-;; various flags, I've possibly ignored: $solveexplicit (not entirely), $dispflag, $programmode, and $breakup
+;; various flags that  I've possibly ignored: $solveexplicit (not entirely), $dispflag,
+;; $programmode, and $breakup.
 
 ;; The top level function solve function:
 ;;   (a) reset multiplicative to default
@@ -132,7 +117,7 @@
 
 	 ;; Some sanity checks and warning messages.
 	 (when (and (null eqlist) $solvenullwarn)
-	   (mtell (intl:gettext "~&solve: equation list is empty, continuing anyway.~%")))
+	   (mtell (intl:gettext "Solve: equation list is empty, continuing anyway.~%")))
 
 	 (when (some #'mnump varl)
 	   (merror (intl:gettext "solve: all variables must not be numbers.~%")))
@@ -165,7 +150,7 @@
 
 			  ((null varl)
 			   (when $solvenullwarn
-				   (mtell (intl:gettext "solve: variable list is empty, continuing anyway.~%")))
+				   (mtell (intl:gettext "Solve: variable list is empty, continuing anyway.~%")))
 			   (if (every #'zerop1 eqlist) '$all (take '(mlist))))
 
 			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation, one unknown
@@ -257,7 +242,7 @@
 ;; on the solution--something like solve ((sin(x)^2 + cos(x)^2-1)*(1/x),x). I'm not sure how to fix this.
 
 (defun product-solver (e x m use-trigsolve cnd) "Solve e=e1*e2*...*en for x"
-	(mtell "using product solve ~%")
+	;(mtell "using product solve ~%")
 	;(displa `((mequal) cnd ,cnd))
 
 	(let ((solx) (sol nil) (wmul))
@@ -321,7 +306,7 @@
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
 			($solveexplicit ;give up & return the empty set
-			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.") e x)
+			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") e x)
 			  (push (list '(mlist) e x) $the_unsolved)
 			  (setq $multiplicities (take '(mlist) m))
 			  (take '(mlist)))
@@ -331,7 +316,7 @@
 			  ;; laplace(exp(-8*exp(u)),u,v) after changing the return value to 0 = e.
 			  ;; Standard Maxima chooses to solve for some equation kernel, but I don't know
 			  ;; how it chooses the kernel--so use a silly huersitic for choosing a kernel.
-			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning an implicit solution.") e x)
+			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning an implicit solution.~%") e x)
 			  (push (list '(mlist) e x) $the_unsolved)
 			  (let ((ker))
 				   (setq ker (if (and (mplusp e) (not ($freeof x (first (last e))))) (first (last e)) x))
@@ -350,7 +335,7 @@
 									   (gethash (caar q) $solve_inverse_package)
 									   (not ($freeof x q)))))
 		  ($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
-		  (mult-acc nil) (ms) (xxx) (mult-save))
+		  (mult-acc nil) (xxx) (mult-save))
 
 		 (setq e (blobify e kernel-p))
 		 (cond ((and (null (cdr (second e))) ($freeof x (first e)))
@@ -420,7 +405,7 @@
 
 (defun solve-mexpt-equation (ee x m use-trigsolve)
 	(declare (ignore m use-trigsolve)) ;likely bug
-	(mtell "top of solve-mexpt-equation ~M  ~%" ee)
+	;(mtell "top of solve-mexpt-equation ~M  ~%" ee)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
@@ -462,7 +447,7 @@
 
 			 	((and (eql 2 (length nvars)) ($freeof x (first e)) (homogeneous-linear-poly-p (first e) nvars))
 				 (let ((k1) (a) (k2) (b) (xx) (yy))
-					  (mtell "doing new mexpt solver ~%")
+					  ;(mtell "doing new mexpt solver ~%")
 					  (setq e (first e))
 					  (setq k1 ($ratcoef e (first nvars)))
 					  (setq a (second (first kernels)))
@@ -493,7 +478,7 @@
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
 		 (setq q (let ((errcatch t) ($errormsg nil)) (ignore-errors ($to_poly e (list '(mlist) x)))))
 
-		 (mtell "doing to poly solve")
+		 ;(mtell "doing to poly solve")
 
 		 (when (and q (< ($length ($third q)) 2))
 			 (setq checked-sol (list '(mlist)))
@@ -508,7 +493,7 @@
 
 			 (setq sol (let (($algexact t)) (cdr ($algsys eq ($listify nvars)))))
 			 (cond ((and sol ($emptyp nonalg-sub))
-					(mtell "branch 1 ~%")
+					;(mtell "branch 1 ~%")
 					(dolist (sk sol)
 						(setq cx ($substitute sk cnd))
 						(setq cx (my-ask-boolean cx))
@@ -517,7 +502,7 @@
 							(setq sk (take '(mequal) x ($substitute sk x)))
 							(setq checked-sol ($cons sk checked-sol)))))
 				 ((and sol (or (null nonalg-sub) ($freeof x eq)))
-				  (mtell "branch 2 ~%")
+				  ;(mtell "branch 2 ~%")
 				  ;(mtell "branch 2 ~%")
 				  (setq nvars ($first nvars))
 				  (dolist (sk sol)
@@ -555,7 +540,7 @@
 ;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt to set the
 ;;; multiplicities to anything reasonable--it resets  multiplicities to the default.
 (defun redundant-equation-solve (eqs x)
-	(mtell "using redundant solve ~%")
+	;(mtell "using redundant solve ~%")
 	(let ((eqset) (sol) (checked-sol nil))
 		 (setq eqs (mapcar #'meqhk (cdr eqs))) ;eqs is now a CL list
 		 (setq eqset (simplifya (cons '($set) eqs) t))
@@ -576,7 +561,7 @@
 				 (cond ((every #'(lambda (q) (zerop1 (try-to-crunch-to-zero q))) (cdr ($substitute sx eqs)))
 						(push sx checked-sol))
 					   (t
-						(intl:gettext (mtell "Unable to verify putative solution ~M ~%" sx))))))
+						(intl:gettext (mtell "Solve: unable to verify putative solution ~M ~%" sx))))))
 		 (mfuncall '$reset '$multiplicities)
 		 (simplifya (cons '(mlist) checked-sol) t)))
 
@@ -618,15 +603,17 @@
 							 (t (setq acc ($cons ssol acc)))))
 					 acc)
 				  (t
-				   (mtell "Unable to solve.~%")
+
+					 (mtell (intl:gettext "Solve: unable to solve.~%"))
 				   (if $solveexplicit (list (list 'mlist)) nil)))))))
 
 
 (defun solvex (e v &optional (foo nil) (baz nil)) ;ahh, what's the meaning of the optional args? One is programmode?
 	;(print `(foo = ,foo))
 	;(print `(baz = ,baz))
-	(let ((xk) (vv) (ee) (sol))
-		 (mtell "calling solvex ~%")
+	(declare (ignore foo baz))
+	(let ((ee) (sol))
+		 ;(mtell "calling solvex ~%")
 		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 		 (push '(mlist) e)
 		 (push '(mlist) v)
@@ -715,7 +702,7 @@
 		 nil))
 
 ;; This function solves x*exp(x) = constant. The match to x*exp(x) must be explicit; for example,
-;;  lambert-w-solve is unable to solve x*exp(x)/2 = 10. When no solution is found, return nil. Of course,
+;; lambert-w-solve is unable to solve x*exp(x)/2 = 10. When no solution is found, return nil. Of course,
 ;; this function could be extended to solve more equations in terms of the Lambert W function.
 (defun lambert-w-solve (e x m) "solve x exp(x) = constant where m is the multiplicity so far"
   (let ((cnst (sratsimp (sub (mult x (take '(mexpt) '$%e x)) e))))
@@ -754,10 +741,10 @@
 	    ;; and NIL if called from LINSOLVE.
 	    (cond (flag (return ($algsys (make-mlist-l eql)
 					 (make-mlist-l varl))))
-		  (t (merror (intl:gettext "linsolve: cannot solve a nonlinear equation."))))))
+		  (t (merror (intl:gettext "Linsolve: cannot solve a nonlinear equation."))))))
      (setq ans (tfgeli 'xa* xn* xm*))
      (if (and $linsolvewarn (car ans))
-	 (mtell (intl:gettext "~&solve: dependent equations eliminated: ~A~%") (car ans)))
+	 (mtell (intl:gettext "Solve: dependent equations eliminated: ~A~%") (car ans)))
      (if (cadr ans)
 	 (return '((mlist simp))))
      (do ((j 0 (1+ j)))
@@ -782,8 +769,8 @@
 
 (defun trigsolve (e x) "Attempt to solve equations that are rational functions of trig functions with the same argument."
 	(let ((sine-args) (cosine-args) (kc) (ks) (gc) (gs) (sol) (buzz nil) (fun) (ker))
-		 (mtell "new trigsolve ~%")
-		 (displa `((mequal) e ,e))
+		 ;(mtell "new trigsolve ~%")
+		;(displa `((mequal) e ,e))
 		 (setq e (apply-identities e *pythagorean-identities*))
 		 (setq e (apply-identities-xxx e *to-cos/sin-identities*))
 		  (displa `((mequal) e2 ,e))
