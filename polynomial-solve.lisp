@@ -240,8 +240,9 @@
 ;;; using gfactor allows Maxima to solve this equation.
 
 (defun polynomial-solve (e x &optional (mx 1)) "Solve e=0 for x, where e is a polynomial in x and mx is a multiplicity."
-	(let ((n) (m) (sol) (k 0) (cfs) (xsol) ($domain '$complex) ($algebraic t))
-		;;;;; (displa `((mequal) TOP ,(sratsimp e)))
+	(let ((n) (m) (sol) (k 0) (cfs) (xsol) ($domain '$complex) ($algebraic t) (p-multiplicities nil))
+
+	   ;; Build up the multiplicities in the CL list p-multiplicities.
 
 		 ;; Factoring isn't a universal win; for example x^105-1=0. So before we factor, look for equations of the
 		 ;; form ax^n+b with n > 4. We could allow n to be any positive integer, but this causes more testsuite
@@ -252,12 +253,9 @@
 				(simplifya (cons '(mlist) sol) t))
 			 (t
 			  (setq sol nil)
-			  (setq $multiplicities nil)
 			  (when (and $solvefactors (or *solve-factors-biquadratic* (not (biquadratic-p e x))))
 				  (setq e ($gfactor e)))
-			  ;(setq e (if $solvefactors ($gfactor e) e))
 			  (setq e (if (mtimesp e) (cdr e) (list e)))
-
 			  (dolist (q e)
 				  (setq m mx)
 				  (when (mexptp q)
@@ -302,11 +300,10 @@
 								(t
 									(values (list (take '(mequal) 0 q)) (list 1))))))
 
-          ;(print `(sol = ,sol))
-					;(print `(mss = ,mss))
+        ;  (print `(sol = ,sol))
+				;	(print `(mss = ,mss))
+				;	(print `(p-multiplicities = ,p-multiplicities))
 					(setq sol (append sol zzz))
-					(setq $multiplicities (append $multiplicities (mapcar #'(lambda (s) (mul s m)) mss)))))
-
-			  (when (not ($listp $multiplicities))
-				  (setq $multiplicities (simplifya (cons '(mlist)  $multiplicities) t)))
-			  (simplifya (cons '(mlist) sol) t)))))
+					(setq p-multiplicities (append p-multiplicities (mapcar #'(lambda (s) (mul s m)) mss)))))
+				  (setq $multiplicities (simplifya (cons '(mlist) p-multiplicities) t))
+			  	(simplifya (cons '(mlist) sol) t)))))
