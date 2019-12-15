@@ -48,7 +48,10 @@
 (defmvar *float-box-label* (gensym))
 (defmvar *big-float-box-label* (gensym))
 
-(defun keep-float (e) "Put floats and big floats inside labeled boxes."
+;; In expression e, convert all floats and bigfloats to their exact rational value
+;; and put that value inside a labeled box. Doing this allows solve to preserve the exact
+;; value of floats
+(defun keep-float (e) "Convert floats and big floats to rational form and put them inside labeled boxes."
     (cond
         (($mapatom e)
          (cond ((floatp e)
@@ -58,16 +61,15 @@
                (t e)))
         (t (simplifya (cons (list (caar e)) (mapcar #'keep-float (cdr e))) t))))
 
-(defun unkeep-float (e)
+;; In expression e, convert all labeled boxes that contain floats but to float form.
+(defun unkeep-float (e) "Convert numbers in labeled float boxes back to float numbers."
     (cond
         (($mapatom e) e)
-
         ((and (consp e) (consp (car e)) (eql 'mlabox (caar e)) (third e)) ;it's a labeled box
          (cond ((eql *float-box-label* (third e)) ($float (second e))) ;unbox and convert to ieee float
                ((eql *big-float-box-label* (third e)) ($bfloat (second e))) ;unbox and convert to bigfloat
               (t e)))
         (t (simplifya (cons (list (caar e)) (mapcar #'unkeep-float (cdr e))) t))))
-
 
 ;; various flags that  I've possibly ignored: $solveexplicit (not entirely), $dispflag,
 ;; $programmode, and $breakup.
