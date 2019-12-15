@@ -258,7 +258,7 @@
 
 (defun product-solver (e x m use-trigsolve cnd) "Solve e=e1*e2*...*en for x"
 	(mtell "using product solve ~%")
-	(displa `((mequal) cnd ,cnd))
+	;(displa `((mequal) cnd ,cnd))
 
 	(let ((solx) (sol nil) (wmul))
 		 (setq e (cdr e))
@@ -320,11 +320,10 @@
 
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
-			($solveexplicit ;give up & return empty set
+			($solveexplicit ;give up & return the empty set
 			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.") e x)
 			  (push (list '(mlist) e x) $the_unsolved)
-
-			  (setq $multiplicities (take '(mlist)))
+			  (setq $multiplicities (take '(mlist) m))
 			  (take '(mlist)))
 
 			(t

@@ -293,11 +293,17 @@
 						 (setq xsol (poly-solve-by-decomp q x))
 						 (when $solveexplicit
 							 (setq xsol (remove-if #'(lambda (q) (eql 0 ($lhs q))) xsol)))
-
 						 (values xsol (mapcar #'(lambda (w) (declare (ignore w)) 1) xsol)))
-						((> n 4)
-							(values (if $solveexplicit nil (list (take '(mequal) 0 q))) (list 1))))
 
+						((> n 4)
+						  (cond
+								($solveexplicit
+									(values nil nil))
+								(t
+									(values (list (take '(mequal) 0 q)) (list 1))))))
+
+          ;(print `(sol = ,sol))
+					;(print `(mss = ,mss))
 					(setq sol (append sol zzz))
 					(setq $multiplicities (append $multiplicities (mapcar #'(lambda (s) (mul s m)) mss)))))
 
