@@ -61,3 +61,12 @@ block([cntx :newcontext()], unwind_protect((assume(a > -107), solve((x+8)*(x-a)*
 
 block([cntx :newcontext()], unwind_protect((assume(a < -107), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
 [x=%e-107,x=a,x=-8]$
+
+/* See Maxima bug #963 linsolve incorrect result */
+(eqs : [A[4]+A[3]+A[2]+A[1] = 1,-A[2]*DY/(2*coeff_y)-A[1]*DY/(2*coeff_y)+A[4]*DY/2+A[3]*DY/2
+= 0, -A[4]*DX/(2*coeff_x)+A[3]*DX/(2*coeff_x)-A[2]*DX/(2*coeff_x)
++ A[1]*DX/(2*coeff_x) = 0],0);
+0$
+
+ratsimp(subst(linsolve(eqs,  [A[1],A[2],A[3],A[4]), eqs));
+[1=1,0=0,0=0]$
