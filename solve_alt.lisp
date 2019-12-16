@@ -533,16 +533,18 @@
 
 		 checked-sol))
 
-;; Standard $linsolve bypasses $solve and directly calls solvex. That requires $linsolve/solvex to duplicate
-;; some of the features of $solve (argument checking and non-atom solve, for example). Let's route linsolve
-;; through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
+;; Standard $linsolve bypasses $solve and calls solvex. That requires $linsolve/solvex to duplicate
+;; some of the features of $solve (argument checking and non-atom solve, for example). instead, let's
+;; route linsolve through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
 
-;; Also, standard linsolve eventually calls a specialized function--maybe it is tfgeli. Here we rely on algsys
-;; for linear equations.
+;; Eventually standard linsolve calls tfgeli. But there is a 2006 bug (#963: linsolve incorrect result)
+;; that has gone unfixed for over ten years. Using $solve (and eventually $algys) fixes this bug. Possibly
+;; tfgeli gives better performance--eventually it should be fixed. But until it is fixed, let's use
+;; $solve/$algys.
 
-;(defun $linsolve (e x)
-;	(let ((sol ($solve e x)))
-;		 (if (and ($listp sol) (not ($emptyp sol)) ($listp ($first sol))) ($first sol) sol)))
+(defun $linsolve (e x)
+	(let ((sol ($solve e x)))
+		 (if (and ($listp sol) (not ($emptyp sol)) ($listp ($first sol))) ($first sol) sol)))
 
 (defun equation-complexity-guess (a b) (< (my-size a) (my-size b))) ;my-size defined in trig_identities
 
@@ -722,53 +724,10 @@
 							    	(t (take '(%lambert_w) cnst))))
 		    	(t nil))))
 
+;; Let's make sure that the old functions solvecubic and solvequartic are not called. So, replace the
+;; function definitions with a call to merror.
 (defun solvecubic (x) (declare (ignore x)) (merror "solvecubic"))
 (defun solvequartic (x) (declare (ignore x)) (merror "solvequartic"))
-
-
-(defmfun $linsolve (eql varl)
-  (let (($ratfac))
-    (setq eql (if ($listp eql) (cdr eql) (ncons eql)))
-    (setq varl (if ($listp varl)
-		   (delete-duplicates (cdr varl) :test #'equal :from-end t)
-		   (ncons varl)))
-    (do ((varl varl (cdr varl)))
-	((null varl))
-      (when (mnump (car varl))
-	(merror (intl:gettext "solve: variable must not be a number; found: ~M") (car varl))))
-    (if (null varl)
-	(make-mlist-simp)
-	(solvex-old (mapcar 'meqhk eql) varl (not $programmode) nil))))
-
-(defun solvex-old (eql varl ind flag &aux ($algebraic $algebraic))
-  (declare (special xa*))
-  (prog (*varl ans varlist genvar xm* xn* mul*)
-     (setq *varl varl)
-     (setq eql (mapcar #'(lambda (x) ($ratdisrep ($ratnumer x))) eql))
-     (cond ((atom (ignore-rat-err (formx flag 'xa* eql varl)))
-	    ;; This flag is T if called from SOLVE
-	    ;; and NIL if called from LINSOLVE.
-	    (cond (flag (return ($algsys (make-mlist-l eql)
-					 (make-mlist-l varl))))
-		  (t (merror (intl:gettext "Linsolve: cannot solve a nonlinear equation."))))))
-     (setq ans (tfgeli 'xa* xn* xm*))
-     (if (and $linsolvewarn (car ans))
-	 (mtell (intl:gettext "Solve: dependent equations eliminated: ~A~%") (car ans)))
-     (if (cadr ans)
-	 (return '((mlist simp))))
-     (do ((j 0 (1+ j)))
-	 ((> j xm*))
-       ;;I put this in the value cell--wfs
-       (setf (aref xa* 0 j) nil))
-     (ptorat 'xa* xn* xm*)
-     (setq varl
-	   (xrutout 'xa* xn* xm*
-		    (mapcar #'(lambda (x) (ith varl x))
-			    (caddr ans))
-		    ind))
-     (if $programmode
-	 (setq varl (make-mlist-l (linsort (cdr varl) *varl))))
-     (return varl)))
 
 ;;;;;;;;;;;;;broken code!
 ;;; Attempt to solve equations that are rational functions of trig functions with identical arguments. When the equation
