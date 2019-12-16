@@ -291,7 +291,6 @@
 
 		 ;; maybe this should be before equation-simplify, but that causes slowness.
 		 (setq cnd (if $solve_ignores_conditions t (in-domain e)))
-
 		 ;;(displa `((mequal) eeee ,e))
 		 (cond
 
@@ -470,7 +469,7 @@
 					  ;; exp(log(k1) + log(a)*XX) + exp(log(k2) + log(b)*YY) = 0. And transform this to
 					  ;; exp(log(k1) + log(a)*XX - log(k2) - log(b)*YY) = -1.
 
-					  (displa `((mlist) k1 ,k1 k2 ,k2 X ,xx  y ,yy a ,a b ,b))
+					  ;;(displa `((mlist) k1 ,k1 k2 ,k2 X ,xx  y ,yy a ,a b ,b))
 
 					  (cond ((and ($freeof x a) ($freeof x b))
 
@@ -783,7 +782,7 @@
 		;(displa `((mequal) e ,e))
 		 (setq e (apply-identities e *pythagorean-identities*))
 		 (setq e (apply-identities-xxx e *to-cos/sin-identities*))
-		  (displa `((mequal) e2 ,e))
+		  ;;(displa `((mequal) e2 ,e))
 		 (setq sine-args (mapcar #'second (cdr ($gatherargs e '%sin))))
 		 (setq cosine-args (mapcar #'second (cdr ($gatherargs e '%cos))))
 		 (setq sine-args (simplifya (cons '($set) sine-args) t))
@@ -807,8 +806,8 @@
 											(list '(mlist) gc gs))))
 					(setq fun (gethash '%sin $solve_inverse_package))
 					(dolist (sx sol)
-						(displa `((mequal) sx ,sx))
-						(displa `((mequal) ker ,ker))
+						;(displa `((mequal) sx ,sx))
+						;(displa `((mequal) ker ,ker))
 						(setq sx ($substitute sx gs))
 						(setq sx (funcall fun sx))
 						(setq sx (mapcan #'(lambda(q) (cdr ($solve (take '(mequal) ker q) x))) sx))

@@ -185,7 +185,6 @@
 		  ; x^a=q --> x=q^(1/a)
 		  (list 'power-inverse #'power-inverse-standard)
 		;  (list 'power-inverse #'(lambda (q a)
-		;								 (print "TJB")
 		;								 (cond ((and (zerop1 q) (mgrp a 0)) ;x^a = 0, where a >0
 		;										(list 0))
 		;									   ((and (zerop1 q) (mgrp 0 a)) ;x^a = 0, where a < 0
@@ -258,7 +257,7 @@
 (setf (get '$solve_alt 'assign) 'neverset)
 
 (defun solve-inverse-assign (a b)
-	(print (list a b))
+	;;(print (list a b))
 	(when (not (hash-table-p b))
         (merror "The value of ~M must be a hash table' ~%" a)))
 
