@@ -306,7 +306,7 @@
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
 
-			((solve-by-blobify e x m))
+			((solve-by-kernelize e x m))
 
 		    ;;;;((and use-trigsolve (trigsolve e x)))
 
@@ -338,7 +338,7 @@
 ;; but we'll handle the case when F is a
 ;; power function separately.
 
-(defun solve-by-blobify (e x m)
+(defun solve-by-kernelize (e x m)
 	(let ((kernel-p #'(lambda (q) (and (consp q)
 									   (consp (car q))
 									   (gethash (caar q) $solve_inverse_package)
@@ -346,7 +346,7 @@
 		  ($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
 		  (mult-acc nil) (xxx) (mult-save))
 
-		 (setq e (blobify e kernel-p))
+		 (setq e (kernelize e kernel-p))
 		 (cond ((and (null (cdr (second e))) ($freeof x (first e)))
 				(setq ker (second e))
 				(setq e (first e))
@@ -360,7 +360,7 @@
 				;; after this, sol is a list of lists
 				(setq sol (mapcar #'(lambda (q) (apply fun-inverse (list q))) sol))
 				(setq mult-save (mapcar #'(lambda (a b)
-											(mapcar #'(lambda (c) b) a)) sol mult-save))
+											(mapcar #'(lambda (c) (declare (ignore c)) b) a)) sol mult-save))
 
 				(setq sol (reduce #'append sol))
 				(setq ker (second ker))
@@ -382,7 +382,7 @@
 				(simplifya (cons '(mlist) acc) t))
 			 (t nil))))
 
-(defun blobify (e kernel-p &optional (subs nil))
+(defun kernelize (e kernel-p &optional (subs nil))
 	(let ((g (gensym)) (x nil) (op))
 		 (cond
 			 (($mapatom e) (list e subs))
@@ -394,11 +394,11 @@
 				   	 (t
 				   	  (list g (acons e g subs))))) ;it's unknown--append a new key/value to subs
 
-			 (t ; map blobify onto the argument list and build up the association list subs
+			 (t ; map kernelize onto the argument list and build up the association list subs
 			  (setq op (list (caar e)))
 			  (setq e (cdr e))
 			  (dolist (xk e)
-				  (setq xk (blobify xk kernel-p subs))
+				  (setq xk (kernelize xk kernel-p subs))
 				  (push (first xk) x)
 				  (setq subs (second xk)))
 			  (list (simplifya (cons op (reverse x)) t) subs)))))
@@ -420,7 +420,7 @@
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
 				  (inverse-function nil) ($use_to_poly nil))
 
-		 (setq e (blobify ee #'(lambda (q) (and (mexptp q) (not ($freeof x q))))))
+		 (setq e (kernelize ee #'(lambda (q) (and (mexptp q) (not ($freeof x q))))))
 		 (mapcar #'(lambda (q) (push (car q) kernels) (push (cdr q) nvars)) (second e))
 
 		 (cond ((and (second e) (not (cdr (second e))) ($freeof x (first e)))
