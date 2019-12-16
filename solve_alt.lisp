@@ -84,8 +84,7 @@
 (defun $solve (eqlist &optional (varl nil))
   (mfuncall '$reset $multiplicities)
 
-  (let ((cntx ($supcontext)) ;make asksign and friends data vanishes after exiting $solve.
-		(nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
+  (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
 	   ;; Allow sets for eqlist and varl.
 	   (when (and (consp eqlist) (consp (car eqlist)) (eql '$set (caar eqlist)))
 		   (setq eqlist ($listify eqlist)))
@@ -145,6 +144,7 @@
 
 	 (unwind-protect
 	  (progn
+			(setq cntx ($supcontext)) ;make asksign and friends data vanish after exiting $solve.
 		  (cond
 
 			  ((null varl)
