@@ -72,14 +72,14 @@
 ;; Flags that I've ignored: $solveexplicit (not entirely), $dispflag, $programmode, and $breakup.
 
 ;; The top level function solve function:
-;;   (a) reset multiplicative to default
-;;   (b) creates new super context--all assumptions made during solve are removed after exiting
-;;   (c) expunge constant variables and duplicates from list of variables
-;;   (d) checks for non equal inequations, and signals an error when found
-;;   (e) expunge duplicate equations
-;;   (f) does gensym substitutions for solving for nonatoms
-;;   (g) dispatches appropriate lower level solve function
-;;   (h) reverts gensym substitutions for nonatom solve
+;;   (a) resets multiplicities to its default value
+;;   (b) expunges constant variables and duplicates from the list of variables
+;;   (c) checks for inequalities and signals an error when found
+;;   (d) creates a new super context--all assumptions made during solve are removed after exiting
+;;   (e) does gensym substitutions when solving for nonatoms
+;;   (f) dispatches the appropriate lower level solve function
+;;   (g) reverts gensym substitutions for nonatom solve
+;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
   (mfuncall '$reset $multiplicities)
