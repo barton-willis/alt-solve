@@ -11,7 +11,7 @@
 
 ;;; When $use_to_poly is true, dispatch the to_poly_solver after attempting other methods;
 ;;; when $use_to_poly is false, never dispatch the to_poly_solver.
-(defmvar $use_to_poly t)
+(defmvar $use_to_poly nil)
 
 ;;; When $solve_ignores_conditions is true, ....?
 (defmvar $solve_ignores_conditions nil)
@@ -20,7 +20,7 @@
 	(:compile-toplevel :load-toplevel :execute)
 	($load "to_poly_solve")
 	($load "function-inverses.lisp")
-	(setq $solve_inverse_package $multivalued_inverse)
+	(setq $solve_inverse_package $single_valued_inverse)
 	($load "trig_identities.lisp")
 	($load "polynomial-solve.lisp")
 	($load "in-domain.lisp")

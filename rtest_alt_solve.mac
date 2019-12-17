@@ -70,3 +70,13 @@ block([cntx :newcontext()], unwind_protect((assume(a < -107), solve((x+8)*(x-a)*
 
 ratsimp(subst(linsolve(eqs,  [A[1],A[2],A[3],A[4]), eqs));
 [1=1,0=0,0=0]$
+
+/* See Maxima bug #3042 linsolve() incorrectly solves underdetermined linear system with symbolic coefficients */
+(eqs : [-((%i*(y+x)*f1*w)/(f*r)),((f*(y*l^2+y*l-4*z-2*y))/(r^3))]/f*r^3,0);
+0$
+
+ratsimp(subst(linsolve(eqs,[x,y,z]),eqs));
+[0,0]$
+
+(remvalue(eqs),0);
+0$
