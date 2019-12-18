@@ -82,6 +82,7 @@
 ;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
+  (mtell "top of $solve~%")
   (mfuncall '$reset $multiplicities)
 
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
@@ -620,9 +621,10 @@
 
 
 (defun solvex (e v &optional (foo nil) (baz nil)) ;ahh, what's the meaning of the optional args? One is programmode?
-	;(print `(foo = ,foo))
-	;(print `(baz = ,baz))
-	(declare (ignore foo baz))
+  (mtell "top of solvex~")
+	(print `(foo = ,foo))
+	(print `(baz = ,baz))
+	;(declare (ignore foo baz))
 	(let ((ee) (sol))
 		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 		 (push '(mlist) e)
