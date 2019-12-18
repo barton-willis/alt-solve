@@ -624,11 +624,9 @@
 	;(print `(baz = ,baz))
 	(declare (ignore foo baz))
 	(let ((ee) (sol))
-		 ;(mtell "calling solvex ~%")
 		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 		 (push '(mlist) e)
 		 (push '(mlist) v)
-
 		 (cond
 			 ;; when every member of e is a polynomial, dispatch algsys.
 

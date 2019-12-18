@@ -143,7 +143,7 @@
 						(setq sol (mapcan #'(lambda (q) (mapcar #'third (cdr (polynomial-solve (sub pk q) x)))) sol)))
 				 (mapcar #'(lambda (q) (take '(mequal) x q)) sol))
 
-		   (setq $multiplicities (mapcar #'(lambda (q) 1) sol))
+		   (setq $multiplicities (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))
 		   (setq $multiplicities (cons '(mlist) $multiplicities))
 
 		   (cond (sol
@@ -181,7 +181,7 @@
 				  (setq sol (mapcar #'(lambda (s) (div s 9)) (list 2 4 5 7 10)))))
 
 			(values  (mapcar #'(lambda (q) (take '(mequal) x (power '$%e (mul '$%i '$%pi q)))) sol)
-					 (mapcar #'(lambda (q) 1) sol))))
+					 (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))))
 
 ;;; Solve a x^n + b = 0 for x. Set the $multiplicities and return a CL list of the solutions. The optional
 ;;; variable mx is the multiplicity so far. For degrees four or less, this function returns nil--lower degree
