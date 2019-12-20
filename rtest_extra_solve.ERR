@@ -1,0 +1,24 @@
+
+/* Maxima error log from tests in C:/Users/Barton/Documents/alt-solve/alt-solve/rtest_extra_solve.mac */
+
+/* Problem 3 (line 7) */
+solve(abs(x) = 1,[x]);
+/* Erroneous Result?:
+[x = 1,x = -1] */ 
+/* Expected result: */
+[x = -1,x = 1];
+
+/* Problem 4 (line 10) */
+solve(abs(x)+abs(1-x) = 6,x);
+/* Erroneous Result?:
+[x = 7/2,x = -5/2] */ 
+/* Expected result: */
+[x = (-5)/2,x = 7/2];
+
+/* Problem 5 (line 13) */
+solve(abs(x-abs(1-x)) = 1/2,x);
+/* Erroneous Result?:
+[] */ 
+/* Expected result: */
+[x = 1/4,x = 3/4];
+
