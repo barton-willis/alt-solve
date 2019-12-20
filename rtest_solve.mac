@@ -1,8 +1,91 @@
 /* Definite integration calls solve (not $solve). We include some definite integration to test solve.*/
 
-(reset(), load("unwind_protect"), solve_ignores_conditions  : false, realonly : false, 
+(reset(), load("unwind_protect"), solve_ignores_conditions : false, realonly : false,
 solve_inverse_package : multivalued_inverse, thyme : elapsed_run_time (), 0);
 0$
+
+nicedummies(solve(0.0,x));
+[x=%r0]$
+
+errcatch(solve([x>0],x));
+[]$
+
+solve([x=1,x=1]);
+[x=1]$
+
+solve(x^a = 5,x);
+[x=5^(1/a)]$
+
+(a : b, b : c, c : d, d : e, x : y, y: z ,0);
+0$
+
+solve([a*x - b],[x]);
+[y=c/b]$
+
+(remvalue(a,b,c,d,x,y),0);
+0$
+
+solve([0],[]);
+all$
+
+solve([0,0],[]);
+all$
+
+block([solveexplicit : false, solvedecomposes : true], multiplicities : [], solve(z*(1+z^3+z^5),z),multiplicities);
+[1,1]$
+
+/* To check if the Lambert W solve code sets the multiplicities correctly, set it to [28]*/
+solve(x^28=0,x);
+[x=0]$
+
+block([solve_inverse_package : multivalued_inverse], nicedummies(solve(x * exp(x)= 107,x)));
+generalized_lambert_w(%z0,107)$
+
+multiplicities;
+[1]$
+
+block([solve_inverse_package : single_valued_inverse], nicedummies(solve(x * exp(x)=8,x)));
+lambert_w(8)$
+multiplicities;
+[1]$
+
+/* expunge spurious solution x=0 */
+solve(x*(log(x) - 1)=0,x);
+[x=%e]$
+
+/* make sure find both solutions */
+solve(x*(log(x+107) - 1)=0,x);
+[x=%e-107,x=0]$
+
+
+block([cntx : supcontext()], unwind_protect( (activate(cntx), assume(not equal(a,-107)), print(facts()), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
+[x=%e-107,x=a,x=-8]$
+
+block([cntx :supcontext()], unwind_protect((activate(cntx), assume(a < -107), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
+[x=%e-107,x=a,x=-8]$
+
+/* See Maxima bug #963 linsolve incorrect result */
+(eqs : [A[4]+A[3]+A[2]+A[1] = 1,-A[2]*DY/(2*coeff_y)-A[1]*DY/(2*coeff_y)+A[4]*DY/2+A[3]*DY/2
+= 0, -A[4]*DX/(2*coeff_x)+A[3]*DX/(2*coeff_x)-A[2]*DX/(2*coeff_x)
++ A[1]*DX/(2*coeff_x) = 0],0);
+0$
+
+ratsimp(subst(linsolve(eqs,  [A[1],A[2],A[3],A[4]]), eqs));
+[1=1,0=0,0=0]$
+
+/* See Maxima bug #3042 linsolve() incorrectly solves underdetermined linear system with symbolic coefficients */
+(eqs : [-((%i*(y+x)*f1*w)/(f*r)),((f*(y*l^2+y*l-4*z-2*y))/(r^3))]/f*r^3,0);
+0$
+
+ratsimp(subst(linsolve(eqs,[x,y,z]),eqs));
+[0,0]$
+
+(remvalue(eqs),0);
+0$
+
+/* did any contexts leak?*/
+contexts;
+[initial,global]$
 
 (ssolve(e,x) := block([sol : nicedummies(solve(e,x))], if listp(sol) then sort(sol) else sol),0);
 0$
@@ -316,7 +399,7 @@ integrate(cos(3*x)/(5-4*cos(x)),x,0,2*%pi);
 %pi/12$
 
 /* The context and assume stuff shouldn't be needed, but it's a problem with integrate, not solve */
-block([cntx : newcontext()], 
+block([cntx : newcontext()],
    unwind_protect(
    block(assume(y < x, x < y, 0 < y, y < 1),
      integrate(integrate(sqrt(4*x^2-y^2),x,y,1),y,0,1)),
@@ -425,14 +508,16 @@ ssolve(abs(x) = 107,x);
 block([cntx : newcontext()],
   unwind_protect(
     block(
+     activate(cntx),
      assume(a > 0),
-     ssolve(abs(x^2-1) = a,x)),
+     solve(abs(x^2-1) = a,x)),
   killcontext(cntx)));
   [x=-sqrt(1-a),x=sqrt(1-a),x=-sqrt(a+1),x=sqrt(a+1)]$
 
 block([cntx : newcontext()],
   unwind_protect(
     block(
+     activate(cntx),
      assume(a < 0),
      ssolve(abs(x^2-1) = a,x)),
   killcontext(cntx)));
@@ -450,7 +535,7 @@ ssolve(abs(5 + abs(x-1)) = 15,x);
 (assume(x > 0),0);
 0$
 
-/* principle value integral coverges */
+/* principle value integral converges */
 integrate(%pi*exp(-2*%pi*t)*exp(2*%pi*x*t*%i),t,minf,inf);
 0$
 
@@ -586,7 +671,7 @@ block(
    activate(cntx, global),
    unwind_protect(
    (assume(a > 0), ssolve(abs(x) = a,x)), killcontext(cntx)));
-[x=-a,x=a]$  
+[x=-a,x=a]$
 
 ssolve(abs(1/5-abs(1/5-x)) = abs(1/5 - abs(1/5-sqrt(5))),x);
 [x=sqrt(5),x=-((5^(3/2)-2)/5)]$
@@ -618,7 +703,7 @@ block(
 
 block(
   supcontext(cntx, global),
-  activate(cntx, global),  
+  activate(cntx, global),
   unwind_protect(
      (assume(a < 1), ssolve(max(x,1) = a,x)), killcontext(cntx)));
 []$
@@ -728,7 +813,7 @@ block(
        assume(0 < bb, bb < 1),
        ssolve(sqrt(x)-sqrt(1-x) = bb,x)),
    killcontext(cntx)));
-[x=(bb*sqrt(2-bb^2)+1)/2]$   
+[x=(bb*sqrt(2-bb^2)+1)/2]$
 
 /* basic trig facts */
 
@@ -778,7 +863,7 @@ ssolve(abs(x) = max(-x,x),x);
 
 ssolve(x^2 - 1 = (x-1)*(x+1),x);
 [x=%r0]$
- 
+
 ssolve(cos(x)^2 + sin(x)^2 = 1,x);
 [x = %r0]$
 
@@ -801,38 +886,68 @@ ssolve(sin(sqrt(x))=0,x);
 ssolve(sin(a*x)=1/2,x);
 [x=(12*%pi*%z0+%pi)/(6*a),x=(12*%pi*%z1+5*%pi)/(6*a)]$
 
-
-block([domain : complex], (ssolve(x^(1/3) = a^(1/3),x), subst(a=-1,%%)));
+block([cntx : newcontext(),domain : complex],
+  unwind_protect(
+    block(
+     activate(cntx),
+     assume(a > 0),
+     subst(a=-1, ssolve(x^(1/3) = a^(1/3),x))),
+  killcontext(cntx)));
 [x=-1]$
 
-(ssolve(x^(1/3) = a^(1/3),x), subst(a=1,%%));
+block([cntx : newcontext(),domain : complex],
+  unwind_protect(
+    block(
+     activate(cntx),
+     assume(a > 0),
+     (ssolve(x^(1/3) = a^(1/3),x), subst(a=1,%%))),
+  killcontext(cntx)));
+[x=1]$
+
+block([cntx : newcontext(),domain : complex],
+  unwind_protect(
+    block(
+     activate(cntx),
+     assume(a > 0),
+     subst(a=1, ssolve(x^(1/3) = a^(1/3),x)))),
+  killcontext(cntx));
 [x=1]$
 
 block([domain : complex], ssolve(x^(1/3) = (-1)^(1/3),x));
 [x=-1]$
 
+block([cntx : newcontext(),domain : complex],
+  unwind_protect(
+    block(
+     activate(cntx),
+     assume(0 < a, a < 1/2),
+     sol : ssolve([abs(1-abs(x))=abs(1-abs(a))],[x])),
+  killcontext(cntx)));
+[x=2-a,x=a-2,x=a,x=-a]$
 
-(sol : ssolve([abs(1-abs(x))=abs(1-abs(a))],[x]), 0);
-0$
+block([cntx : newcontext(),domain : complex],
+  unwind_protect(
+    block(
+     activate(cntx),
+     assume(5 < a),
+     sol : solve([abs(1-abs(x))=abs(1-abs(a))],[x])),
+  killcontext(cntx)));
+[x=a,x=-a]$
 
-subst(a=7,sol);
-[x=-7 , x=7]$
-
-subst(a=%i,sol);
-[x=-1, x=1]$
-
-(assume(abs(a)<1), ssolve([abs(1-abs(x))=abs(1-abs(a))],[x]));
-%union([x=2-abs(a)] , [x=abs(a)-2] , [x=-abs(a)] , [x=abs(a)])$
-
-(forget(abs(a) < 1),0);
-0$
+block([cntx : newcontext(),domain : complex],
+  unwind_protect(
+    block(
+     activate(cntx),
+     assume(a < -2),
+     sol : solve([abs(1-abs(x))=abs(1-abs(a))],[x])),
+  killcontext(cntx)));
+[x=a,x=-a]$
 
 ssolve(x^(3/2)=(a)^(3/2),x);
 [x=a, x=-(sqrt(3)*%i*a)/2-a/2, x=(sqrt(3)*%i*a)/2-a/2]$
 
 solve(x^3=8,x);
 [x=2,x=sqrt(3)*%i-1,x=-(sqrt(3)*%i)-1]$
-
 
 solve(x*(x-1)=0,x);
 [x=1, x=0]$
@@ -841,7 +956,7 @@ solve(x*(x-1)=0,x);
 
 ssolve((sin(x)-8*cos(x)*sin(x))*(sin(x)^2+cos(x))-(2*cos(x)*sin(x)-sin(x))
     *(-2*sin(x)^2+2*cos(x)^2-cos(x)),x);
-[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi,x=2*%pi*%z2-acos(1/3)+%pi,x=2*%pi*%z3+acos(1/3)-%pi,x=%pi*%z4]$	
+[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi,x=2*%pi*%z2-acos(1/3)+%pi,x=2*%pi*%z3+acos(1/3)-%pi,x=%pi*%z4]$
 
 ssolve(sin(a*x)=1/2,x);
 [x=(12*%pi*%z0+%pi)/(6*a),x=(12*%pi*%z1+5*%pi)/(6*a)]$
@@ -849,8 +964,14 @@ ssolve(sin(a*x)=1/2,x);
 ssolve(x+sqrt(sqrt(195)*%i+1),x);
 [x=-sqrt(sqrt(195)*%i+1)]$
 
-solve([abs(x)=abs(a)],[x]);
-[x=-abs(a), x=abs(a)]$
+block([cntx : supcontext(),domain : complex],
+  unwind_protect(
+    block(
+     activate(cntx),
+     assume(0<a, a<1),
+     solve([abs(1-abs(x))=abs(1-abs(a))],[x])),
+  killcontext(cntx)));
+[x=2-a,x=a-2,x=a,x=-a]$
 
 /*
 solve([abs(1-abs(x))=abs(1-abs(a))],[x]);
@@ -873,7 +994,7 @@ ssolve(log(x)=9,x);
 [x = exp(9)]$
 
 ssolve(log(x^2-1)=log(9^2-1),x);
-[x = -9, x=9]$ 
+[x = -9, x=9]$
 
 ssolve(log(x^2+1)-log(9^2+1),[x]);
 [x = -9, x=9]$
@@ -920,7 +1041,7 @@ ssolve((x-1)/(1+x)=a,x);
 ssolve(1/x = 1/a,x);
 [x=a]$
 
-/* this is not expected to ever work 
+/* this is not expected to ever work
 (solve(1/x = 1/a,x), subst(a=0,%%));
 []$ */
 
@@ -995,7 +1116,7 @@ ssolve(2*sqrt(x) + 3*x^(1/4) - 2 = 0, x);
 ssolve(sqrt(log(x)) = log(sqrt(x)), x);
 [x=1 ,x=%e^4]$
 
-/* pargs isn't strong enough to simplify this, I think. For now, let me leave 
+/* pargs isn't strong enough to simplify this, I think. For now, let me leave
 solve(log(acos(asin(x^(2/3) - b) - 1)) + 2 = 0, x);
 %union([x = -(b + sin(1 + cos(1/e^2)))^(3/2)] , [x = (b + sin(1 + cos(1/e^2)))^(3/2)])$
 */
@@ -1024,7 +1145,7 @@ ssolve(%e^z = 1,z);
 ssolve(tan(x) = 1,x);
 [x=(4*%pi*%z0+%pi)/4]$
 
-ssolve( sin(x) = tan(x),x); 
+block([solve_ignores_conditions : true], solve( sin(x) = tan(x),x));
 [x = 2*%pi*%z0,x = 2*%pi*%z1+%pi,x = 2*%pi*%z2,x = 2*%pi*%z3+%pi]$
 
 ssolve(sqrt(log(x)) = log(sqrt(x)),x);
@@ -1080,7 +1201,7 @@ nicedummies(solve(imagpart(z) / realpart(z)= 12,z));
 block([eqn1 :   x +   y +   z =  6,
        eqn2 : 2*x +   y + 2*z = 10,
        eqn3 :   x + 3*y +   z = 10,
-       %rnum : -1],    
+       %rnum : -1],
 ssolve([eqn1, eqn2, eqn3], [x, y, z]));
 [[x=%r0,y=2,z=4-%r0]]$
 
@@ -1091,7 +1212,7 @@ block(
     unwind_protect(
        (supcontext(cntx,global),
         activate(cntx, global),
-        assume(a < 0), 
+        assume(a < 0),
         solve(a+x-sqrt(x),x)),
   killcontext(cntx)));
   [x=-((2*a-sqrt(1-4*a)-1)/2)]$
@@ -1123,7 +1244,7 @@ block(
     unwind_protect(
        (supcontext(cntx,global),
         activate(cntx, global),
-        assume(a < 0), 
+        assume(a < 0),
         solve(x - sqrt(x) + a,x)),
   killcontext(cntx)));
   [x=-((2*a-sqrt(1-4*a)-1)/2)]$
@@ -1166,7 +1287,7 @@ ssolve(sin(x)+cos(x)=0,x);
 [x=2*%pi*%z0-%pi/4,x=2*%pi*%z0+(3*%pi)/4]$
 
 /* Fri Feb 1 05:31:56 CST 2008 changed 0.05 to 5/100) */
-ssolve(x*exp(-x)-5/100 = 0,x); 
+ssolve(x*exp(-x)-5/100 = 0,x);
 [x = -lambert_w(-1/20)]$
 
 /* Sun May 11 11:52:05 CDT 2008 */
@@ -1205,7 +1326,7 @@ ssolve([a1+b2=r2,a1*b2=r3,a3*b1+a2*b2=r4,r4+a5+a3*b2=d5,a5*b1=0],
 */
 
 /* Sun Apr 2 08:31:17 CDT 2006 */
-block([eq : x^3-8*x^2-197*x-502], 
+block([eq : x^3-8*x^2-197*x-502],
    every(lambda([s], is(abs(subst(s,eq)) < 1.0e-12)), args(solve(eq,x))));
 true$
 
@@ -1216,7 +1337,7 @@ ssolve([x^2+y^2=2^2,(x-1)^2+(y-1)^2=2^2],[x,y]);
 
 /* Wed Mar 28 16:33:34 CDT 2007 */
 ssolve([(2*x+1)^3=13.5*(x^5+1)],[x]);
-[0 = 13.5*x^5-8*x^3-12*x^2-6*x+12.5]$ 
+[0 = 13.5*x^5-8*x^3-12*x^2-6*x+12.5]$
 
 ssolve(sin(x)=sin(x),x);
 [x=%r0]$
@@ -1377,8 +1498,8 @@ block([%rnum : 0], solve(rat(a+c,a,b,c,d),[a,b]));
 [[a=-c,b=%r1]]$
 
 /* [ 826915 ] Solve wrong with irreducible polydecomp */
-block([sol, eq], 
-   eq :  (x^5+x-3)^5+x^5+x-6, 
+block([sol, eq],
+   eq :  (x^5+x-3)^5+x^5+x-6,
    sol : solve(eq,x),
    every(lambda([s], is(cabs(subst(s, eq)) < 1.0e-6)), args(sol)));
 true$
@@ -1408,7 +1529,7 @@ solve(5^x * x = 42,x);
 solve(5^(x^2 - 1) * (x^2-1) / %pi = 42,x);
 [x = -sqrt(lambert_w(42*%pi*log(5))+log(5))/sqrt(log(5))],
        [x = sqrt(lambert_w(42*%pi*log(5))+log(5))/sqrt(log(5))]$
-            
+
 /* Examples from wikipedia.org -- http://en.wikipedia.org/wiki/Lambert_W_function*/
 
 solve(2^x = 5*x,x);
@@ -1418,7 +1539,7 @@ solve(x^x = z,x);
 [x = log(z)/lambert_w(log(z))]$
 
 solve(x * log(x) = a,x);
-[x = a / lambert_w(a)]$ 
+[x = a / lambert_w(a)]$
 
 /* one-to-one cruncher & related */
 
@@ -1695,15 +1816,13 @@ are other equations in this thread that the solve cannot do:
 
   solve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]),
   solve([bt=atan((a*r)/(s*(r-d))),x=100*cos(bt),y=d*sin(bt)],[x,y,bt]).
-*/  
+*/
 
 ssolve([a=3+x,b=1-x,x=2],[x]);
 []$
 
-ssolve(tan(a)=b,a);
-[a=atan(b)+%pi*%z0]$
-
-
+block([solve_ignores_conditions : true], solve( tan(a)=b,a));
+[a=atan(b)+%pi*%z2]$
 
 /* --------------------------- FIX ME SOON
 ssolve(sin(x) = sin(x - p[0]),x);
@@ -1716,7 +1835,7 @@ ssolve(sin(x-5) - sin(5-x),x);
 [x=%pi*%z0+5]$
 
 ssolve(cos(x-5) - cos(5-x),x);
-[x = %r0]$	
+[x = %r0]$
 
 ssolve(cos(x^2-1)=0,x);
 [x=sqrt(4*%pi*%z0+%pi+2)/sqrt(2),x=sqrt(4*%pi*%z1-%pi+2)/sqrt(2)]$
@@ -1736,8 +1855,8 @@ ssolve(23040 *(4*%e^-(1200*t)-%e^-(300*t))^2-720000*(16*%e^-(1200*t)-%e^-(300*t)
 
 block([cntx : newcontext()],
   unwind_protect(
-    block([%rnum : 0], 
-      declare(a,complex, b,complex), 
+    block([%rnum : 0],
+      declare(a,complex, b,complex),
       ssolve([a*b=15*%i-5,a*conjugate(b)=-13*%i+9],[a,b])),
      killcontext(cntx)));
 [a=%r1, b = (5*(3*%i-1))/%r1]$
@@ -1750,7 +1869,6 @@ ssolve(sin(x),x);
 ssolve(cos(x),x);
 [x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2]$
 
-*/
 ssolve(sin(5*x+7),x);
 [x = (%pi*%z0-7)/5]$
 
@@ -1770,8 +1888,8 @@ ssolve(abs(x+7)*sin(x),x);
 ssolve(abs(x+7)*sin(x)*cos(x),x);
 [x=-7,x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1]$
 
-ssolve(tan(x)=tan(zzz),x);
-[x=atan(tan(zzz))+%pi*%z0]$
+block([solve_ignores_conditions : true], solve(tan(x)=tan(zzz),x));
+[x=atan(tan(zzz))+%pi*%z2]$
 
 ssolve(tan(x)=tan(%pi/4),x);
 [x=(4*%pi*%z0+%pi)/4]$
@@ -1813,7 +1931,7 @@ ssolve(tan(x)=%e,x);
 0$
 
 solve(eqns,[A,B,C,D,E,F]);
-[[A = -1234567/(aa+2),B = -cc/bb,C = (aa*cc)/(bb-aa),D = -((bb*cc)/(bb-aa)),E = 0,F = 0]]$ 
+[[A = -1234567/(aa+2),B = -cc/bb,C = (aa*cc)/(bb-aa),D = -((bb*cc)/(bb-aa)),E = 0,F = 0]]$
 
 /* #3312 solve does not identify multiplicities correctly */
 
@@ -1829,7 +1947,7 @@ solve(Q*sqrt(Q^2 + 2)=1,Q);
 
 /* #3234 solve with list of vars */
 
-block([L:x*y*z+%lambda*(2*x*y+2*x*z+2*y*z-1)], 
+block([L:x*y*z+%lambda*(2*x*y+2*x*z+2*y*z-1)],
    solve([diff(L,x)=0,diff(L,y)=0,diff(L,z)=0,diff(L,%lambda)=0], [x,y,z,%lambda]));
 [[x=-1/sqrt(6),y=-1/sqrt(6),z=-1/sqrt(6),%lambda=1/(4*sqrt(6))],[x=1/sqrt(6),y=1/sqrt(6),z=1/sqrt(6),%lambda=-1/(4*sqrt(6))]]$
 
@@ -1838,14 +1956,14 @@ solve((sin(y+x)-1)/sin(y+x)=1,y);
 []$
 
 /* #2844 solve(x*acot(x),x) should have a solution */
-solve(acot(x)=0,x); 
+solve(acot(x)=0,x);
 []$
 
-solve(x*acot(x)=0,x); 
+solve(x*acot(x)=0,x);
 []$
 
 /* #2779 %solve(sin(x)=tan(x),x) fails  */
-ssolve(sin(x)=tan(x),x);
+block([solve_ignores_conditions : true], solve(sin(x)=tan(x),x));
 [x = 2*%pi*%z0,x = 2*%pi*%z1+%pi,x = 2*%pi*%z2,x = 2*%pi*%z3+%pi]$
 
 /* #2773 Spurious solution using arc-trig */
@@ -1855,45 +1973,44 @@ block([assume_notequal : true], ssolve(sin(cos(x))/cos(x) = 0, x));
 /* #2770 %solve(%i*sin(q)+cos(q),q) gives log(0) warning */
  solve(%i*sin(q)+cos(q),q);
  []$
- 
+
  /* #2769 %solve misses identity case */
  (eq: -(sin(q)-%i*cos(q))/(%i*sin(q)+cos(q)) = %i,0);
  0$
- 
+
  ssolve(eq,x);
  [x=%r0]$
- 
+
  ssolve(eq,q);
  [q=%r0]$
- 
+
  /* #2743 solve does not correctly solve */
  solve([925/100 = sqrt(2*h/10) + h/340], [h]);
  [h=14705-340*sqrt(1785)]$
- 
- /* #2593 Problem in solve procedure */
- solve([2 = (1-z)/x,x=0],[x,z]);
- []$
- 
+
 /* #2567 Solve does not take denominators into account */
 solve((x^2-1)/(x-1)=2);
 []$
 
 /* #2546 solve with repeated equations gives a wrong answer */
-ssolve([sin(x)=cos(x), sin(x)=cos(x)],x); 
+ssolve([sin(x)=cos(x), sin(x)=cos(x)],x);
 [x=%pi/4,x=-(3*%pi)/4]$
 
-/* #2518 solve takes infinite time and memory --- oops 
+/* #2518 solve takes infinite time and memory --- oops
 solve([z/(z-1) = (z-x)/y, (z-x)/y = y/(z-y), y/(z-y) = (z-y)/(y-1)], [x,y,z]); */
-  
-/* #2497 Can't solve some equation with sqrt inside */  
+
+/* #2497 Can't solve some equation with sqrt inside */
 solve(sqrt(2*x+3)+2*(2*x+3) = 55,x);
 [x=11]$
 
 /* #2458 to_poly_solve gives a wrong solution for cos(x)=sin(3x) */
+
+/* solution is a big mess--for now, let's not do it
 ssolve(cos(x)-sin(3*x),x);
 [x = (4*%pi*%z0+%pi)/4]$  /* not sure about this */
-  
- /* #2397 Solve returns [] when solutions exists */ 
+*/
+
+ /* #2397 Solve returns [] when solutions exists */
 block([keepfloat : true], solve(%e^(0.0057195*x)+%e^(-0.0057195*x)=1,x));
 [x=174.8404580820002*log((sqrt(3)*%i+1)/2),x=174.8404580820002*log(-(sqrt(3)*%i-1)/2)]$
 
@@ -1909,7 +2026,7 @@ ssolve([x^3-x*4=0], [x]);
 solve(((x - 1)^(3/2) - (x + 1)*sqrt(x - 1))/sqrt((x - 1)*(x + 1)),x);
 []$ /* not sure about correct solution */
 
-/* FIX ME soon 
+/* FIX ME soon
 /* #2178 to_poly_solve -- spurious complex solution */
 block(
   supcontext(cntx, global),
@@ -1929,7 +2046,7 @@ block([%rnum : 0], solve([-(y*A)/sqrt(2*A^2+1)-(x*A)/sqrt(2*A^2+1)+A/sqrt(2*A^2+
 [[x=0,y=%r1,z=%r1*A-A]]$
 
 /* #1935 Solver doesn't finish */
-block([keepfloat : true], ssolve(2000=1000*1.072^x,x));
+block([], nicedummies(solve(2000=1000*1.072^x,x)));
 [x=14.38309551705914*(2*%i*%pi*%z0+log(2))]$
 
 /* #1923 Does not solve simple equation */
@@ -1939,6 +2056,7 @@ solve(400-(800*(6-x))/sqrt((6-x)^2+4)=0,x);
 /* #1905 Solving equations with logarithms */
 solve([log(x)*x=0], [x]);
 [x=1]$
+
 
 /* #1870 simple equations with sqrt(x^2....) cannot be solved */
 
@@ -1953,7 +2071,7 @@ block([use_to_poly : true, solve_inverse_package : multivalued_inverse], solve(
 block([use_to_poly : true, solve_inverse_package : single_valued_inverse], solve(y=sqrt(y),y));
 [y=0,y=1]$
 
-/* #3538 solver doesn'e solve simple alg/ system */
+/* #3538 solver doesn't solve simple alg/ system */
 ssolve([a=1,exp(b)=2],[a,b]);
 [[a=1,b=2*%i*%pi*%z0+log(2)]]$
 
@@ -2010,7 +2128,7 @@ m2:78.84375,
 c1:0.8359375,
 c2:18.8515625,
 c3:18.6875, solve_inverse_package : single_valued_inverse],
-solve( L= ((N^(1/m2)-c1) / (c2-c3*N^(1/m2)))^(1/m1), N)); 
+solve( L= ((N^(1/m2)-c1) / (c2-c3*N^(1/m2)))^(1/m1), N));
 [N=(-(18.8515625*L^0.1593017578125+0.8359375)/(-18.6875*L^0.1593017578125-1))^78.84375]$
 
 
@@ -2020,7 +2138,7 @@ block([like : 28*log((1-s)*r)+18*log(s*(1-s)*r)+18*log(s*s*(1-s)*r)
   solve([diff(like,s), diff(like,r)],[s,r]));
 [[r=(16*sqrt(4021)+1819)/11250,s=(sqrt(4021)-5)/74],[r=-(16*sqrt(4021)-1819)/11250,s=-(sqrt(4021)+5)/74]]$
 
-/* #2960 %solve(sin(x)=abs(sin(x)),x) bad */  
+/* #2960 %solve(sin(x)=abs(sin(x)),x) bad */
 /*    solve(sin(x)=abs(sin(x)),x); */
 
 /* #2954 solve( (sin(y+x)-1)/sin(y+x)=1 ,y) returns [] */
@@ -2040,11 +2158,11 @@ solve([x=p*cos(q),y=p*sin(q)],[p,q]);
 [p=sqrt(x^2+y^2) and q=atan2(y,x)]$
 
 /* #2846 Solve says it removes solutions, but also adds them */
-block([solve_inverse_package : multivalued_inverse], 
+block([solve_inverse_package : multivalued_inverse],
     ssolve((1 - 8*cos(x))*(sin(x)^2 + cos(x)) - (2*cos(x) - 1)*(-2*sin(x)^2 + 2*cos(x)^2 - cos(x)),x));
 [x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi,x=2*%pi*%z2-acos(1/3)+%pi,x=2*%pi*%z3+acos(1/3)-%pi]$
 
-block([solve_inverse_package : single_valued_inverse], 
+block([solve_inverse_package : single_valued_inverse],
     ssolve((1 - 8*cos(x))*(sin(x)^2 + cos(x)) - (2*cos(x) - 1)*(-2*sin(x)^2 + 2*cos(x)^2 - cos(x)),x));
 [x=%pi,x=%pi-acos(1/3)]$
 
@@ -2067,28 +2185,27 @@ block([solveexplicit : true],
  (-2*(-C-(6*B+8*A)^(1/3)+6)-2*(-C-(3*B+3*A)^(1/3)+5)-2*(-C-2^(1/3)*B^(1/3)+4))
   /3], [A,B,C]);
   []$
-  
+
   /* #2779 %solve(sin(x)=tan(x),x) fails */
-  block([solve_inverse_package : multivalued_inverse], solve(sin(x)=tan(x),x));
+  block([solve_ignores_conditions : true], solve(sin(x)=tan(x),x));
   [x=%pi*%z1]$
-  
+
   /* #2773 Spurious solution using arc-trig */
   block([solve_inverse_package : single_valued_inverse], solve(sin(cos(x))/cos(x) = 0, x));
   []$
-  
-  /* #2770 %solve(%i*sin(q)+cos(q),q) gives log(0) warning 
-  Ahh, this doesn't test for the abscence of the warning.  */
+
+  /* #2770 %solve(%i*sin(q)+cos(q),q) gives log(0) warning
+  Ahh, this doesn't test for the absence  of the warning.  */
   block([solve_inverse_package : multivalued_inverse], solve(%i*sin(q)+cos(q),q));
   []$
-  
 
 /* How persnickety should solve be? To solve tan(x) = b, should solve ask if b is in the real domain of tangent? */
 
 ssolve(tan(x)-b,x);
 [x=atan(b)+%pi*%z0]$
 
-ssolve(a*tan(x)-a*b,x);
-[x=atan(b)+%pi*%z0]$
+block([solve_ignores_conditions : true], solve(a*tan(x)-a*b,x));
+[x=atan(b)+%pi*%z2]$
 
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$

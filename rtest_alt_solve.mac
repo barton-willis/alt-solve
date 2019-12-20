@@ -56,10 +56,11 @@ solve(x*(log(x) - 1)=0,x);
 solve(x*(log(x+107) - 1)=0,x);
 [x=%e-107,x=0]$
 
-block([cntx :newcontext()], unwind_protect((assume(a > -107), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
+
+block([cntx : supcontext()], unwind_protect( (activate(cntx), assume(not equal(a,-107)), print(facts()), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
 [x=%e-107,x=a,x=-8]$
 
-block([cntx :newcontext()], unwind_protect((assume(a < -107), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
+block([cntx :supcontext()], unwind_protect((activate(cntx), assume(a < -107), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
 [x=%e-107,x=a,x=-8]$
 
 /* See Maxima bug #963 linsolve incorrect result */
@@ -68,7 +69,7 @@ block([cntx :newcontext()], unwind_protect((assume(a < -107), solve((x+8)*(x-a)*
 + A[1]*DX/(2*coeff_x) = 0],0);
 0$
 
-ratsimp(subst(linsolve(eqs,  [A[1],A[2],A[3],A[4]), eqs));
+ratsimp(subst(linsolve(eqs,  [A[1],A[2],A[3],A[4]]), eqs));
 [1=1,0=0,0=0]$
 
 /* See Maxima bug #3042 linsolve() incorrectly solves underdetermined linear system with symbolic coefficients */
@@ -80,3 +81,7 @@ ratsimp(subst(linsolve(eqs,[x,y,z]),eqs));
 
 (remvalue(eqs),0);
 0$
+
+/* did any contexts leak?*/
+contexts;
+[initial,global]$

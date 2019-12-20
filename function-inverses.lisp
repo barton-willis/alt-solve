@@ -9,6 +9,7 @@
 (defvar *function-inverses* (make-hash-table))
 
 (defun power-inverse-standard (q a)
+  ;(mtell "top of power-inverse-standard q = ~M  a = ~M ~%" q a)
 	(let ((kmax) (kmin) (sol nil) (xxx) (ph) (cnd) (ok) ($m1pbranch t) ($domain '$complex))
 
 		 (cond

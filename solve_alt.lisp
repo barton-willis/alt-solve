@@ -11,7 +11,7 @@
 
 ;;; When $use_to_poly is true, dispatch the to_poly_solver after attempting other methods;
 ;;; when $use_to_poly is false, never dispatch the to_poly_solver.
-(defmvar $use_to_poly nil)
+(defmvar $use_to_poly t)
 
 ;;; When $solve_ignores_conditions is true, ....?
 (defmvar $solve_ignores_conditions nil)
@@ -20,7 +20,7 @@
 	(:compile-toplevel :load-toplevel :execute)
 	($load "to_poly_solve")
 	($load "function-inverses.lisp")
-	(setq $solve_inverse_package $single_valued_inverse)
+	(setq $solve_inverse_package $multivalued_inverse)
 	($load "trig_identities.lisp")
 	($load "polynomial-solve.lisp")
 	($load "in-domain.lisp")
@@ -82,7 +82,7 @@
 ;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
-  (mtell "top of $solve~%")
+  ;(mtell "top of $solve ~M ~M ~%" eqlist varl)
   (mfuncall '$reset $multiplicities)
 
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
@@ -284,7 +284,7 @@
 
 (defvar $the_unsolved nil) ;;this is purely for debugging
 
-(defun solve-single-equation (e x &optional (m 1) (use-trigsolve t))
+(defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
 	(let ((cnd)) ;did have ($assume_pos nil), but why?
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
@@ -429,20 +429,21 @@
 				(setq nvars (car nvars))
 				(setq ker (first kernels))
 				(setq inverse-function
-					  (cond (($freeof x (second ker)) ;looking at a^X = b
-							 (setq zzz (second ker))
-							 (setq ker (third ker))
-							 (gethash 'exponential-inverse $solve_inverse_package))
+					  (cond
+							(($freeof x (second ker)) ;looking at a^X = b
+							  (setq zzz (second ker))
+							  (setq ker (third ker))
+							  (gethash 'exponential-inverse $solve_inverse_package))
 
-					  	    (($freeof x (third ker)) ;looking at X^a = b
-							 (setq zzz (third ker))
-							 (setq ker (second ker))
-							 (gethash 'power-inverse $solve_inverse_package))
+					  	 (($freeof x (third ker)) ;looking at X^a = b
+					  		 (setq zzz (third ker))
+							   (setq ker (second ker))
+						  	 (gethash 'power-inverse $solve_inverse_package))
 
 						    ((alike1 (second ker) (third ker))
-							 (setq zzz 0)
-							 (setq ker (second ker))
-							 (gethash 'lambert-like-inverse $solve_inverse_package))))
+						   	 (setq zzz 0)
+						  	 (setq ker (second ker))
+						  	 (gethash 'lambert-like-inverse $solve_inverse_package))))
 
 				(when inverse-function
 					(setq sol ($solve (first e) nvars))
@@ -564,7 +565,7 @@
 				 (setq eqset ($adjoin ek eqset))))
 
 		 (setq eqset (sort (cdr eqset) #'equation-complexity-guess)) ;effort to find simplest equation
-		 (setq sol (let (($solveexplicit t)) ($solve (first eqset) x)))
+		 (setq sol (let (($solveexplicit t)) (solve-single-equation (first eqset) x)))
 		 ;;include only solutions that can be verified--likely this will sometimes miss legitimate solutions.
 		 (push '(mlist) eqs) ;restore eqs to a Maxima list
 		 (when ($listp sol) ;sol could be $all, maybe?
@@ -619,12 +620,14 @@
 					 (mtell (intl:gettext "Solve: unable to solve.~%"))
 				   (if $solveexplicit (list (list 'mlist)) nil)))))))
 
+;;; What's the meaning of the optional args foo and baz? Is one is programmode? I think this code is
+;; inhertited from the old solvex?
 
-(defun solvex (e v &optional (foo nil) (baz nil)) ;ahh, what's the meaning of the optional args? One is programmode?
-  (mtell "top of solvex~")
-	(print `(foo = ,foo))
-	(print `(baz = ,baz))
-	;(declare (ignore foo baz))
+
+(defun solvex (e v &optional (foo nil) (baz nil))
+	;(print `(not sure about foo = ,foo))
+	;(print `(not sure about baz = ,baz))
+	(declare (ignore foo baz))
 	(let ((ee) (sol))
 		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 		 (push '(mlist) e)
@@ -679,17 +682,18 @@
 ;; contains equations which if solved would yield additional solutions.
 
 (defun solve (e x ms)
+  ;(mtell "top of solve ~M ~M ~M ~%" e x ms)
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
 				($solve_ignores_conditions t)
-				($use_to_poly t)
+				($use_to_poly nil)
 				($realonly nil)
 				($negdistrib t) ;not sure about this?
 				(*solve-factors-biquadratic* nil)
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
-				 (setq sol ($solve e x)) ;what if solve returns all? It's a bug!
+				 (setq sol (solve-single-equation e x ms nil)) ;what if solve returns all? It's a bug!
 				 (setq sol (reverse (cdr sol)))
 				 (setq m (cond (($listp $multiplicities)
 								(cdr $multiplicities))
@@ -737,7 +741,7 @@
 
 (defun trigsolve (e x) "Attempt to solve equations that are rational functions of trig functions with the same argument."
 	(let ((sine-args) (cosine-args) (kc) (ks) (gc) (gs) (sol) (buzz nil) (fun) (ker))
-		 ;(mtell "new trigsolve ~%")
+		 (mtell "new trigsolve ~%")
 		;(displa `((mequal) e ,e))
 		 (setq e (apply-identities e *pythagorean-identities*))
 		 (setq e (apply-identities-xxx e *to-cos/sin-identities*))
