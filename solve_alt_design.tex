@@ -1,0 +1,146 @@
+\documentclass[]{scrartcl}
+\usepackage[letterpaper,margin=1.0in]{geometry}
+
+\usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
+\usepackage[american]{babel}
+\usepackage{mathptmx}
+\usepackage{enumitem}
+\newlist{alphalist}{enumerate}{3}
+\setlist[alphalist]{label=\alph*),before=\raggedright}
+
+\newcommand{\altsolve}{\texttt{solve\_alt}}
+\newcommand{\algsys}{\texttt{algsys}}
+\newcommand{\solveexplicit}{\texttt{solveexplicit}}
+\newcommand{\fpprec}{\texttt{fpprec}}
+
+\newcommand{\multivaluedinverse}{\texttt{multivalued\_inverse}}
+\newcommand{\singlevaluedinverse}{\texttt{single\_valued\_inverse}}
+\newcommand{\solveinversepackage}{\textt{solve\_inverse\_package}}
+
+\title{An alternative solve function for Maxima}
+\begin{document}
+
+
+\maketitle
+
+\section{Aims}
+
+The \altsolve\/ package aims to be a replacement for Maxima's solve function. The goals are to
+
+\begin{alphalist}[noitemsep]
+
+\item support the needs for a variety users, including high school students,  university students, engineers, statisticians, and scientists,
+
+\item provide clear user documentation that is focused on user's questions,
+
+\item focus on equations that are pertinent to science and engineering problems,
+
+\item have Common Lisp source code that is easy to extend and to fix,
+
+\item attempt to find all real and complex solutions to equations, but take care to not  return spurious solutions.
+
+\end{alphalist}
+Additionally, \altsolve\/  aims to be compatible with Maxima's current solve function; by compatible, we require:
+
+\begin{alphalist}[noitemsep]
+
+\item  Solutions are expressed as Maxima lists.
+
+ \item The \altsolve\/ code requires only modest modifications to the rest of the source code for  Maxima.
+
+\item Except for algebraically equivalent, but different results, \altsolve\/  runs the testsuite and the share testsuite with no errors. This condition should hold for all combinations of the primary option variables that effect functioning of \altsolve.
+
+\item  The \altsolve code runs the testsuite and the share testsuite in about the same time as standard Maxima on all supported operating systems and Common Lisp versions.
+
+\end{alphalist}
+We do \emph{not} aim to
+\begin{alphalist}[noitemsep]
+
+\item solve inequalities, diophantine equations, differential equations, or to use purely numerical methods (the Newton method, for example) solutions,
+
+\item build a platform that could be used to display the steps done to find the solution,
+
+\item write a new version of \algsys.
+
+\end{alphalist}
+Our development priorities are (in order from highest to least)
+
+\begin{alphalist}[noitemsep]
+
+\item  provide well written source code with ample informative comments,
+
+\item  have  a modest code size,
+
+\item be conservative with memory usage,
+
+\item solve equations quickly.
+
+\item source code should compile without few warnings on all supported versions of Common Lisp.
+\end{alphalist}
+
+
+\section{Representation of solutions}
+
+To be compatible with Maxima, solutions to equations with one variable have the form of a Maxima list; for example \([x = e_1, x = e_2, \cdots, x = e_n]\), where the expressions \(e_1, e_2, \dots, e_n\) are free of \(x\). The order of solutions is \emph{unspecified}.
+
+When \altsolve\/  is unable to find a solution and the option variable \solveexplicit\/ is false, return an equivalent, but possibly simplified equation;  otherwise print a message that there is no method for solving the equation and return the empty list.
+
+%I'm not sure what solve(0=0, []) should return. Returning the symbol  \all makes a bit of a mess (a solution cannot be relied on to be a list)
+
+
+
+
+
+
+Atoms of the form \%Zk, \%Rk, and \%Ck, where k is a nonnegative integer, represent arbitrary integers, real numbers, and complex numbers, respectively.
+
+Solutions to equations with two or more variables are lists of lists of the form \([x_1 = e_1, x_2 = e_2, \cdots, x_n = e_n] \), where the expressions \(e_1\) through \(e_n\) are free of the symbols \(x_1\) through \(x_n \). The order of variables in each solution is unspecified, and the order of the lists is unspecified.
+
+\section{Keep float mechanism}
+
+The top level solve function encloses all floats (Binary64) and big floats in labeled boxes. The floats are converted to exact rational form.
+After solve exits, numbers are converted back to floats (big floats are converted using the \emph{current} value of \fpprec.
+
+It can, of course, happen that the simplification after conversion back to floats can involve subtractive cancellation. In such cases, purely numerical methods might be better.
+
+\section{Solve function hierarchy}
+
+ The top level function solve function:
+ \begin{alphalist}[noitemsep]
+   \item resets multiplicities to its default value,
+   \item expunges constant variables and duplicates from the list of variables,
+   \item checks for inequalities and signals an error when found,
+   \item creates a new super context--all assumptions made during solve are removed after exiting,
+   \item protects all floats and big floats in labeled boxes,
+   \item does gensym substitutions when solving for nonatoms,
+   \item dispatches the appropriate lower level solve function,
+   \item reverts gensym substitutions for nonatom solve,
+   \item unboxes the floats and big floats,
+   \item kills the super context.
+\end{alphalist}
+
+The lower level solve functions are solve-single-equation (solve one equation in one unknown), redundant-equation-solve (solve two or more equations for one unknown), and solve-multiple-equations (solve two or more equations in two or more unknowns).
+
+
+\paragraph{solve-single-equation} If the input is a polynomial, dispatch the polynomial solve code.
+
+First the equation is processed using
+The primary method for solving one equation in one unknown is to match the equation to the form \(a F(X) - b = 0\), where \(X\) depends on the unknown, the function \(F\) has a known inverse, and \(a\) and \(b\) are free of the unknown \(x\). When the match is successful, the new tasks is to solve \(X = F^{-1}(b/a) \). In general, \(F^{-1}\) is multi-valued--in such cases, the task is to solve finitely many equations of the form  \(X = F^{-1}(b/a) \).
+
+The multi inverses for functions are stored in a Common Lisp hashtable. To accommodate the needs of diverse users, there are two hashtables; one is named \multivaluedinverse\/ and the other \singlevaluedinverse.  The option variable \solveinversepackage\/ is the value of the current hashtable for the function multi inverses.
+
+\section{Polynomial zeros}
+
+The zeros of polynomials of degree four or less are expressed in terms of radicals. Also  cyclotomic polynomials of degree six are solved in terms of radicals, as well as polynomial of degree five or greater that decompose into polynomials of degree four or less. \emph{Well there option variable solvedecomp controls using polynomial decomposition, but I think this option could be removed.}
+
+\begin{alphalist}[noitemsep]
+
+\item  Polynomial coefficients that are not simplified to zero by the  general simplifier are assumed to be nonzero. Even if an atom has been declared to be zero, the general simplifier does not simplify  it to zero. Thus even if the atom \(a\) has been declared to be zero, the solution to \(a x = b\) is \(x = -b/a \).
+
+
+
+\end{alphalist}
+
+
+
+\end{document}
