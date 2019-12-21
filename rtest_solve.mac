@@ -523,8 +523,7 @@ block([cntx : newcontext()],
   killcontext(cntx)));
 []$
 
-
-solve((cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1),x);
+block([solve_ignores_conditions : true], solve((cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1),x));
 []$
 
 ssolve(abs(5 + abs(x-1)) = 15,x);
@@ -1015,7 +1014,7 @@ ssolve(asin(x) = %pi/6,x);
 [x=1/2]$
 
 
-/* linear equations and frational linear */
+/* linear equations and fractional linear equations */
 
 ssolve(4*x + 5 = 2* x + 13,x);
 [x=4]$
@@ -2465,8 +2464,33 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
     [0=0, 0=0, 0=0];
     (forget(h<0),0);
     0;
+
+block([cntx : supcontext()], unwind_protect((assume(equal(a, 0)), solve(abs(x) = a,x)), killcontext(cntx)));
+[x=0]$
+
+block([cntx : supcontext()], unwind_protect((assume(a < 0), solve(abs(x) = a,x)), killcontext(cntx)));
+[]$
+
+block([cntx : supcontext()], unwind_protect((assume(a > 0), solve(abs(x) = a,x)), killcontext(cntx)));
+[x=a,x=-a]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
+
+solve(6*x^2 = 28,x^2);
+[x^2=14/3]$
+
+solve(6*x^2 = 28/x^2,x^2);
+[x^2=-sqrt(42)/3,x^2=sqrt(42)/3]$
+
+solve([6*x^2 = 28/x^2],[x^2,x^2]);
+[x^2=-sqrt(42)/3,x^2=sqrt(42)/3]$
+
+block([%rnum : 0], solve([x+y=1, x-y=2],[x,y]));
+[[x=%r1,y=%r1\-2]]$
+
+block([%rnum : 0], solve([x+y=1, x^2+y^2 = 1],[x,y]));
+[[x=%r1,y=sqrt(1\-%r1^2)],[x=%r2,y=\-sqrt(1\-%r2^2)]]$
 
 (kill(ssolve), remvalue(thyme), reset(),0);
 0$

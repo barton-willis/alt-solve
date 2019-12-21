@@ -1,12 +1,12 @@
 
 /* Maxima error log from tests in C:/Users/Barton/Documents/alt-solve/alt-solve/rtest_solve.mac */
 
-/* Problem 116 (line 372) */
-block([solveexplicit:false],ssolve(asin(cos(3*x))*(f(x)-1),x));
+/* Problem 89 (line 277) */
+block([solve_inverse_package:single_valued_inverse],solve(1.03b0^x = 2.0b0));
 /* Erroneous Result?:
-[x = %pi/6,f(x) = 1] */ 
+[x = 2.344977225043778b1] */ 
 /* Expected result: */
-[x = (4*%pi*%z0+%pi)/6,x = (4*%pi*%z1-%pi)/6,f(x) = 1];
+[x = 2.344977225043776b1];
 
 /* Problem 127 (line 414) */
 algsys([x^2+y^2 = 1,(x-2)^2+(y-3)^2 = 9],[x,y]);
@@ -82,14 +82,6 @@ sqrt(2)*%pi */
 /* Expected result: */
 -((2^(3/2)-2)*%pi)/(sqrt(2)-2);
 
-/* Problem 153 (line 502) */
-ssolve(64*sin(x)^4+64*sin(x)^2+16,x);
-/* Erroneous Result?:
-[x = -%i*asinh(1/sqrt(2)),x = %i*asinh(1/sqrt(2))] */ 
-/* Expected result: */
-[x = 2*%pi*%z0-%i*asinh(1/sqrt(2)),x = 2*%pi*%z1+%i*asinh(1/sqrt(2))+%pi,
- x = 2*%pi*%z2+%i*asinh(1/sqrt(2)),x = 2*%pi*%z3-%i*asinh(1/sqrt(2))+%pi];
-
 /* Problem 155 (line 514) */
 block([cntx:newcontext()],
       unwind_protect(block(activate(cntx),assume(a > 0),
@@ -99,6 +91,13 @@ block([cntx:newcontext()],
 /* Expected result: */
 [x = -sqrt(1-a),x = sqrt(1-a),x = -sqrt(a+1),x = sqrt(a+1)];
 
+/* Problem 157 (line 527) */
+solve((cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1),x);
+/* Erroneous Result?:
+error\-catch */ 
+/* Expected result: */
+[];
+
 /* Problem 170 (line 569) */
 ssolve((x^2+1)^4+(x^2+1)^2+1/4,x);
 /* Erroneous Result?:
@@ -107,6 +106,13 @@ ssolve((x^2+1)^4+(x^2+1)^2+1/4,x);
 /* Expected result: */
 [x = -sqrt((sqrt(2)*%i-2)/2),x = sqrt((sqrt(2)*%i-2)/2),
  x = -sqrt(-(sqrt(2)*%i+2)/2),x = sqrt(-(sqrt(2)*%i+2)/2)];
+
+/* Problem 179 (line 597) */
+ssolve(sech(x) = a,x);
+/* Erroneous Result?:
+[x = 2*%i*%pi*%z0-acosh(1/a),x = acosh(1/a)+2*%i*%pi*%z1] */ 
+/* Expected result: */
+[x = 2*%i*%pi*%z1-acosh(1/a),x = acosh(1/a)+2*%i*%pi*%z0];
 
 /* Problem 181 (line 603) */
 ssolve(csch(x) = a,x);
@@ -132,7 +138,7 @@ ssolve(x = 1/sqrt(1+x^2),x);
 /* Problem 237 (line 838) */
 ssolve(sin(x) = cos(x),x);
 /* Erroneous Result?:
-[x = -(3*%pi)/4,x = %pi/4] */ 
+[x = 2*%pi*%z0+%pi/4,x = 2*%pi*%z1-(3*%pi)/4] */ 
 /* Expected result: */
 [x = (8*%pi*%z0+%pi)/4,x = (8*%pi*%z1+3*%pi)/4,x = (8*%pi*%z2-%pi)/4,
  x = (8*%pi*%z3+5*%pi)/4];
@@ -140,7 +146,7 @@ ssolve(sin(x) = cos(x),x);
 /* Problem 247 (line 872) */
 ssolve(sin(x)*cos(x) = sin(%pi/4)*cos(%pi/4),x);
 /* Erroneous Result?:
-[x = %pi/4] */ 
+[x = -((-2*%pi*%z0)-%pi/2)/2] */ 
 /* Expected result: */
 [x = (8*%pi*%z0+%pi)/4,x = (8*%pi*%z1+3*%pi)/4,x = (8*%pi*%z2-%pi)/4,
  x = (8*%pi*%z3+5*%pi)/4];
@@ -148,7 +154,7 @@ ssolve(sin(x)*cos(x) = sin(%pi/4)*cos(%pi/4),x);
 /* Problem 250 (line 883) */
 ssolve(sin(sqrt(x)) = 0,x);
 /* Erroneous Result?:
-[x = 0] */ 
+error\-catch */ 
 /* Expected result: */
 [x = %pi^2*%z0^2];
 
@@ -196,13 +202,6 @@ solve(x^3 = 8,x);
 /* Expected result: */
 [x = 2,x = sqrt(3)*%i-1,x = (-sqrt(3)*%i)-1];
 
-/* Problem 274 (line 1011) */
-ssolve(log(sqrt(1-x^2)+%i*x) = (%i*%pi)/6,x);
-/* Erroneous Result?:
-[] */ 
-/* Expected result: */
-[x = 1/2];
-
 /* Problem 286 (line 1055) */
 ssolve(cosh(x) = 0,x);
 /* Erroneous Result?:
@@ -213,22 +212,16 @@ ssolve(cosh(x) = 0,x);
 /* Problem 287 (line 1058) */
 ssolve(cosh(x)-sinh(2*x)/2 = 0,x);
 /* Erroneous Result?:
-[x = -(%i*%pi)/2,x = (%i*%pi)/2,x = log(sqrt(2)-1)+%i*%pi,x = log(sqrt(2)+1)] */ 
+[x = %i*(2*%pi*%z0+%pi/2),x = %i*(2*%pi*%z1-%pi/2),
+ x = 2*%i*%pi*%z2+log(sqrt(2)+1),x = %i*(2*%pi*%z3+%pi)+log(sqrt(2)-1)] */ 
 /* Expected result: */
 [x = 2*%i*%pi*%z0+log(-%i),x = 2*%i*%pi*%z1+log(%i),
  x = 2*%i*%pi*%z2+log(sqrt(2)+1),x = 2*%i*%pi*%z3+log(1-sqrt(2))];
 
-/* Problem 288 (line 1062) */
-ssolve(sinh(x)+cosh(x) = 1,x);
-/* Erroneous Result?:
-[x = 0] */ 
-/* Expected result: */
-[x = 2*%i*%pi*%z0];
-
 /* Problem 289 (line 1067) */
 ssolve(sin(x) = cos(x),x);
 /* Erroneous Result?:
-[x = -(3*%pi)/4,x = %pi/4] */ 
+[x = 2*%pi*%z0+%pi/4,x = 2*%pi*%z1-(3*%pi)/4] */ 
 /* Expected result: */
 [x = 2*%pi*%z0+%pi,x = 2*%pi*%z1-%pi,x = 2*%pi*%z2-acos(1/3)+%pi,
  x = 2*%pi*%z3+acos(1/3)-%pi,x = %pi*%z4];
@@ -236,7 +229,7 @@ ssolve(sin(x) = cos(x),x);
 /* Problem 290 (line 1070) */
 ssolve(42*cos(x)+sin(x) = 42*cos(%pi/4)+sin(%pi/4),x);
 /* Erroneous Result?:
-[x = %pi/4,x = -atan(1679/1847)] */ 
+[x = 2*%pi*%z0-atan(1679/1847),x = 2*%pi*%z1+%pi/4] */ 
 /* Expected result: */
 [x = 2*%pi*%z0-asin(43/sqrt(3530))-atan(42)+%pi,
  x = 2*%pi*%z1+asin(43/sqrt(3530))-atan(42)];
@@ -244,7 +237,7 @@ ssolve(42*cos(x)+sin(x) = 42*cos(%pi/4)+sin(%pi/4),x);
 /* Problem 291 (line 1073) */
 ssolve(sin(x)*cos(x) = 1/2,x);
 /* Erroneous Result?:
-[x = %pi/4] */ 
+[x = -((-2*%pi*%z0)-%pi/2)/2] */ 
 /* Expected result: */
 [x = (8*%pi*%z0-%pi)/4,x = (8*%pi*%z1+5*%pi)/4,x = (8*%pi*%z2+%pi)/4,
  x = (8*%pi*%z3+3*%pi)/4];
@@ -252,12 +245,13 @@ ssolve(sin(x)*cos(x) = 1/2,x);
 /* Problem 292 (line 1076) */
 ssolve(cos(3*x)-2*cos(2*x)+cos(x) = 1/2,x);
 /* Erroneous Result?:
-[x = -%pi/3,x = %pi/3,x = -%i*log((sqrt(13)-2*sqrt((sqrt(13)-1)/2)+1)/4),
- x = -%i*log((sqrt(13)+2*sqrt((sqrt(13)-1)/2)+1)/4),
- x = (-%i*log(sqrt(2*sqrt(13)+(1-sqrt(13))^2+2)/4))
-   +atan((2*sqrt((sqrt(13)+1)/2))/(1-sqrt(13)))+%pi,
- x = (-%i*log(sqrt(2*sqrt(13)+(sqrt(13)-1)^2+2)/4))
-   +atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))+%pi] */ 
+[x = 2*%pi*%z0-%i*log((sqrt(13)+2*sqrt((sqrt(13)-1)/2)+1)/4),
+ x = 2*%pi*%z1-%i*log((sqrt(13)-2*sqrt((sqrt(13)-1)/2)+1)/4),
+ x = 2*%pi*%z2-%i*log(sqrt(2*sqrt(13)+(1-sqrt(13))^2+2)/4)
+              +atan((2*sqrt((sqrt(13)+1)/2))/(1-sqrt(13)))+%pi,
+ x = 2*%pi*%z3-%i*log(sqrt(2*sqrt(13)+(sqrt(13)-1)^2+2)/4)
+              +atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))+%pi,
+ x = 2*%pi*%z4+%pi/3,x = 2*%pi*%z5-%pi/3] */ 
 /* Expected result: */
 ev([x = 2*%pi*%z0-atan(sqrt(sqrt(13)/2+1/2)/(1/2-sqrt(13)/2))-%pi],
    [x = 2*%pi*%z1+atan(sqrt(sqrt(13)/2+1/2)/(1/2-sqrt(13)/2))+%pi],
@@ -268,7 +262,7 @@ ev([x = 2*%pi*%z0-atan(sqrt(sqrt(13)/2+1/2)/(1/2-sqrt(13)/2))-%pi],
 /* Problem 293 (line 1084) */
 ssolve(sin(2*x)+cos(2*x) = 1,x);
 /* Erroneous Result?:
-[x = 0,x = %pi/4] */ 
+[x = -((-2*%pi*%z0)-%pi/2)/2,x = %pi*%z1] */ 
 /* Expected result: */
 [x = %pi*%z0,x = %pi*%z1+%pi/4];
 
@@ -276,10 +270,11 @@ ssolve(sin(2*x)+cos(2*x) = 1,x);
 ssolve(%e^(2*x)+2*%e^x+1 = z,x);
 /* Erroneous Result?:
 [x = log(sin(atan2(0,z)/2)^2*abs(z)+((-cos(atan2(0,z)/2)*sqrt(abs(z)))-1)^2)/2
-   -%i*atan2(sin(atan2(0,z)/2)*sqrt(abs(z)),
-             (-cos(atan2(0,z)/2)*sqrt(abs(z)))-1),
+   +%i*(2*%pi*%z1-atan2(sin(atan2(0,z)/2)*sqrt(abs(z)),
+                        (-cos(atan2(0,z)/2)*sqrt(abs(z)))-1)),
  x = log(sin(atan2(0,z)/2)^2*abs(z)+(cos(atan2(0,z)/2)*sqrt(abs(z))-1)^2)/2
-   +%i*atan2(sin(atan2(0,z)/2)*sqrt(abs(z)),cos(atan2(0,z)/2)*sqrt(abs(z))-1)] */ 
+   +%i*(atan2(sin(atan2(0,z)/2)*sqrt(abs(z)),cos(atan2(0,z)/2)*sqrt(abs(z))-1)
+       +2*%pi*%z0)] */ 
 /* Expected result: */
 [x = log((-sqrt(z))-1)+2*%i*%pi*%z1,x = log(sqrt(z)-1)+2*%i*%pi*%z0];
 
@@ -290,18 +285,12 @@ ssolve(exp(2-x^2) = exp(-x),x);
 /* Expected result: */
 [x = (-(sqrt(8*%i*%pi*%z0+9)-1))/2,x = (sqrt(8*%i*%pi*%z0+9)+1)/2];
 
-/* Problem 303 (line 1116) */
-ssolve(sqrt(log(x)) = log(sqrt(x)),x);
-/* Erroneous Result?:
-[] */ 
-/* Expected result: */
-[x = 1,x = %e^4];
-
 /* Problem 307 (line 1133) */
 ssolve((x+1)*(sin(x)^2+1)^2*cos(3*x)^3 = 0,x);
 /* Erroneous Result?:
-[x = -1,x = -%i*asinh(1),x = %i*asinh(1),x = (4*%pi*%z0+%pi)/6,
- x = (4*%pi*%z1-%pi)/6] */ 
+[x = -1,x = 2*%pi*%z0-%i*asinh(1),x = 2*%pi*%z1+%i*asinh(1)+%pi,
+ x = 2*%pi*%z2+%i*asinh(1),x = 2*%pi*%z3-%i*asinh(1)+%pi,
+ x = (4*%pi*%z4+%pi)/6,x = (4*%pi*%z5-%pi)/6] */ 
 /* Expected result: */
 [[x = -1],[x = 2*%pi*%z0-%i*(log(sqrt(2)+1)+%i*%pi)],
  [x = 2*%pi*%z1-%i*(log(sqrt(2)-1)+%i*%pi)],[x = 2*%pi*%z2-%i*log(sqrt(2)-1)],
@@ -315,13 +304,6 @@ block([solve_ignores_conditions:true],solve(sin(x) = tan(x),x));
 [tan(x) = sin(x)] */ 
 /* Expected result: */
 [x = 2*%pi*%z0,x = 2*%pi*%z1+%pi,x = 2*%pi*%z2,x = 2*%pi*%z3+%pi];
-
-/* Problem 311 (line 1151) */
-ssolve(sqrt(log(x)) = log(sqrt(x)),x);
-/* Erroneous Result?:
-[] */ 
-/* Expected result: */
-[x = 1,x = %e^4];
 
 /* Problem 314 (line 1175) */
 block(supcontext(cntx,global),activate(cntx,global),
@@ -344,14 +326,14 @@ block(unwind_protect((supcontext(cntx,global),activate(cntx,global),
 /* Problem 318 (line 1226) */
 ssolve([x = 0,1-exp(y) = 0],[x,y]);
 /* Erroneous Result?:
-[[x = x-{x},y = log(g271637-{1-g271637})]] */ 
+[[x = 0,y = 2*%i*%pi*%z0]] */ 
 /* Expected result: */
 [x = 0,y = 2*%i*%pi*%z0];
 
 /* Problem 319 (line 1229) */
 ssolve([y*sin(x) = 0,cos(x) = 0],[x,y]);
 /* Erroneous Result?:
-[] */ 
+[[x = (4*%pi*%z0+%pi)/2,y = 0],[x = (4*%pi*%z1-%pi)/2,y = 0]] */ 
 /* Expected result: */
 [x = (2*%pi*%z0+%pi)/2,y = 0];
 
@@ -360,7 +342,8 @@ ssolve(0.004*(8*%e^((-300)*t)-8*%e^((-1200)*t))
             *(720000*%e^((-300)*t)-11520000*%e^((-1200)*t))
         +0.004*(9600*%e^((-1200)*t)-2400*%e^((-300)*t))^2,t);
 /* Erroneous Result?:
-[t = log((25-3*sqrt(41))/4)/900,t = log((3*sqrt(41)+25)/4)/900] */ 
+[t = (%i*%pi*%z0)/450+log((3*sqrt(41)+25)/4)/900,
+ t = (%i*%pi*%z1)/450+log((25-3*sqrt(41))/4)/900] */ 
 /* Expected result: */
 [t = (2*%i*%pi*%z0+log(25/4-(3*sqrt(41))/4))/900,
  t = (2*%i*%pi*%z1+log((3*sqrt(41))/4+25/4))/900];
@@ -387,7 +370,7 @@ block(unwind_protect((supcontext(cntx,global),activate(cntx,global),
 /* Problem 333 (line 1286) */
 ssolve(sin(x)+cos(x) = 0,x);
 /* Erroneous Result?:
-[x = -%pi/4,x = (3*%pi)/4] */ 
+[x = 2*%pi*%z0-%pi/4,x = 2*%pi*%z1+(3*%pi)/4] */ 
 /* Expected result: */
 [x = 2*%pi*%z0-%pi/4,x = 2*%pi*%z0+(3*%pi)/4];
 
@@ -473,7 +456,7 @@ block([%rnum:0],ssolve(x^4+a^4,[x,a]));
 /* Problem 365 (line 1414) */
 ssolve(sin(x^2) = 0,x);
 /* Erroneous Result?:
-[x = 0] */ 
+[x = -sqrt(%pi)*sqrt(%z0),x = sqrt(%pi)*sqrt(%z0)] */ 
 /* Expected result: */
 [x = sqrt(%pi)*sqrt(%z0)];
 
@@ -495,8 +478,7 @@ ssolve([abs(x*y-1) = a,a^2-x*y],[x*y,a]);
 /* Problem 373 (line 1446) */
 ssolve([x+y = 1,sqrt(x+1) = 1],[x,y]);
 /* Erroneous Result?:
-[[x = g288305^2-2*{g288305-1}*g288305+{g288305-1}^2-1,
-  y = y-{g288305^2-2*{g288305-1}*g288305+{g288305-1}^2+y-2}]] */ 
+[[x = 0,y = 1]] */ 
 /* Expected result: */
 [x = 0,y = 1];
 
@@ -594,13 +576,6 @@ solve(1+x^(5/2),x);
  [x = (sqrt(5-sqrt(5))*sqrt(5)*%i)/2^(5/2)
     +(sqrt(5-sqrt(5))*%i)/2^(5/2)+sqrt(5)/4+(-1)/4]];
 
-/* Problem 380 (line 1493) */
-ssolve(sqrt(%e^(2*t)*sin(t)^2+%e^(2*t)*cos(t)^2+3*%e^(2*t)) = 2,t);
-/* Erroneous Result?:
-[t = 0] */ 
-/* Expected result: */
-[t = %i*%pi*%z0];
-
 /* Problem 382 (line 1504) */
 block([sol,eq],eq:(x^5+x-3)^5+x^5+x-6,sol:solve(eq,x),
       every(lambda([s],is(cabs(subst(s,eq)) < 9.999999999999999e-7)),
@@ -621,14 +596,14 @@ solve((4*k^2-4)*y^2+(4-4*k^2)*y+6*k^2-1,y);
 /* Problem 385 (line 1517) */
 solve(x*exp(x) = a,x);
 /* Erroneous Result?:
-generalized_lambert_w(%z215,a) */ 
+generalized_lambert_w(%z261,a) */ 
 /* Expected result: */
 [x = lambert_w(a)];
 
 /* Problem 386 (line 1520) */
 solve(exp(x) = a/x,x);
 /* Erroneous Result?:
-generalized_lambert_w(%z216,a) */ 
+generalized_lambert_w(%z262,a) */ 
 /* Expected result: */
 [x = lambert_w(a)];
 
@@ -664,7 +639,7 @@ solve(2^x = 5*x,x);
 /* Problem 391 (line 1538) */
 solve(x^x = z,x);
 /* Erroneous Result?:
-[x = %e^lambert_w(log(z)+2*%i*%pi*%z218)] */ 
+[x = %e^lambert_w(log(z)+2*%i*%pi*%z264)] */ 
 /* Expected result: */
 [x = log(z)/lambert_w(log(z))];
 
@@ -686,8 +661,8 @@ ssolve(exp(x) = exp(x^2-1),x);
 /* Problem 394 (line 1549) */
 solve(exp(x)-exp(x^2-1),x);
 /* Erroneous Result?:
-[x = -(sqrt((-8*%i*%pi*%z221)-8*log(-1)+5)-1)/2,
- x = (sqrt((-8*%i*%pi*%z221)-8*log(-1)+5)+1)/2] */ 
+[x = -(sqrt((-8*%i*%pi*%z267)-8*log(-1)+5)-1)/2,
+ x = (sqrt((-8*%i*%pi*%z267)-8*log(-1)+5)+1)/2] */ 
 /* Expected result: */
 [x = -(sqrt(5-8*%i*%pi*%z0)-1)/2,x = (sqrt(5-8*%i*%pi*%z0)+1)/2];
 
@@ -741,7 +716,7 @@ block([algebraic:true],solve(x^(3/2) = 1/2+(sqrt(3)*%i)/2,x));
 /* Problem 412 (line 1614) */
 ssolve(asin(cos(x)),x);
 /* Erroneous Result?:
-[x = %pi/2] */ 
+[x = (4*%pi*%z0+%pi)/2,x = (4*%pi*%z1-%pi)/2] */ 
 /* Expected result: */
 [x = (2*%pi*%z0+%pi)/2];
 
@@ -761,20 +736,6 @@ solve(taylor(sin(x),x,0,4),x);
 /* Expected result: */
 [x = 0,x = sqrt(6),x = -sqrt(6)];
 
-/* Problem 443 (line 1730) */
-solve([min(x,1) = max(2,7-x)],[x]);
-/* Erroneous Result?:
-[x = 6] */ 
-/* Expected result: */
-[];
-
-/* Problem 446 (line 1739) */
-ssolve([sqrt(x) = min(x,35)],[x]);
-/* Erroneous Result?:
-[x = 0,x = 1] */ 
-/* Expected result: */
-[x = 0,x = 1,x = 1225];
-
 /* Problem 447 (line 1742) */
 solve([sqrt(x-y) = 2,sqrt(x+y) = 5],[x,y]);
 /* Erroneous Result?:
@@ -788,13 +749,6 @@ solve(Q*sqrt(Q^2+2)-1,Q);
 [Q = (sqrt(2)-1)*sqrt(sqrt(2)+1),Q = ((-sqrt(2))-1)*sqrt(1-sqrt(2))] */ 
 /* Expected result: */
 [Q = ((-sqrt(2))-1)*sqrt(1-sqrt(2)),Q = (sqrt(2)-1)*sqrt(sqrt(2)+1)];
-
-/* Problem 450 (line 1755) */
-solve(log(x+sqrt(x^2-1)) = 1,x);
-/* Erroneous Result?:
-[] */ 
-/* Expected result: */
-[x = (%e^-1*(%e^2+1))/2];
 
 /* Problem 451 (line 1764) */
 solve((x-%pi)/sin(x) = 0,x);
@@ -810,31 +764,24 @@ solve((sqrt(x)-1)/(x-1),x);
 /* Expected result: */
 [];
 
-/* Problem 454 (line 1782) */
-ssolve((-3)+cosh(x)+(-sinh(x))/tanh(x) = 0,x);
-/* Erroneous Result?:
-[x = 0] */ 
-/* Expected result: */
-[x = %i*%pi*%z0];
-
 /* Problem 457 (line 1795) */
 block([assume_notequal:true],ssolve(sin(x^2)/x,x));
 /* Erroneous Result?:
-[x = 0] */ 
+[x = -sqrt(%pi)*sqrt(%z0),x = sqrt(%pi)*sqrt(%z0)] */ 
 /* Expected result: */
 [x = sqrt(2)*sqrt(%pi)*sqrt(%z0),x = sqrt(2*%pi*%z1+%pi)];
 
 /* Problem 458 (line 1798) */
 block([assume_notequal:true],ssolve(sin(x^2)/x^2,x));
 /* Erroneous Result?:
-[x = 0] */ 
+[x = -sqrt(%pi)*sqrt(%z0),x = sqrt(%pi)*sqrt(%z0)] */ 
 /* Expected result: */
 [x = (-sqrt(%pi))*sqrt(%z1),x = sqrt(%pi)*sqrt(%z0)];
 
 /* Problem 459 (line 1801) */
 block([assume_notequal:true],ssolve(sin(x^2)/x^3,x));
 /* Erroneous Result?:
-[x = 0] */ 
+[x = -sqrt(%pi)*sqrt(%z0),x = sqrt(%pi)*sqrt(%z0)] */ 
 /* Expected result: */
 [x = sqrt(2)*sqrt(%pi)*sqrt(%z0),x = sqrt(2*%pi*%z1+%pi)];
 
@@ -848,44 +795,32 @@ ssolve(x^a = 1,x);
 /* Problem 462 (line 1824) */
 block([solve_ignores_conditions:true],solve(tan(a) = b,a));
 /* Erroneous Result?:
-[a = atan(b)+%pi*%z241] */ 
+[a = atan(b)+%pi*%z296] */ 
 /* Expected result: */
 [a = atan(b)+%pi*%z2];
 
 /* Problem 463 (line 1831) */
 ssolve(sin(x) = cos(x),x);
 /* Erroneous Result?:
-[x = -(3*%pi)/4,x = %pi/4] */ 
+[x = 2*%pi*%z0+%pi/4,x = 2*%pi*%z1-(3*%pi)/4] */ 
 /* Expected result: */
 [x = (4*%pi*%z0+%pi)/4];
 
 /* Problem 466 (line 1840) */
 ssolve(cos(x^2-1) = 0,x);
 /* Erroneous Result?:
-[x = -sqrt((%pi+2)/2),x = sqrt((%pi+2)/2)] */ 
+[x = -sqrt(4*%pi*%z0+%pi+2)/sqrt(2),x = sqrt(4*%pi*%z0+%pi+2)/sqrt(2),
+ x = -sqrt(%pi*(4*%z1-1)+2)/sqrt(2),x = sqrt(%pi*(4*%z1-1)+2)/sqrt(2)] */ 
 /* Expected result: */
 [x = sqrt(4*%pi*%z0+%pi+2)/sqrt(2),x = sqrt(4*%pi*%z1-%pi+2)/sqrt(2)];
-
-/* Problem 467 (line 1843) */
-solve(log(x-sqrt(x-1)) = 0,x);
-/* Erroneous Result?:
-[] */ 
-/* Expected result: */
-[x = 1,x = 2];
-
-/* Problem 468 (line 1846) */
-solve(log(x-sqrt(x-1)) = log(2009),x);
-/* Erroneous Result?:
-[] */ 
-/* Expected result: */
-[x = (sqrt(8033)+4019)/2];
 
 /* Problem 469 (line 1851) */
 ssolve(23040*(4*%e^-(1200*t)-%e^-(300*t))^2
         -720000*(16*%e^-(1200*t)-%e^-(300*t))
                *((4/125)*%e^-(300*t)-(4/125)*%e^-(1200*t)),t);
 /* Erroneous Result?:
-[t = log((25-3*sqrt(41))/4)/900,t = log((3*sqrt(41)+25)/4)/900] */ 
+[t = (%i*%pi*%z0)/450+log((3*sqrt(41)+25)/4)/900,
+ t = (%i*%pi*%z1)/450+log((25-3*sqrt(41))/4)/900] */ 
 /* Expected result: */
 [t = (2*%i*%pi*%z0+log(25/4-(3*sqrt(41))/4))/900,
  t = (2*%i*%pi*%z1+log((3*sqrt(41))/4+25/4))/900];
@@ -918,7 +853,7 @@ ssolve(2013*sin(x)*cos(x)*sin(sqrt(5)*x),x);
 /* Problem 476 (line 1882) */
 ssolve(sin(x^2),x);
 /* Erroneous Result?:
-[x = 0] */ 
+[x = -sqrt(%pi)*sqrt(%z0),x = sqrt(%pi)*sqrt(%z0)] */ 
 /* Expected result: */
 [x = sqrt(2)*sqrt(%pi)*sqrt(%z0),x = sqrt(2*%pi*%z1+%pi)];
 
@@ -932,7 +867,7 @@ ssolve(abs(x+7)*sin(x)*cos(x),x);
 /* Problem 479 (line 1891) */
 block([solve_ignores_conditions:true],solve(tan(x) = tan(zzz),x));
 /* Erroneous Result?:
-[x = atan(tan(zzz))+%pi*%z261] */ 
+[x = atan(tan(zzz))+%pi*%z325] */ 
 /* Expected result: */
 [x = atan(tan(zzz))+%pi*%z2];
 
@@ -953,7 +888,7 @@ not_set_yet;
 /* Problem 487 (line 1921) */
 solve([x/(x+y)+log(x+y),x/(x+y)],[x,y]);
 /* Erroneous Result?:
-[[false]] */ 
+[[x = 0,y = 1]] */ 
 /* Expected result: */
 [x = 0,y = 1];
 
@@ -1005,7 +940,7 @@ block([solve_ignores_conditions:true],solve(sin(x) = tan(x),x));
 /* Problem 499 (line 1970) */
 block([assume_notequal:true],ssolve(sin(cos(x))/cos(x) = 0,x));
 /* Erroneous Result?:
-[x = acos(%pi*%z0)] */ 
+[x = 2*%pi*%z1+acos(%pi*%z0),x = 2*%pi*%z2-acos(%pi*%z0)] */ 
 /* Expected result: */
 [x = 2*%pi*%z1+acos(2*%pi*%z0)];
 
@@ -1019,7 +954,7 @@ solve((x^2-1)/(x-1) = 2);
 /* Problem 506 (line 1996) */
 ssolve([sin(x) = cos(x),sin(x) = cos(x)],x);
 /* Erroneous Result?:
-[x = -(3*%pi)/4,x = %pi/4] */ 
+[] */ 
 /* Expected result: */
 [x = %pi/4,x = (-3*%pi)/4];
 
@@ -1045,13 +980,6 @@ solve(((x-1)^(3/2)-(x+1)*sqrt(x-1))/sqrt((x-1)*(x+1)),x);
 /* Expected result: */
 [];
 
-/* Problem 520 (line 2075) */
-ssolve([a = 1,exp(b) = 2],[a,b]);
-/* Erroneous Result?:
-[[a = a-{a-1},b = log(g326247-{g326247-2})]] */ 
-/* Expected result: */
-[[a = 1,b = 2*%i*%pi*%z0+log(2)]];
-
 /* Problem 522 (line 2083) */
 (solve(abs(sin(x)),x),multiplicities);
 /* Erroneous Result?:
@@ -1066,14 +994,6 @@ not_set_yet;
 /* Expected result: */
 [3/2];
 
-/* Problem 524 (line 2091) */
-block([solve_inverse_package:single_valued_inverse],
-      solve([x/(x+y),x/(x+y)+log(x+y)],[x,y]));
-/* Erroneous Result?:
-[[false]] */ 
-/* Expected result: */
-[[x = 0,y = 1]];
-
 /* Problem 528 (line 2107) */
 block([solve_inverse_package:single_valued_inverse],solve(x^(1/3) = -1,x));
 /* Erroneous Result?:
@@ -1086,9 +1006,7 @@ block([m1:0.1593017578125,m2:78.84375,c1:0.8359375,c2:18.8515625,c3:18.6875,
        solve_inverse_package:single_valued_inverse],
       solve(L = ((N^(1/m2)-c1)/(c2-c3*N^(1/m2)))^(1/m1),N));
 /* Erroneous Result?:
-[N = (-(18.8515625*L^0.1593017578125+0.8359375)
-   /((-18.6875*L^0.1593017578125)-1))
-   ^78.84375] */ 
+error\-catch */ 
 /* Expected result: */
 [N = ((-(18.8515625*L^0.1593017578125+0.8359375))
    /((-18.6875)*L^0.1593017578125-1))
@@ -1147,7 +1065,7 @@ block([solve_inverse_package:single_valued_inverse],
 /* Problem 548 (line 2207) */
 block([solve_ignores_conditions:true],solve(a*tan(x)-a*b,x));
 /* Erroneous Result?:
-[x = atan(b)+%pi*%z289] */ 
+[x = atan(b)+%pi*%z360] */ 
 /* Expected result: */
 [x = atan(b)+%pi*%z2];
 
@@ -1168,18 +1086,18 @@ solve(abs(x)+abs(1-x) = 6,x);
 /* Problem 553 (line 2222) */
 solve(abs(x-abs(1-x)) = 1/2,x);
 /* Erroneous Result?:
-[] */ 
+[x = 3/4,x = 1/4] */ 
 /* Expected result: */
 [x = 1/4,x = 3/4];
 
-/* Problem 556 (line 2248) */
+/* Problem 556 (line 2250) */
 solve([2*x-3*y = 3,2*y-3*x = -4]);
 /* Erroneous Result?:
 [[x = 6/5,y = -1/5]] */ 
 /* Expected result: */
 [[y = (-1)/5,x = 6/5]];
 
-/* Problem 559 (line 2294) */
+/* Problem 559 (line 2296) */
 is(equal(eigenvalues(matrix([2,0,-1,0,0,0,-1,0,0,0,0,0,0],
                             [0,2,0,-1,-1,0,0,0,0,0,0,0,0],
                             [-1,0,3,-1,0,0,0,0,0,0,0,0,-1],
@@ -1200,7 +1118,7 @@ false */
 /* Expected result: */
 true;
 
-/* Problem 560 (line 2311) */
+/* Problem 560 (line 2313) */
 is(equal(eigenvectors(matrix([2,0,-1,0,0,0,-1,0,0,0,0,0,0],
                              [0,2,0,-1,-1,0,0,0,0,0,0,0,0],
                              [-1,0,3,-1,0,0,0,0,0,0,0,0,-1],
@@ -1232,14 +1150,14 @@ false */
 /* Expected result: */
 true;
 
-/* Problem 566 (line 2332) */
+/* Problem 566 (line 2334) */
 eigenvectors(matrix([1,1,0],[0,1,0],[0,0,2]));
 /* Erroneous Result?:
 [[[2,1],[1,2]],[[[0,0,1]],[[1,0,0]]]] */ 
 /* Expected result: */
 [[[1,2],[2,1]],[[[1,0,0]],[[0,0,1]]]];
 
-/* Problem 567 (line 2340) */
+/* Problem 567 (line 2342) */
 eigenvectors(matrix([3,1,0,0,0],[1,3,0,0,0],[0,0,2,1,1],[0,0,1,2,1],
                     [0,0,1,1,2]));
 /* Erroneous Result?:
@@ -1249,14 +1167,14 @@ eigenvectors(matrix([3,1,0,0,0],[1,3,0,0,0],[0,0,2,1,1],[0,0,1,2,1],
 [[[2,1,4],[1,2,2]],
  [[[1,-1,0,0,0]],[[0,0,1,0,-1],[0,0,0,1,-1]],[[1,1,0,0,0],[0,0,1,1,1]]]];
 
-/* Problem 568 (line 2347) */
+/* Problem 568 (line 2349) */
 eigenvectors(matrix([0,1,0,0],[0,0,0,0],[0,0,2,0],[0,0,0,2]));
 /* Erroneous Result?:
 [[[2,0],[2,2]],[[[0,0,1,0],[0,0,0,1]],[[1,0,0,0]]]] */ 
 /* Expected result: */
 [[[0,2],[2,2]],[[[1,0,0,0]],[[0,0,1,0],[0,0,0,1]]]];
 
-/* Problem 569 (line 2354) */
+/* Problem 569 (line 2356) */
 (A:matrix([-2,1,1],[1,-2,1],[1,1,-2]),simtran(A)),A = matrix([-2,1,1],[1,-2,1],[1,1,-2]);
 /* Erroneous Result?:
 [[[0,-3],[1,2]],
@@ -1267,7 +1185,7 @@ eigenvectors(matrix([0,1,0,0],[0,0,0,0],[0,0,2,0],[0,0,0,2]));
  [[[1/sqrt(2),0,(-1)/sqrt(2)],[0,1/sqrt(2),(-1)/sqrt(2)]],
   [[1/sqrt(3),1/sqrt(3),1/sqrt(3)]]]];
 
-/* Problem 570 (line 2357) */
+/* Problem 570 (line 2359) */
 leftmatrix . A . rightmatrix,leftmatrix = matrix([1/sqrt(3),1/sqrt(3),1/sqrt(3)],
                     [2^(3/2)/3,-sqrt(2)/3,-sqrt(2)/3],
                     [-sqrt(2)/3,2^(3/2)/3,-sqrt(2)/3]),A = matrix([-2,1,1],[1,-2,1],[1,1,-2]),rightmatrix = matrix([1/sqrt(3),1/sqrt(2),0],[1/sqrt(3),0,1/sqrt(2)],
@@ -1277,14 +1195,14 @@ matrix([0,0,0],[0,-3,0],[0,0,-3]) */
 /* Expected result: */
 matrix([-3,0,0],[0,-3,0],[0,0,0]);
 
-/* Problem 573 (line 2369) */
+/* Problem 573 (line 2371) */
 algsys([x^4+1],[x]);
 /* Erroneous Result?:
 [[x = (-1)^(1/4)],[x = -(-1)^(1/4)],[x = sqrt(-%i)],[x = -sqrt(-%i)]] */ 
 /* Expected result: */
 [[x = (-1)^(1/4)],[x = (-(-1)^(1/4))*%i],[x = -(-1)^(1/4)],[x = sqrt(-%i)]];
 
-/* Problem 574 (line 2372) */
+/* Problem 574 (line 2374) */
 solve(x^6-1);
 /* Erroneous Result?:
 [x = 1/2-(sqrt(3)*%i)/2,x = (-(sqrt(3)*%i)/2)-1/2,x = -1,
@@ -1293,14 +1211,14 @@ solve(x^6-1);
 [x = (sqrt(3)*%i+1)/2,x = (sqrt(3)*%i-1)/2,x = -1,x = (-(sqrt(3)*%i+1))/2,
  x = (-(sqrt(3)*%i-1))/2,x = 1];
 
-/* Problem 575 (line 2375) */
+/* Problem 575 (line 2377) */
 solve(x^2-1,x);
 /* Erroneous Result?:
 [x = 1,x = -1] */ 
 /* Expected result: */
 [x = -1,x = 1];
 
-/* Problem 576 (line 2378) */
+/* Problem 576 (line 2380) */
 (eq:(-x^3)*a3+x^2*a2+(-x)*a1+a0,ratvars:[x1,x2],solve(eq,x)),eq = (-a3*x^3)+a2*x^2-a1*x+a0;
 /* Erroneous Result?:
 [x = -((((-sqrt(3)*%i)-1)*((3*a3
@@ -1379,14 +1297,14 @@ solve(x^2-1,x);
                                      +a2^3/(27*a3^3))
                                      ^(1/3)+a2/(3*a3)];
 
-/* Problem 581 (line 2393) */
+/* Problem 581 (line 2395) */
 integrate(log(1+7/x^2),x,1,inf);
 /* Erroneous Result?:
 2*sqrt(7)*atan(sqrt(7))-log(8) */ 
 /* Expected result: */
 (14*atan(sqrt(7))-sqrt(7)*log(8))/sqrt(7);
 
-/* Problem 582 (line 2396) */
+/* Problem 582 (line 2398) */
 algsys(eqs:[y^2+x^2-(400-400/(2/q+1))^2 = 0,
             ((-y)-400/(2/q+1)+400)^2+x^2+(-640000)/(2/q+1)^2 = 0],[x,y]),eqs = [y^2+x^2-(400-400/(2/q+1))^2 = 0,
        ((-y)-400/(2/q+1)+400)^2+x^2-640000/(2/q+1)^2 = 0];
@@ -1397,7 +1315,7 @@ algsys(eqs:[y^2+x^2-(400-400/(2/q+1))^2 = 0,
 [[x = (-400)*q*sqrt((-(q-2))/(q+2)),y = (-(400*q^2-800))/(q+2)],
  [x = 400*q*sqrt((-(q-2))/(q+2)),y = (-(400*q^2-800))/(q+2)]];
 
-/* Problem 583 (line 2400) */
+/* Problem 583 (line 2402) */
 algsys(eqs:[y^2+x^2-(400-400/(2/q+1))^2 = 0,
             ((-y)-400/(2/q+1)+400)^2+x^2+(-640000)/(2/q+1)^2 = 0],[x,y]),eqs = [y^2+x^2-(400-400/(2/q+1))^2 = 0,
        ((-y)-400/(2/q+1)+400)^2+x^2-640000/(2/q+1)^2 = 0];
@@ -1408,7 +1326,7 @@ algsys(eqs:[y^2+x^2-(400-400/(2/q+1))^2 = 0,
 [[x = -400*q*sqrt(-(q-2)/(q+2)),y = -(400*q^2-800)/(q+2)],
  [x = 400*q*sqrt(-(q-2)/(q+2)),y = -(400*q^2-800)/(q+2)]];
 
-/* Problem 585 (line 2408) */
+/* Problem 585 (line 2410) */
 algsys(subst(q = 1-sqrt(3),eqs),[x,y]),eqs = [y^2+x^2-(400-400/(2/q+1))^2 = 0,
        ((-y)-400/(2/q+1)+400)^2+x^2-640000/(2/q+1)^2 = 0];
 /* Erroneous Result?:
@@ -1418,7 +1336,7 @@ algsys(subst(q = 1-sqrt(3),eqs),[x,y]),eqs = [y^2+x^2-(400-400/(2/q+1))^2 = 0,
 [[x = -(25*2^(9/2))/3^(1/4),y = 800/sqrt(3)],
  [x = (25*2^(9/2))/3^(1/4),y = 800/sqrt(3)]];
 
-/* Problem 586 (line 2412) */
+/* Problem 586 (line 2414) */
 algsys([v^2-2*v+u^2+10*u+1,v^2-10*v+u^2+2*u+1],[v,u]);
 /* Erroneous Result?:
 [[v = -(sqrt(34)-6)/2,u = (sqrt(34)-6)/2],
@@ -1427,7 +1345,7 @@ algsys([v^2-2*v+u^2+10*u+1,v^2-10*v+u^2+2*u+1],[v,u]);
 [[v = -(sqrt(34)-6)/2,u = (sqrt(2)*sqrt(17)-6)/2],
  [v = (sqrt(34)+6)/2,u = -(sqrt(2)*sqrt(17)+6)/2]];
 
-/* Problem 587 (line 2416) */
+/* Problem 587 (line 2418) */
 algsys([2*v^2-12*v+1,v^2-2*v+u^2+10*u+1],[v,u]);
 /* Erroneous Result?:
 [[v = -(sqrt(34)-6)/2,u = -(sqrt(34)+14)/2],
@@ -1440,7 +1358,7 @@ algsys([2*v^2-12*v+1,v^2-2*v+u^2+10*u+1],[v,u]);
  [v = (sqrt(2)*sqrt(17)+6)/2,u = -(sqrt(34)+6)/2],
  [v = -(sqrt(2)*sqrt(17)-6)/2,u = (sqrt(34)-6)/2]];
 
-/* Problem 588 (line 2424) */
+/* Problem 588 (line 2426) */
 algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
 /* Erroneous Result?:
 [[x = sqrt(2)*%i,y = (sqrt(5)-1)/2,z = -(sqrt(5)+1)/2],
@@ -1461,7 +1379,7 @@ algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
  [x = sqrt(sqrt(5)-2),y = (sqrt(5)-1)/2,z = (sqrt(5)-1)/2],
  [x = -sqrt(sqrt(5)-2),y = (sqrt(5)-1)/2,z = (sqrt(5)-1)/2]];
 
-/* Problem 596 (line 2455) */
+/* Problem 596 (line 2457) */
 s:algsys(eqs,[x,y,z]),s = [[x = (sqrt(-g)*sqrt(-h))/g,y = (sqrt(-g)*sqrt(-h))/g,
       z = (sqrt(-g)*sqrt(-h)*(h-g))/(g*h)],
      [x = -(sqrt(-g)*sqrt(-h))/g,y = -(sqrt(-g)*sqrt(-h))/g,

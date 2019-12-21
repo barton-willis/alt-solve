@@ -241,9 +241,7 @@
 
 (defun polynomial-solve (e x &optional (mx 1)) "Solve e=0 for x, where e is a polynomial in x and mx is a multiplicity."
 	(let ((n) (m) (sol) (k 0) (cfs) (xsol) ($domain '$complex) ($algebraic t) (p-multiplicities nil))
-
 	   ;; Build up the multiplicities in the CL list p-multiplicities.
-
 		 ;; Factoring isn't a universal win; for example x^105-1=0. So before we factor, look for equations of the
 		 ;; form ax^n+b with n > 4. We could allow n to be any positive integer, but this causes more testsuite
 		 ;; failures.
@@ -270,7 +268,6 @@
 						 (incf k 1))
 
 				  (push x cfs)
-
 				(multiple-value-bind (zzz mss)
 					(cond
 						((eql n 0)

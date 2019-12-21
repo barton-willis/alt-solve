@@ -146,6 +146,7 @@
 	 (unwind-protect
 	  (progn
 			(setq cntx ($supcontext)) ;make asksign and friends data vanish after exiting $solve.
+	    ;(displa (mfuncall '$facts))
 		  (cond
 
 			  ((null varl)
@@ -162,14 +163,15 @@
 			  ((null (cdr varl)) ;one unknown, more than one equation
 			   (redundant-equation-solve (cons '(mlist) eqlist) (car varl)))
 
-			  ;; Multiple equations: SOLVEX.
+			  ;; several equations, several unknowns.
 			  (t
-			   (setq sol (solvex eqlist varl nil nil))
-			   (when (not (every #'$listp (cdr sol))) ;;this is unfortunate?
-				   (setq sol `((mlist) ,sol)))
-				(setq sol ($substitute nonatom-subst sol))
-			    sol)))
-
+			  	(setq sol (solve-multiple-equations eqlist varl))
+			    ;(print `(eqlist = ,eqlist))
+				 ;(print `(varlist = ,varlist))
+			   ;(setq sol (solvex eqlist varl nil nil))
+			   ;(when (not (every #'$listp (cdr sol))) ;;this is unfortunate?
+				 ;  (setq sol `((mlist) ,sol)))
+				($substitute nonatom-subst sol))))
 	  ($killcontext cntx))))
 
 ;;; Do basic simplifications of an equation. In particular:
@@ -285,12 +287,13 @@
 (defvar $the_unsolved nil) ;;this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
+  ;(mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
 	(let ((cnd)) ;did have ($assume_pos nil), but why?
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
 		 (setq e (first e))
 
-		 ;; maybe this should be before equation-simplify, but that causes slowness.
+		 ;; maybe this should be before equeation-simplify, but that causes slowness.
 		 (setq cnd (if $solve_ignores_conditions t (in-domain e)))
 		 ;;(displa `((mequal) eeee ,e))
 		 (cond
@@ -414,8 +417,10 @@
 ;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
 
 (defun solve-mexpt-equation (ee x m use-trigsolve)
-	(declare (ignore m use-trigsolve)) ;likely bug
-	;(mtell "top of solve-mexpt-equation ~M  ~%" ee)
+
+	;;(declare (ignore m use-trigsolve)) ;likely this code should make use of m & use-tringsolve
+
+	;(mtell "top of solve-mexpt-equation ~M ~M ~M ~M ~%" ee x m use-trigsolve)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
@@ -450,9 +455,10 @@
 					(cond
 						((eql sol '$all) '$all)
 						(t
+						 ;(displa (mfuncall '$facts))
 						 (setq sol (mapcan #'(lambda (q) (funcall inverse-function ($rhs q) zzz)) (cdr sol)))
 						 ;; not sure what to do when solve returns $all? It's a mess--don't want an error.
-						 (setq sol (mapcan #'(lambda (q) (let ((sq ($solve (sub ker q) x)))
+						 (setq sol (mapcan #'(lambda (q) (let ((sq (solve-single-equation (sub ker q) x m use-trigsolve)))
 																(if ($listp sq) (cdr sq) (list sq)))) sol))
 						 (setq sol (simplifya (cons '(mlist) sol) t))))))
 
@@ -620,26 +626,97 @@
 					 (mtell (intl:gettext "Solve: unable to solve.~%"))
 				   (if $solveexplicit (list (list 'mlist)) nil)))))))
 
-;;; What's the meaning of the optional args foo and baz? Is one is programmode? I think this code is
-;; inhertited from the old solvex?
+
+(defun solvex-old (eql varl ind flag &aux ($algebraic $algebraic))
+  (declare (special xa*))
+  (prog (*varl ans varlist genvar xm* xn* mul*)
+     (setq *varl varl)
+     (setq eql (mapcar #'(lambda (x) ($ratdisrep ($ratnumer x))) eql))
+     (cond ((atom (ignore-rat-err (formx flag 'xa* eql varl)))
+	    ;; This flag is T if called from SOLVE
+	    ;; and NIL if called from LINSOLVE.
+	    (cond (flag (return ($algsys (make-mlist-l eql)
+					 (make-mlist-l varl))))
+		  (t (merror (intl:gettext "linsolve: cannot solve a nonlinear equation."))))))
+     (setq ans (tfgeli 'xa* xn* xm*))
+     (if (and $linsolvewarn (car ans))
+	 (mtell (intl:gettext "~&solve: dependent equations eliminated: ~A~%") (car ans)))
+     (if (cadr ans)
+	 (return '((mlist simp))))
+     (do ((j 0 (1+ j)))
+	 ((> j xm*))
+       ;;I put this in the value cell--wfs
+       (setf (aref xa* 0 j) nil))
+     (ptorat 'xa* xn* xm*)
+     (setq varl
+	   (xrutout 'xa* xn* xm*
+		    (mapcar #'(lambda (x) (ith varl x))
+			    (caddr ans))
+		    ind))
+     (if $programmode
+	 (setq varl (make-mlist-l (linsort (cdr varl) *varl))))
+     (return varl)))
+
+;; missing need to filter using cnd?
+;; Solve the CL list of equations e for the CL list of variables in x.
+(defun solve-multiple-equations (e x)
+ (let ((cnd) (sol) (ee nil))
+  ;; We don't attempt to determine the multiplicity for multiple equations. Thus reset
+	;; $multiplicities to not_set_yet.
+	 (mfuncall '$reset '$multiplicities)
+	 (setq e (mapcar #'keep-float e))
+	 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
+
+	 ;; maybe this should be before equation-simplify, but that causes slowness.
+	 (setq cnd (or $solve_ignores_conditions
+		 (reduce #'(lambda (a b) (take '(mand) a b)) (mapcar #'in-domain e))))
+
+		(push '(mlist) e)
+		(push '(mlist) x)
+  	(cond  ((every #'(lambda (q) ($polynomialp q x
+			    	#'(lambda (s) ($lfreeof x s))
+	   			  #'(lambda (s) (and (integerp s) (>= s 0))))) (cdr e))
+						(mtell "solve-multiple-equations is dispatching $algsys ~%")
+						(setq sol ($algsys e x))
+						(unkeep-float sol))
+		 		(t
+					 (setq ee e)
+	  			 (setq e ($setify e))
+	  			 (setq x ($setify x))
+	  			 (setq e (triangularize-eqs e x))
+					 (print `(e = ,e))
+	  			 (setq sol (let (($solve_ignores_conditions t)) (solve-triangular-system (cdr e) (cdr x))))
+					 (setq sol (mapcar #'unkeep-float sol))
+					 (if sol sol ee)))))
 
 
-(defun solvex (e v &optional (foo nil) (baz nil))
-	;(print `(not sure about foo = ,foo))
-	;(print `(not sure about baz = ,baz))
-	(declare (ignore foo baz))
+
+(defun solvex (e v &optional (ind nil) (flag nil))
+  (declare (ignore ind flag))
+  (mtell "top of solvex ~%")
+  ($solve e v))
+
+(defun solvex-xxx (e v &optional (ind nil) (flag nil))
+	(mtell "top of solvex eq = ~M x = ~M ind = ~M flag = ~M" e v ind flag)
+	;(declare (ignore foo baz))
 	(let ((ee) (sol))
 		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 		 (push '(mlist) e)
 		 (push '(mlist) v)
+
 		 (cond
 			 ;; when every member of e is a polynomial, dispatch algsys.
 
 			 (($emptyp e)
 			  `((mlist)))
 
-			 ((every #'(lambda (q) ($polynomialp q v #'(lambda (s) ($lfreeof v s)))) (cdr e))
+			 ((every #'(lambda (q) (polynomialp q v
+				    #'(lambda (s) ($lfreeof v s))
+			      #'(lambda (s)  (and (integerp s) (>= s 0))))) (cdr e))
+			  (mtell "dispatching $algsys ~%")
 			  (let (($algexact nil))
+					(displa `((mequal) e ,e))
+					(displa `((mequal) v ,v))
 				   ;(displa (mfuncall '$reset))
 				   ($algsys e v))) ;previously set $solveradcan to nil, but not sure why
 
@@ -682,7 +759,7 @@
 ;; contains equations which if solved would yield additional solutions.
 
 (defun solve (e x ms)
-  ;(mtell "top of solve ~M ~M ~M ~%" e x ms)
+  ;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
 				($solve_ignores_conditions t)
@@ -693,6 +770,7 @@
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
+				 ;(displa (mfuncall '$facts))
 				 (setq sol (solve-single-equation e x ms nil)) ;what if solve returns all? It's a bug!
 				 (setq sol (reverse (cdr sol)))
 				 (setq m (cond (($listp $multiplicities)
