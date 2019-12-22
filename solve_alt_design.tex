@@ -2,8 +2,9 @@
 \usepackage[letterpaper,margin=1.0in]{geometry}
 
 \usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
+\microtypecontext{spacing=nonfrench}
 \usepackage[american]{babel}
-\usepackage{mathptmx}
+\usepackage{fourier}
 \usepackage{enumitem}
 \newlist{alphalist}{enumerate}{3}
 \setlist[alphalist]{label=\alph*),before=\raggedright}
@@ -15,9 +16,9 @@
 
 \newcommand{\multivaluedinverse}{\texttt{multivalued\_inverse}}
 \newcommand{\singlevaluedinverse}{\texttt{single\_valued\_inverse}}
-\newcommand{\solveinversepackage}{\textt{solve\_inverse\_package}}
-
+\newcommand{\solveinversepackage}{\texttt{solve\_inverse\_package}}
 \title{An alternative solve function for Maxima}
+\author{Barton Willis}
 \begin{document}
 
 
@@ -121,13 +122,14 @@ It can, of course, happen that the simplification after conversion back to float
 
 The lower level solve functions are solve-single-equation (solve one equation in one unknown), redundant-equation-solve (solve two or more equations for one unknown), and solve-multiple-equations (solve two or more equations in two or more unknowns).
 
-
 \paragraph{solve-single-equation} If the input is a polynomial, dispatch the polynomial solve code.
 
 First the equation is processed using
 The primary method for solving one equation in one unknown is to match the equation to the form \(a F(X) - b = 0\), where \(X\) depends on the unknown, the function \(F\) has a known inverse, and \(a\) and \(b\) are free of the unknown \(x\). When the match is successful, the new tasks is to solve \(X = F^{-1}(b/a) \). In general, \(F^{-1}\) is multi-valued--in such cases, the task is to solve finitely many equations of the form  \(X = F^{-1}(b/a) \).
 
-The multi inverses for functions are stored in a Common Lisp hashtable. To accommodate the needs of diverse users, there are two hashtables; one is named \multivaluedinverse\/ and the other \singlevaluedinverse.  The option variable \solveinversepackage\/ is the value of the current hashtable for the function multi inverses.
+The multi inverses for functions are stored in a Common Lisp hashtable. To accommodate the needs of diverse users,
+there are two hashtables; one is named \multivaluedinverse\/ and the other \singlevaluedinverse.  The option
+variable \solveinversepackage\/ is the value of the current hashtable for the function multi inverses.
 
 \section{Polynomial zeros}
 
