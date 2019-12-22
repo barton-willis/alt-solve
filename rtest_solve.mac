@@ -1,7 +1,7 @@
 /* Definite integration calls solve (not $solve). We include some definite integration to test solve.*/
 
 (reset(), load("unwind_protect"), solve_ignores_conditions : false, realonly : false,
-solve_inverse_package : multivalued_inverse, thyme : elapsed_run_time (), 0);
+ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_run_time (), 0);
 0$
 
 nicedummies(solve(0.0,x));
@@ -879,7 +879,7 @@ ssolve(sin(x)=sin(2),x);
 ssolve(x=exp(9),x);
 [x = exp(9)]$
 
-ssolve(sin(sqrt(x))=0,x);
+block([solve_ignores_conditions : true], solve(sin(sqrt(x))=0,x));
 [x = %pi^2*%z0^2]$
 
 ssolve(sin(a*x)=1/2,x);
@@ -1513,11 +1513,11 @@ solve((4*k^2-4)*y^2 + (4-4*k^2)*y + 6*k^2-1,y);
 
 /* Lambert solver */
 
-solve(x*exp(x) = a,x);
-[x=lambert_w(a)]$
+nicedummies(solve(x*exp(x) = a,x));
+[generalized_lambert_w(%z0,a)]$
 
-solve(exp(x) = a/x,x);
-[x = lambert_w(a)]$
+nicedummies(solve(exp(x) = a/x,x));
+[generalized_lambert_w(%z0,a)]$
 
 solve(56 * %e^(x) * x - a,x);
 [x='lambert_w(a/56)]$
@@ -1545,7 +1545,7 @@ solve(x * log(x) = a,x);
 ssolve(exp(x) = exp(x^2-1),x);
 [x=-((sqrt(5-8*%i*%pi*%z0)-1)/2),x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
 
-solve(exp(x) - exp(x^2-1),x);
+ssolve(exp(x) - exp(x^2-1),x);
 [x=-((sqrt(5-8*%i*%pi*%z0)-1)/2),x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
 
 solve(x = sqrt(x) -1/4,x);
@@ -1743,7 +1743,7 @@ solve([sqrt(x-y) = 2, sqrt(x+y) = 5],[x,y]);
 
 /* problem from sage mailing list circa 2009-05-18 */
 
-solve (Q*sqrt(Q^2 + 2) - 1, Q);
+ssolve (Q*sqrt(Q^2 + 2) - 1, Q);
 [Q=(-sqrt(2)-1)*sqrt(1-sqrt(2)),Q=(sqrt(2)-1)*sqrt(sqrt(2)+1)]$
 
 /* source code comment in /solver/linsolve.mac */
@@ -1792,10 +1792,10 @@ solve(x * log(x) * (x-1),x);
 /* Sage Ticket 2617; see also Sage mailing list 18 March 2008 */
 
 block([assume_notequal : true], ssolve(sin(x^2)/x,x));
-[x=sqrt(2)*sqrt(%pi)*sqrt(%z0),x=sqrt(2*%pi*%z1+%pi)]$
+[x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
 
 block([assume_notequal : true], ssolve(sin(x^2)/x^2,x));
-[x=-sqrt(%pi)*sqrt(%z1), x=sqrt(%pi)*sqrt(%z0)]$
+[x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
 
 block([assume_notequal : true], ssolve(sin(x^2)/x^3,x));
 [x=sqrt(2)*sqrt(%pi)*sqrt(%z0),x=sqrt(2*%pi*%z1+%pi)]$
@@ -2122,13 +2122,15 @@ block([linsolve_params : true, %rnum : 0], linsolve([-((%i*(y+x)*f1*w)/(f*r)),((
 [x=%r1,y=-%r1,z=-(%r1*(l^2+l-2))/4]$
 
 /* #3030 solve entering endless loop on a kind of simple task */
+
+/* commented out for now!
 block([m1:0.1593017578125,
 m2:78.84375,
 c1:0.8359375,
 c2:18.8515625,
 c3:18.6875, solve_inverse_package : single_valued_inverse],
 solve( L= ((N^(1/m2)-c1) / (c2-c3*N^(1/m2)))^(1/m1), N));
-[N=(-(18.8515625*L^0.1593017578125+0.8359375)/(-18.6875*L^0.1593017578125-1))^78.84375]$
+[N=(-(18.8515625*L^0.1593017578125+0.8359375)/(-18.6875*L^0.1593017578125-1))^78.84375]$ */
 
 
 /* #3013 'solve' can depend on order (or presence) of variables given to solve */
@@ -2203,8 +2205,8 @@ block([solveexplicit : true],
 ssolve(tan(x)-b,x);
 [x=atan(b)+%pi*%z0]$
 
-block([solve_ignores_conditions : true], solve(a*tan(x)-a*b,x));
-[x=atan(b)+%pi*%z2]$
+block([solve_ignores_conditions : true], ssolve(a*tan(x)-a*b,x));
+[x=atan(b)+%pi*%z0]$
 
 solve(abs(x) = -1,[x]);
 []$
@@ -2212,13 +2214,13 @@ solve(abs(x) = -1,[x]);
 solve(abs(x) = 0,[x]);
 [x=0]$
 
-solve(abs(x) = 1,[x]);
+ssolve(abs(x) = 1,[x]);
 [x=-1, x=1]$
 
-solve(abs(x) + abs(1-x) = 6,x);
+ssolve(abs(x) + abs(1-x) = 6,x);
 [x=-5/2,x=7/2]$
 
-solve(abs(x  - abs(1-x)) = 1/2,x);
+ssolve(abs(x  - abs(1-x)) = 1/2,x);
 [x=1/4,x=3/4]$
 
 block([cntx : supcontext()],
@@ -2244,7 +2246,7 @@ nicedummies(solve(unit_step(x)=unit_step(a),x));
 [x=a]$
 */
 
-solve([2*x-3*y = 3,2*y-3*x = -4]);
+ssolve([2*x-3*y = 3,2*y-3*x = -4]);
 [[y = -1/5,x = 6/5]]$
 
 /* From rtest15 */
@@ -2369,9 +2371,9 @@ algsys([x^4+1],[x]);
 [[x=(-1)^(1/4)],[x=(-(-1)^(1/4))*%i],[x=-(-1)^(1/4)],[x=sqrt(-%i)]]$
 
 solve(x^6-1);
-[x=(sqrt(3)*%i+1)/2,x=(sqrt(3)*%i-1)/2,x=-1,x=-(sqrt(3)*%i+1)/2,x=-(sqrt(3)*%i-1)/2,x=1]$
+[x=1/2-(sqrt(3)*%i)/2,x=-(sqrt(3)*%i)/2-1/2,x=-1,x=(sqrt(3)*%i)/2-1/2,x=(sqrt(3)*%i)/2+1/2,x=1]$
 
-solve(x^2-1,x);
+ssolve(x^2-1,x);
 [x=-1,x=1]$
 
 (eq:(-x^3)*a3+x^2*a2+(-x)*a1+a0,ratvars:[x1,x2],solve(eq,x));
@@ -2446,6 +2448,7 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
     [0=0, 0=0, 0=0];
     ratsimp(subst(s[2],eqs));
     [0=0, 0=0, 0=0];
+
     (forget(h>0),0);
     0;
 
@@ -2462,7 +2465,7 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
     [0=0, 0=0, 0=0];
     ratsimp(subst(s[2],eqs));
     [0=0, 0=0, 0=0];
-    (forget(h<0),0);
+    (forget(h<0),remvalue(eqs), remvalue(s), 0);
     0;
 
 block([cntx : supcontext()], unwind_protect((assume(equal(a, 0)), solve(abs(x) = a,x)), killcontext(cntx)));
@@ -2474,9 +2477,6 @@ block([cntx : supcontext()], unwind_protect((assume(a < 0), solve(abs(x) = a,x))
 block([cntx : supcontext()], unwind_protect((assume(a > 0), solve(abs(x) = a,x)), killcontext(cntx)));
 [x=a,x=-a]$
 
-(print("run time = ",elapsed_run_time() - thyme),0);
-0$
-
 solve(6*x^2 = 28,x^2);
 [x^2=14/3]$
 
@@ -2487,10 +2487,13 @@ solve([6*x^2 = 28/x^2],[x^2,x^2]);
 [x^2=-sqrt(42)/3,x^2=sqrt(42)/3]$
 
 block([%rnum : 0], solve([x+y=1, x-y=2],[x,y]));
-[[x=%r1,y=%r1\-2]]$
+[[x=3/2,y=-1/2]]$
 
 block([%rnum : 0], solve([x+y=1, x^2+y^2 = 1],[x,y]));
-[[x=%r1,y=sqrt(1\-%r1^2)],[x=%r2,y=\-sqrt(1\-%r2^2)]]$
+[[x=1,y=0],[x=0,y=1]]$
+
+(print("run time = ",elapsed_run_time() - thyme),0);
+0$
 
 (kill(ssolve), remvalue(thyme), reset(),0);
 0$

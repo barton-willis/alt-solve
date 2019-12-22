@@ -1,7 +1,7 @@
-;; Author: Barton Willis
-;; Common Lisp/Maxima code for symbolic solutions of equations.
+;;;; Author: Barton Willis
+;;;; Common Lisp/Maxima code for symbolic solutions of equations.
 
-;; This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+;;;; This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 
 (in-package :maxima)
 
@@ -59,7 +59,7 @@
                (t e)))
         (t (simplifya (cons (list (caar e)) (mapcar #'keep-float (cdr e))) t))))
 
-;; In expression e, convert all labeled boxes that contain floats but to float form.
+;;; In expression e, convert all labeled boxes that contain floats but to float form.
 (defun unkeep-float (e) "Convert numbers in labeled float boxes back to float numbers."
     (cond
         (($mapatom e) e)
@@ -69,17 +69,17 @@
               (t e)))
         (t (simplifya (cons (list (caar e)) (mapcar #'unkeep-float (cdr e))) t))))
 
-;; Flags that I've ignored: $solveexplicit (not entirely), $dispflag, $programmode, and $breakup.
+;;; Flags that I've ignored: $solveexplicit (not entirely), $dispflag, $programmode, and $breakup.
 
-;; The top level function solve function:
-;;   (a) resets multiplicities to its default value
-;;   (b) expunges constant variables and duplicates from the list of variables
-;;   (c) checks for inequalities and signals an error when found
-;;   (d) creates a new super context--all assumptions made during solve are removed after exiting
-;;   (e) does gensym substitutions when solving for nonatoms
-;;   (f) dispatches the appropriate lower level solve function
-;;   (g) reverts gensym substitutions for nonatom solve
-;;   (h) kills the super context
+;;; The top level function solve function:
+;;;   (a) resets multiplicities to its default value
+;;;   (b) expunges constant variables and duplicates from the list of variables
+;;;  (c) checks for inequalities and signals an error when found
+;;;   (d) creates a new super context--all assumptions made during solve are removed after exiting
+;;;   (e) does gensym substitutions when solving for nonatoms
+;;;   (f) dispatches the appropriate lower level solve function
+;;;   (g) reverts gensym substitutions for nonatom solve
+;;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
   ;(mtell "top of $solve ~M ~M ~%" eqlist varl)
@@ -123,7 +123,7 @@
 
 	 ;; (setq eqlist (remove-if #'zerop1 eqlist))
 	 ;;Eliminate duplicate equations.
-	 ;;;(setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
+	 ;;(setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
 
 	 ;; stuff for solving for nonatoms. Should check for problems such as solve([xxx,yyy],[f(x),x])
 	 (dolist (xxx varl)
@@ -226,7 +226,7 @@
 			  (cond
 				  ((member answer '($yes |$y| |$Y|) :test #'eql)
 
-				   ;(mapcar #'(lambda (q) (mfuncall '$assume q)) cnd)
+				   ;;(mapcar #'(lambda (q) (mfuncall '$assume q)) cnd)
 				   t)
 
 				  ((member answer '($no |$n| |$N|) :test #'eql) nil)
@@ -235,10 +235,10 @@
 				   (mtell (intl:gettext "Acceptable answers are yes, y, Y, no, n, N. ~%"))
 				   (my-ask-boolean cnd)))))))
 
-;; Remove the members of sol that do not satisfy cnd. The members of the CL list sol have
-;; the form solution.multiplicity.
-;; The Maxima expression cnd is generally a conjunction of Maxima predicates. For each solution, we
-;; substitute sx in to cnd and call my-ask-boolean.
+;;; Remove the members of sol that do not satisfy cnd. The members of the CL list sol have
+;;; the form solution.multiplicity.
+;;; The Maxima expression cnd is generally a conjunction of Maxima predicates. For each solution, we
+;;; substitute sx in to cnd and call my-ask-boolean.
 
 (defun filter-solution (sol cnd) "Remove the members of sol that do not satisfy cnd"
 	(let ((checked-sol nil))
@@ -247,16 +247,16 @@
 				 (push sx checked-sol)))
 		 (reverse checked-sol)))
 
-;; Solve the equation e=0 for x, where e is a mtimes expression. Actually, effectively the equation is e^m = 0, so
-;; m is the multiplicity so far in the solving process. The list cnd has conditions on the solution.
+;;; Solve the equation e=0 for x, where e is a mtimes expression. Actually, effectively the equation is e^m = 0, so
+;;; m is the multiplicity so far in the solving process. The list cnd has conditions on the solution.
 
-;; When e = e1*e2* ... * en, solve e1=0, e2=0, ... en = 0.  Remove the duplicates from the union of the solutions, and
-;; remove those solutions that do not satisfy cnd. One problem is when one of the solutions is all, but there is a condition
-;; on the solution--something like solve ((sin(x)^2 + cos(x)^2-1)*(1/x),x). I'm not sure how to fix this.
+;;; When e = e1*e2* ... * en, solve e1=0, e2=0, ... en = 0.  Remove the duplicates from the union of the solutions, and
+;;; remove those solutions that do not satisfy cnd. One problem is when one of the solutions is all, but there is a condition
+;;; on the solution--something like solve ((sin(x)^2 + cos(x)^2-1)*(1/x),x). I'm not sure how to fix this.
 
 (defun product-solver (e x m use-trigsolve cnd) "Solve e=e1*e2*...*en for x"
-	;(mtell "using product solve ~%")
-	;(displa `((mequal) cnd ,cnd))
+	;;(mtell "using product solve ~%")
+	;;(displa `((mequal) cnd ,cnd))
 
 	(let ((solx) (sol nil) (wmul))
 		 (setq e (cdr e))
@@ -273,7 +273,7 @@
 								   (mapcar #'(lambda (q) (declare (ignore q)) '$not_yet_set) solx)))
 
 
-					(dolist (sx solx) ;build an association list of the form solution.multiplicity
+					(dolist (sx solx) ; build an association list of the form solution.multiplicity
 						(push (cons sx (pop wmul)) sol))))
 		 (cond
 			 ((eql sol '$all)
@@ -284,11 +284,11 @@
 			  (setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr sol)) t))
 			  (simplifya (cons '(mlist) (mapcar #'car sol)) t)))))
 
-(defvar $the_unsolved nil) ;;this is purely for debugging
+(defvar $the_unsolved nil) ;this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
-  ;(mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
-	(let ((cnd)) ;did have ($assume_pos nil), but why?
+  ;;(mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
+	(let ((cnd)) ; did have ($assume_pos nil), but why?
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
 		 (setq e (first e))
@@ -312,13 +312,13 @@
 
 			((solve-by-kernelize e x m))
 
-		    ;;;;((and use-trigsolve (trigsolve e x)))
+		    ;;((and use-trigsolve (trigsolve e x)))
 
 			((lambert-w-solve e x m))
 
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
-			($solveexplicit ;give up & return the empty set
+			($solveexplicit ; give up & return the empty set
 			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") e x)
 			  (push (list '(mlist) e x) $the_unsolved)
 			  (setq $multiplicities (take '(mlist) m))
@@ -336,11 +336,11 @@
 				   (setq $multiplicities (take '(mlist) m))
 				   (take '(mlist) (take '(mequal) ker (sub ker e))))))))
 
-;; This function attempts to identify a term F(x) such e is a function of only F(x). And when it is,
-;; first solve for F(x), and second solve for x. The function F has a known inverse. Unifying the
-;; cases, for example,  of F(x) = x^a and F(x) = cos(x) is problematic. Maybe these cases can be unified,
-;; but we'll handle the case when F is a
-;; power function separately.
+;;; This function attempts to identify a term F(x) such e is a function of only F(x). And when it is,
+;;; first solve for F(x), and second solve for x. The function F has a known inverse. Unifying the
+;;; cases, for example,  of F(x) = x^a and F(x) = cos(x) is problematic. Maybe these cases can be unified,
+;;; but we'll handle the case when F is a
+;;; power function separately.
 
 (defun solve-by-kernelize (e x m)
 	(let ((kernel-p #'(lambda (q) (and (consp q)
@@ -391,12 +391,12 @@
 		 (cond
 			 (($mapatom e) (list e subs))
 
-			  ((funcall kernel-p e) ;it's a kernel
+			  ((funcall kernel-p e) ; it's a kernel
 			   (setq x (assoc e subs :test #'alike1)) ;is it a known kernel?
 			   (cond (x
-					  (list (cdr x) subs)) ;it's a known kernel--use the value from the association list subs
+					  (list (cdr x) subs)) ; it's a known kernel--use the value from the association list subs
 				   	 (t
-				   	  (list g (acons e g subs))))) ;it's unknown--append a new key/value to subs
+				   	  (list g (acons e g subs))))) ; it's unknown--append a new key/value to subs
 
 			 (t ; map kernelize onto the argument list and build up the association list subs
 			  (setq op (list (caar e)))
@@ -413,14 +413,14 @@
 		(setq e (sub e (mul x ($ratcoef e x)))))
 	(zerop1 ($ratdisrep e)))
 
-;; Try to find a kernel blob1^blob2 in ee such that ee is a function of constants (thing free of x)
-;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
+;;; Try to find a kernel blob1^blob2 in ee such that ee is a function of constants (thing free of x)
+;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
 
 (defun solve-mexpt-equation (ee x m use-trigsolve)
 
 	;;(declare (ignore m use-trigsolve)) ;likely this code should make use of m & use-tringsolve
 
-	;(mtell "top of solve-mexpt-equation ~M ~M ~M ~M ~%" ee x m use-trigsolve)
+	;;(mtell "top of solve-mexpt-equation ~M ~M ~M ~M ~%" ee x m use-trigsolve)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
@@ -430,17 +430,17 @@
 		 (mapcar #'(lambda (q) (push (car q) kernels) (push (cdr q) nvars)) (second e))
 
 		 (cond ((and (second e) (not (cdr (second e))) ($freeof x (first e)))
-				;(setq nvars (car (mapcar #'cdr (second e))))
+				;;(setq nvars (car (mapcar #'cdr (second e))))
 				(setq nvars (car nvars))
 				(setq ker (first kernels))
 				(setq inverse-function
 					  (cond
-							(($freeof x (second ker)) ;looking at a^X = b
+							(($freeof x (second ker)) ; looking at a^X = b
 							  (setq zzz (second ker))
 							  (setq ker (third ker))
 							  (gethash 'exponential-inverse $solve_inverse_package))
 
-					  	 (($freeof x (third ker)) ;looking at X^a = b
+					  	 (($freeof x (third ker)) ; looking at X^a = b
 					  		 (setq zzz (third ker))
 							   (setq ker (second ker))
 						  	 (gethash 'power-inverse $solve_inverse_package))
@@ -455,7 +455,7 @@
 					(cond
 						((eql sol '$all) '$all)
 						(t
-						 ;(displa (mfuncall '$facts))
+						 ;;(displa (mfuncall '$facts))
 						 (setq sol (mapcan #'(lambda (q) (funcall inverse-function ($rhs q) zzz)) (cdr sol)))
 						 ;; not sure what to do when solve returns $all? It's a mess--don't want an error.
 						 (setq sol (mapcan #'(lambda (q) (let ((sq (solve-single-equation (sub ker q) x m use-trigsolve)))
@@ -464,7 +464,7 @@
 
 			 	((and (eql 2 (length nvars)) ($freeof x (first e)) (homogeneous-linear-poly-p (first e) nvars))
 				 (let ((k1) (a) (k2) (b) (xx) (yy))
-					  ;(mtell "doing new mexpt solver ~%")
+					  ;;(mtell "doing new mexpt solver ~%")
 					  (setq e (first e))
 					  (setq k1 ($ratcoef e (first nvars)))
 					  (setq a (second (first kernels)))
@@ -495,7 +495,7 @@
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
 		 (setq q (let ((errcatch t) ($errormsg nil)) (ignore-errors ($to_poly e (list '(mlist) x)))))
 
-		 ;(mtell "doing to poly solve")
+		 ;;(mtell "doing to poly solve")
 
 		 (when (and q (< ($length ($third q)) 2))
 			 (setq checked-sol (list '(mlist)))
@@ -510,7 +510,7 @@
 
 			 (setq sol (let (($algexact t)) (cdr ($algsys eq ($listify nvars)))))
 			 (cond ((and sol ($emptyp nonalg-sub))
-					;(mtell "branch 1 ~%")
+					;;(mtell "branch 1 ~%")
 					(dolist (sk sol)
 						(setq cx ($substitute sk cnd))
 						(setq cx (my-ask-boolean cx))
@@ -519,62 +519,62 @@
 							(setq sk (take '(mequal) x ($substitute sk x)))
 							(setq checked-sol ($cons sk checked-sol)))))
 				 ((and sol (or (null nonalg-sub) ($freeof x eq)))
-				  ;(mtell "branch 2 ~%")
-				  ;(mtell "branch 2 ~%")
+				  ;;(mtell "branch 2 ~%")
+				  ;;(mtell "branch 2 ~%")
 				  (setq nvars ($first nvars))
 				  (dolist (sk sol)
 					  (setq sk (let (($use_to_poly nil)) ($solve ($first sk) nvars)))
 					  (setq ek ($substitute sk nonalg-sub))
 					  (setq cx ($substitute sk cnd))
 					  (setq cx (my-ask-boolean cx))
-					  ;;;;(setq cx (simplifya (cons '(%and) (mapcar #'(lambda (q) (mfuncall '$maybe q)) (cdr cx))) t))
+					  ;;(setq cx (simplifya (cons '(%and) (mapcar #'(lambda (q) (mfuncall '$maybe q)) (cdr cx))) t))
 					  (when (or (eql cx t) (eql cx '$maybe))
 						  (setq sk ($solve ek x))
 						  (setq sk ($rectform sk))
 						(setq checked-sol ($append checked-sol sk))))))
 
-			 ;(setq checked-sol (filter-solution (cdr checked-sol) (cdr cnd)))
-			 ;(setq checked-sol (simplifya (cons '(mlist) checked-sol) t))
+			 ;;(setq checked-sol (filter-solution (cdr checked-sol) (cdr cnd)))
+			 ;;(setq checked-sol (simplifya (cons '(mlist) checked-sol) t))
 
 			 (when checked-sol
 				 (mtell "used the to poly solver")))
 
 		 checked-sol))
 
-;; Standard $linsolve bypasses $solve and calls solvex. That requires $linsolve/solvex to duplicate
-;; some of the features of $solve (argument checking and non-atom solve, for example). instead, let's
-;; route linsolve through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
+;;; Standard $linsolve bypasses $solve and calls solvex. That requires $linsolve/solvex to duplicate
+;;; some of the features of $solve (argument checking and non-atom solve, for example). instead, let's
+;;; route linsolve through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
 
-;; Eventually standard linsolve calls tfgeli. But there is a 2006 bug (#963: linsolve incorrect result)
-;; that has gone unfixed for over ten years. Using $solve (and eventually $algys) fixes this bug. Possibly
-;; tfgeli gives better performance--eventually it should be fixed. But until it is fixed, let's use
-;; $solve/$algys.
+;;; Eventually standard linsolve calls tfgeli. But there is a 2006 bug (#963: linsolve incorrect result)
+;;; that has gone unfixed for over ten years. Using $solve (and eventually $algys) fixes this bug. Possibly
+;;; tfgeli gives better performance--eventually it should be fixed. But until it is fixed, let's use
+;;; $solve/$algys.
 
 (defun $linsolve (e x)
 	(let ((sol ($solve e x)))
 		 (if (and ($listp sol) (not ($emptyp sol)) ($listp ($first sol))) ($first sol) sol)))
 
-(defun equation-complexity-guess (a b) (< (my-size a) (my-size b))) ;my-size defined in trig_identities
+(defun equation-complexity-guess (a b) (< (my-size a) (my-size b))) ; my-size defined in trig_identities
 
 ;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt to set the
 ;;; multiplicities to anything reasonable--it resets  multiplicities to the default.
 (defun redundant-equation-solve (eqs x)
-	;(mtell "using redundant solve ~%")
+	;;(mtell "using redundant solve ~%")
 	(let ((eqset) (sol) (checked-sol nil))
 		 (setq eqs (mapcar #'meqhk (cdr eqs))) ;eqs is now a CL list
 		 (setq eqset (simplifya (cons '($set) eqs) t))
 
-		 (dolist (ek eqs) ;for each equation ek, ratsubst 0 for ek and adjoin ek back into the equations
-			 (when (not ($freeof x ek)) ;disallow subsitution when ek is freeof x
+		 (dolist (ek eqs) ; for each equation ek, ratsubst 0 for ek and adjoin ek back into the equations
+			 (when (not ($freeof x ek)) ; disallow subsitution when ek is freeof x
 				 (setq eqset ($ratsubst 0 ek eqset))
 				 (setq eqset ($disjoin 0 eqset))
 				 (setq eqset ($adjoin ek eqset))))
 
-		 (setq eqset (sort (cdr eqset) #'equation-complexity-guess)) ;effort to find simplest equation
+		 (setq eqset (sort (cdr eqset) #'equation-complexity-guess)) ; effort to find simplest equation
 		 (setq sol (let (($solveexplicit t)) (solve-single-equation (first eqset) x)))
 		 ;;include only solutions that can be verified--likely this will sometimes miss legitimate solutions.
-		 (push '(mlist) eqs) ;restore eqs to a Maxima list
-		 (when ($listp sol) ;sol could be $all, maybe?
+		 (push '(mlist) eqs) ; restore eqs to a Maxima list
+		 (when ($listp sol) ; sol could be $all, maybe?
 			 (setq sol (cdr sol))
 			 (dolist (sx sol)
 				 (cond ((every #'(lambda (q) (zerop1 (try-to-crunch-to-zero q))) (cdr ($substitute sx eqs)))
@@ -588,8 +588,8 @@
 	(let (($listconstvars nil)) ($setify ($listofvars e))))
 
 (defun triangularize-eqs (e x)
-	;(setq e ($setify e))
-	;(setq x ($setify x))
+	;;(setq e ($setify e))
+	;;(setq x ($setify x))
 	(setq e ($equiv_classes e #'(lambda (a b) ($setequalp
 											   ($intersection (set-of-vars a) x)
 											   ($intersection (set-of-vars b) x)))))
@@ -612,7 +612,7 @@
 			 (t
 			  (setq e (pop eqs))
 			  (setq x (intersection (cdr ($listofvars e)) vars :test #'alike1))
-			  (cond ((null (cdr x)) ;only one variable
+			  (cond ((null (cdr x)) ; only one variable
 					 (setq sol (cdr ($solve e (first x))))
 					 (dolist (sx sol)
 						 (setq eeqs (mapcar #'(lambda (q) ($substitute sx q)) eqs))
@@ -657,21 +657,22 @@
 	 (setq varl (make-mlist-l (linsort (cdr varl) *varl))))
      (return varl)))
 
-;; missing need to filter using cnd?
-;; Solve the CL list of equations e for the CL list of variables in x.
-(defun solve-multiple-equations (e x)
+;;; missing need to filter using cnd?
+;;; Solve the CL list of equations e for the CL list of variables in x.
+(defun solve-multiple-equations (e x) "Solve the CL list of equations e for the CL list of unknowns x"
  (let ((cnd) (sol) (ee nil))
-  ;; We don't attempt to determine the multiplicity for multiple equations. Thus reset
-	;; $multiplicities to not_set_yet.
+  ;; We don't attempt to determine the multiplicity for multiple equations. Thus we reset
+	;; $multiplicities to its default.
 	 (mfuncall '$reset '$multiplicities)
-	 (setq e (mapcar #'keep-float e))
+	 (setq e (mapcar #'keep-float e)) ; protect floats in boxes.
+	 ;; The second member of equation-simplify holds multiplicity data--thus extact just the first
 	 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 
 	 ;; maybe this should be before equation-simplify, but that causes slowness.
 	 (setq cnd (or $solve_ignores_conditions
 		 (reduce #'(lambda (a b) (take '(mand) a b)) (mapcar #'in-domain e))))
 
-		(push '(mlist) e)
+		(push '(mlist) e) ;convert e and x to Maxima lists.
 		(push '(mlist) x)
   	(cond  ((every #'(lambda (q) ($polynomialp q x
 			    	#'(lambda (s) ($lfreeof x s))
@@ -689,8 +690,6 @@
 					 (setq sol (mapcar #'unkeep-float sol))
 					 (if sol sol ee)))))
 
-
-
 (defun solvex (e v &optional (ind nil) (flag nil))
   (declare (ignore ind flag))
   (mtell "top of solvex ~%")
@@ -698,7 +697,7 @@
 
 (defun solvex-xxx (e v &optional (ind nil) (flag nil))
 	(mtell "top of solvex eq = ~M x = ~M ind = ~M flag = ~M" e v ind flag)
-	;(declare (ignore foo baz))
+	;;(declare (ignore foo baz))
 	(let ((ee) (sol))
 		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 		 (push '(mlist) e)
@@ -759,19 +758,19 @@
 ;; contains equations which if solved would yield additional solutions.
 
 (defun solve (e x ms)
-  ;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
+  ;;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
 				($solve_ignores_conditions t)
 				($use_to_poly nil)
 				($realonly nil)
 				($negdistrib t) ;not sure about this?
-				(*solve-factors-biquadratic* nil)
+				(*solve-factors-biquadratic* t)
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
 				 ;(displa (mfuncall '$facts))
-				 (setq sol (solve-single-equation e x ms nil)) ;what if solve returns all? It's a bug!
+				 (setq sol (solve-single-equation e x ms nil)) ; what if solve returns all? It's a bug!
 				 (setq sol (reverse (cdr sol)))
 				 (setq m (cond (($listp $multiplicities)
 								(cdr $multiplicities))
@@ -784,7 +783,7 @@
 		 	(setq *failures nil)
 		 	(dolist (q sol)
 				(setq mss (mul ms (pop m)))
-				(cond ((and (mequalp q) (eql 0 (second q))) ;second = $lhs
+				(cond ((and (mequalp q) (eql 0 (second q))) ; second = $lhs
 					   (push q *failures)
 					   (push mss *failures))
 					  (t
@@ -794,20 +793,20 @@
 		   (rootsort *failures)
 		 nil))
 
-;; This function solves x*exp(x) = constant. The match to x*exp(x) must be explicit; for example,
-;; lambert-w-solve is unable to solve x*exp(x)/2 = 10. When no solution is found, return nil. Of course,
-;; this function could be extended to solve more equations in terms of the Lambert W function.
+;;; This function solves x*exp(x) = constant. The match to x*exp(x) must be explicit; for example,
+;;; lambert-w-solve is unable to solve x*exp(x)/2 = 10. When no solution is found, return nil. Of course,
+;;; this function could be extended to solve more equations in terms of the Lambert W function.
 (defun lambert-w-solve (e x m) "solve x exp(x) = constant where m is the multiplicity so far"
   (let ((cnst (sratsimp (sub (mult x (take '(mexpt) '$%e x)) e))))
-		(cond (($freeof x cnst) ;match with x*exp(x) = cnst
+		(cond (($freeof x cnst) ; match with x*exp(x) = cnst
 			       (setq $multiplicities (take '(mlist) m))
 			       (cond ((eql $solve_inverse_package $multivalued_inverse)
 		   	         		(take '(%generalized_lambert_w) ($new_variable '$integer) cnst))
 							    	(t (take '(%lambert_w) cnst))))
 		    	(t nil))))
 
-;; Let's make sure that the old functions solvecubic and solvequartic are not called. So, replace the
-;; function definitions with a call to merror.
+;;; Let's make sure that the old functions solvecubic and solvequartic are not called. So, replace the
+;;; function definitions with a call to merror.
 (defun solvecubic (x) (declare (ignore x)) (merror "solvecubic"))
 (defun solvequartic (x) (declare (ignore x)) (merror "solvequartic"))
 
@@ -820,7 +819,7 @@
 (defun trigsolve (e x) "Attempt to solve equations that are rational functions of trig functions with the same argument."
 	(let ((sine-args) (cosine-args) (kc) (ks) (gc) (gs) (sol) (buzz nil) (fun) (ker))
 		 (mtell "new trigsolve ~%")
-		;(displa `((mequal) e ,e))
+		;;(displa `((mequal) e ,e))
 		 (setq e (apply-identities e *pythagorean-identities*))
 		 (setq e (apply-identities-xxx e *to-cos/sin-identities*))
 		  ;;(displa `((mequal) e2 ,e))
@@ -842,13 +841,13 @@
 				(setq gs (gensym))
 				(setq e ($ratsubst gc kc e))
 				(setq e ($ratsubst gs ks e))
-				(when ($freeof x e) ;bailout when e isn't freeof x
+				(when ($freeof x e) ; bailout when e isn't freeof x
 					(setq sol (cdr ($algsys (list '(mlist) e (add (mul gc gc) (mul gs gs) -1))
 											(list '(mlist) gc gs))))
 					(setq fun (gethash '%sin $solve_inverse_package))
 					(dolist (sx sol)
-						;(displa `((mequal) sx ,sx))
-						;(displa `((mequal) ker ,ker))
+						;;(displa `((mequal) sx ,sx))
+						;;(displa `((mequal) ker ,ker))
 						(setq sx ($substitute sx gs))
 						(setq sx (funcall fun sx))
 						(setq sx (mapcan #'(lambda(q) (cdr ($solve (take '(mequal) ker q) x))) sx))
