@@ -692,7 +692,12 @@
 
 (defun solvex (e v &optional (ind nil) (flag nil))
   (declare (ignore ind flag))
-  (mtell "top of solvex ~%")
+;  (mtell "top of solvex ~%")
+;	(mtell "e = ~M  v = ~M ~%" e v)
+;	(print `(e = ,e))
+;	(print `(v = ,v))
+	(push '(mlist) e)
+	(push '(mlist) v)
   ($solve e v))
 
 (defun solvex-xxx (e v &optional (ind nil) (flag nil))
@@ -757,12 +762,14 @@
 ;; of the form <var>=<function of independent variables>, and *failures
 ;; contains equations which if solved would yield additional solutions.
 
+(defvar *list-of-equations* nil)
 (defun solve (e x ms)
   ;;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
+	(push (list e x) *list-of-equations*)
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
 				($solve_ignores_conditions t)
-				($use_to_poly nil)
+				($use_to_poly t)
 				($realonly nil)
 				($negdistrib t) ;not sure about this?
 				(*solve-factors-biquadratic* t)
