@@ -1,0 +1,31 @@
+## Common Lisp
+*.FASL
+*.fasl
+
+## Maxima
+*.ERR
+*.err
+*.wxm
+*.WXM
+*.wxmx
+*.WXMX
+
+## TeX/LaTeX files
+*.aux
+*.bbl
+*.blg
+*.log
+*.pdf
+*.gz
+*.GZ
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb

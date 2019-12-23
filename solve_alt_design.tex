@@ -1,4 +1,4 @@
-\documentclass[]{scrartcl}
+\documentclass[]{article}%{scrartcl}
 \usepackage[letterpaper,margin=1.0in]{geometry}
 
 \usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
@@ -6,10 +6,12 @@
 \usepackage[american]{babel}
 \usepackage{fourier}
 \usepackage{enumitem}
+\usepackage{xcolor}
 \newlist{alphalist}{enumerate}{3}
 \setlist[alphalist]{label=\alph*),before=\raggedright}
 
 \newcommand{\altsolve}{\texttt{solve\_alt}}
+\newcommand{\solve}{\texttt{solve}}
 \newcommand{\algsys}{\texttt{algsys}}
 \newcommand{\solveexplicit}{\texttt{solveexplicit}}
 \newcommand{\fpprec}{\texttt{fpprec}}
@@ -26,19 +28,19 @@
 
 \section{Aims}
 
-The \altsolve\/ package aims to be a replacement for Maxima's solve function. The goals are to
+The \altsolve\/ package aims to be a replacement for Maxima's solve function. The goals are
 
 \begin{alphalist}[noitemsep]
 
-\item support the needs for a variety users, including high school students, university students, engineers, statisticians, and scientists,
+\item to support the needs for a variety users, including high school students, university students, engineers, statisticians, and scientists,
 
-\item provide clear user documentation that is focused on user's questions,
+\item to provide clear user documentation that is focused on user's questions,
 
-\item focus on symbolic equations that are pertinent to science and engineering problems,
+\item to focus on symbolic solution to equations that are pertinent to science and engineering problems,
 
-\item write Common Lisp source code that is easy to extend and to fix,
+\item source code (Common Lisp) that is easy to extend and to fix,
 
-\item attempt to find all real and complex solutions to equations, but take care to not  return spurious solutions.
+\item to find all real and complex solutions to equations, but take care to not return spurious solutions.
 
 \end{alphalist}
 Additionally, \altsolve\/  aims to be compatible with Maxima's current solve function; by compatible, we require:
@@ -49,43 +51,99 @@ Additionally, \altsolve\/  aims to be compatible with Maxima's current solve fun
 
  \item The \altsolve\/ code requires only modest modifications to the rest of the source code for  Maxima.
 
-\item Except for algebraically equivalent, but different results, \altsolve\/  runs the testsuite and the share testsuite with no errors. This condition should hold for all combinations of the primary option variables that effect functioning of \altsolve.
+\item Except for algebraically equivalent, but different results, \altsolve\/  runs the testsuite and the share testsuite with no errors and in roughy the same time. This condition should hold for all combinations of the primary option variables that effect functioning of \altsolve.
 
-\item  The \altsolve code runs the testsuite and the share testsuite in about the same time as standard Maxima on all supported operating systems and Common Lisp versions.
-
+\item The code compiles and runs under all supported Common Lisp versions that are supported by Maxima.
 \end{alphalist}
-We do \emph{not} aim to
+We do \emph{not} aim
 \begin{alphalist}[noitemsep]
 
-\item solve inequalities, diophantine equations, differential equations, or to dispatch purely numerical methods (the Newton method, for example) solutions,
+\item to solve inequalities, Diophantine equations, differential equations, or to dispatch purely numerical methods (the Newton method, for example) solutions,
 
-\item build a platform that could be used to display the steps done to find the solution,
+\item to build a platform that could be used to display the steps done to find the solution,
 
-\item write a new version of \algsys.
+\item to write a new version of \algsys.
 
 \end{alphalist}
 Our development priorities are (in order from highest to least)
 
 \begin{alphalist}[noitemsep]
 
-\item  provide well written source code with ample informative comments,
+\item  to provide well written source code with ample informative comments,
 
-\item  have  a modest code size,
+\item to have a modest code size,
 
-\item be conservative with memory usage,
+\item to be conservative with memory usage,
 
-\item solve equations quickly.
+\item to solve equations quickly.
 
-\item source code should compile without few warnings on all supported versions of Common Lisp.
 \end{alphalist}
 
+\section{Use of database facts}
+
+Type declarations on the unknown (for example declare(x, real)) do not limit the solution set to include only integers. But the type declaration might be used inside the solve process in simplfication. So it's possible that a type declartion of an unknown will alter the solution set, but again, the solution set is free to contain members that do not satisfy the delcared types (if any) of the unknowns.
+
+A user who needs only real or integer, or \dots solutions will need to filter the solution set for those members that satisfy other conditions. The function sublist can help with this process.
+
+\section{Solve is an ordinary function}
+
+The function \solve \/ evaluates its input. That makes it an \emph{ordinary} Maxima function. This means, for example, that the function call \(\mathrm{solve}(x/x=1,x)\) is effectively evaluated to \(\mathrm{solve}(1=1,x)\) before \solve \/ starts its work. Efforts to thwart this (by setting simp to false or by quoting) are likely to be unsuccessful.
 
 \section{Representation of solutions}
 
-To be compatible with Maxima, solutions to equations with one variable have the form of a Maxima list; for example \([x = e_1, x = e_2, \cdots, x = e_n]\), where the expressions \(e_1, e_2, \dots, e_n\) are free of \(x\). The order of solutions is \emph{unspecified}.
+To be compatible with Maxima, solutions to equations with one variable have the form of a Maxima list; thus a solution has the form \([x = e_1, x = e_2, \cdots, x = e_n]\), where the expressions \(e_1, e_2, \dots, e_n\) are free of \(x\). The order of solutions is \emph{unspecified}. The simple list structure of a solutions allows for the following example to yield true:
 
-When \altsolve\/  is unable to find a solution and the option variable \solveexplicit\/ is false, return an equivalent, but possibly simplified equation;  otherwise print a message that there is no method for solving the equation and return the empty list.
+\begin{verbatim}
+(%i1)	eq : (x-5)*(x-2)=0$
+(%i2)	every(map(lambda([q], subst(q, eq)), solve(eq,x)));
+(%o2)	true
+\end{verbatim}
 
+The solutions should invovle objects that Maxima functions such as sign, mapatom, featurep, and declare understand.
+
+\section{Option variables}
+
+\begin{description}
+
+
+\item [solveexplicit] (default false) When \altsolve\/  is unable to find a solution and the option variable \solveexplicit\/ is false, return an equivalent, but possibly simplified equation;  otherwise print a message that there is no method for solving the equation and return the empty list.
+
+\item [use\_to\_poly] (default true)  When use\_to\_poly is true, \altsolve\/ is able to solve more algebraic
+equations.  Likely there is little reason to set this option variable to false.
+
+\item[solve\_ignores\_conditions] (default false) When this option varaible is false, \altsolve\/ attempts to
+remove solutions that are not in the natural domain of the equation; when true, solutions may include those that are outside the domain; for example
+\begin{verbatim}
+(%i7)	block([solve_ignores_conditions : true], solve( x * (log(x) - 1)  = 0));
+(%o7)	[x=%e,x=0]
+
+(%i8)	block([solve_ignores_conditions : false], solve( x * (log(x) - 1)  = 0));
+(%o8)	[x=%e]
+\end{verbatim}
+
+The correct functioning of this mechanism requires the correct functioning of many other Maxima components. But it is subject various limitations.
+
+\item[solve\_inverse\_package] When solve\_inverse\_package is multivalued\_inverse, \altsolve\/ attemps to find all solutions (both real and complex) to equations; when its value is single\_valued\_inverse, the effort is to find one or more soltions, but primarly a real solution. Examples:
+\begin{verbatim}
+  (%i1)	block([solve_inverse_package : multivalued_inverse], solve(1.03^x = 5.2));
+  (%o1)	[x=33.83087013568215*(2*%i*%pi*%z3+1.648658625587382)]
+
+  (%i2)	block([solve_inverse_package : single_valued_inverse], solve(1.03^x = 5.2));
+  (%o2)	[x=55.77555586031892]
+\end{verbatim}
+For a problem in finiancial math or high school level math, likely is the one that is desired. Another
+example is
+\begin{verbatim}
+(%i1)	block([solve_inverse_package : multivalued_inverse], solve(sin(x) = 1/2));
+(%o1)	[x=(12*%pi*%z5+%pi)/6,x=(12*%pi*%z6+5*%pi)/6]
+
+(%i2)	block([solve_inverse_package : single_valued_inverse], solve(sin(x) = 1/2));
+(%o2)	[x=%pi/6]
+\end{verbatim}
+
+Maxima's integration, especially definite integration code, needs to solve equations. But this code would mostly misbehave using the  multivalued\_inverse package. The \altsolve\/ code automatically sets solve\_inverse\_package to single\_valued\_inverse when inside the integration code.
+
+\end{description}
 %I'm not sure what solve(0=0, []) should return. Returning the symbol  \all makes a bit of a mess (a solution cannot be relied on to be a list)
 
 
