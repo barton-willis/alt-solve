@@ -764,7 +764,7 @@
 
 (defvar *list-of-equations* nil)
 (defun solve (e x ms)
-  ;;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
+  (mtell "top of ?solve ~M ~M ~M ~%" e x ms)
 	(push (list e x) *list-of-equations*)
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
@@ -777,10 +777,10 @@
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
 				 ;(displa (mfuncall '$facts))
-				 (setq sol (solve-single-equation e x ms nil)) ; what if solve returns all? It's a bug!
-				 (setq sol (reverse (cdr sol)))
+				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom
+				 (setq sol (reverse (cdr sol))) ; maybe reverse makes this more consistent with standard solve.
 				 (setq m (cond (($listp $multiplicities)
-								(cdr $multiplicities))
+								(mapcar #'(lambda (q) (mul ms q)) (cdr $multiplicities)))
 							 (t
 							  (mtell "Yikes--multiplicities didn't get set ~%")
 							  (mapcar #'(lambda (q) (declare (ignore q)) 1) sol)))))
