@@ -38,7 +38,6 @@ The \altsolve\/ package aims to be a replacement for Maxima's solve function. Th
 
 \item to focus on symbolic solution to equations that are pertinent to science and engineering problems,
 
-\item source code (Common Lisp) that is easy to extend and to fix,
 
 \item to find all real and complex solutions to equations, but take care to not return spurious solutions.
 
@@ -51,14 +50,15 @@ Additionally, \altsolve\/  aims to be compatible with Maxima's current solve fun
 
  \item The \altsolve\/ code requires only modest modifications to the rest of the source code for  Maxima.
 
-\item Except for algebraically equivalent, but different results, \altsolve\/  runs the testsuite and the share testsuite with no errors and in roughy the same time. This condition should hold for all combinations of the primary option variables that effect functioning of \altsolve.
+\item Except for algebraically equivalent, but different results, \altsolve\/  runs the testsuite and the share testsuite with no errors and in roughy the same time as the standard Maxima. This condition should hold for
+all combinations of the primary option variables that effect functioning of \altsolve.
 
-\item The code compiles and runs under all supported Common Lisp versions that are supported by Maxima.
+\item The code compiles with no errors and few warnings and runs under all supported Common Lisp versions that are supported by Maxima.
 \end{alphalist}
 We do \emph{not} aim
 \begin{alphalist}[noitemsep]
 
-\item to solve inequalities, Diophantine equations, differential equations, or to dispatch purely numerical methods (the Newton method, for example) solutions,
+\item to solve inequalities, Diophantine equations, differential equations, recursion relations, or to dispatch numerical methods (the Newton method, for example),
 
 \item to build a platform that could be used to display the steps done to find the solution,
 
@@ -69,7 +69,7 @@ Our development priorities are (in order from highest to least)
 
 \begin{alphalist}[noitemsep]
 
-\item  to provide well written source code with ample informative comments,
+\item to write source code (Common Lisp) that is easy to extend and to fix,
 
 \item to have a modest code size,
 
@@ -79,11 +79,18 @@ Our development priorities are (in order from highest to least)
 
 \end{alphalist}
 
+
 \section{Use of database facts}
 
-Type declarations on the unknown (for example declare(x, real)) do not limit the solution set to include only integers. But the type declaration might be used inside the solve process in simplfication. So it's possible that a type declartion of an unknown will alter the solution set, but again, the solution set is free to contain members that do not satisfy the delcared types (if any) of the unknowns.
+Type declarations on the unknown (for example declare(x, real)) do not limit the solution set to include
+only real values. But the type declaration might be used inside the solve process in simplification. So
+it's possible that a type declaration of an unknown will alter the solution set, but again, the solution
+set is free to contain members that do not satisfy the declared types (if any) of the unknowns.
+Similarly, inequality assumptions on the unknown (for example assume(0 < x, x< 1)) do not limit the solution
+set to values that satisfy the assumptions in the fact database. But again, simplifications that are done
+in the solve process may use the fact database.
 
-A user who needs only real or integer, or \dots solutions will need to filter the solution set for those members that satisfy other conditions. The function sublist can help with this process.
+A user who needs only integer solutions, for example, will need to filter the solution set for those members that are integers. The function \texttt{sublist} can help with this process.
 
 \section{Solve is an ordinary function}
 
@@ -99,19 +106,38 @@ To be compatible with Maxima, solutions to equations with one variable have the 
 (%o2)	true
 \end{verbatim}
 
-The solutions should invovle objects that Maxima functions such as sign, mapatom, featurep, and declare understand.
+The solutions should involve objects that Maxima functions such as sign, mapatom, featurep, and declare understand.
 
 \section{Option variables}
 
 \begin{description}
 
+\item [globalsolve] For now, \altsolve\/ does not implement the globalsolve option variable.
+
+\item [programmode] For now, \altsolve\/ does not implement the programmode option variable.
+
+\item [solveradcan] When solveradcan is true, \altsolve\/ applies radcan early in the solve process. Exactly what ``early'' means is unspecified.
+
+\item [solvefactors] For now, \altsolve\/ ignores this option variable.
+
+\item [solvenullwarn] When this option variable is true and either the equation list or the unknown list is
+empty, print a warning.
+
+\item [solvetrigwarn] For now, \altsolve\/ does not implement the solvetrigwarn option variable.
+
+\item [solvedecomposes] When solvedecomposes is true, the function \texttt{polydecom} is applied to
+polynomial equations of degree five or more. When the decomposition yields polynomials of degree four
+or less, \altsolve\/ returns a solution in terms of radicals. There is, I think, little reason to
+set solvedecomposes to false.
 
 \item [solveexplicit] (default false) When \altsolve\/  is unable to find a solution and the option variable \solveexplicit\/ is false, return an equivalent, but possibly simplified equation;  otherwise print a message that there is no method for solving the equation and return the empty list.
+
+\item [linsolve\_params] For now, \altsolve \/ ignores this option variable.
 
 \item [use\_to\_poly] (default true)  When use\_to\_poly is true, \altsolve\/ is able to solve more algebraic
 equations.  Likely there is little reason to set this option variable to false.
 
-\item[solve\_ignores\_conditions] (default false) When this option varaible is false, \altsolve\/ attempts to
+\item[solve\_ignores\_conditions] (default false) When this option variable is false, \altsolve\/ attempts to
 remove solutions that are not in the natural domain of the equation; when true, solutions may include those that are outside the domain; for example
 \begin{verbatim}
 (%i7)	block([solve_ignores_conditions : true], solve( x * (log(x) - 1)  = 0));
@@ -153,7 +179,10 @@ Maxima's integration, especially definite integration code, needs to solve equat
 
 Atoms of the form \%Zk, \%Rk, and \%Ck, where k is a nonnegative integer, represent arbitrary integers, real numbers, and complex numbers, respectively.
 
-Solutions to equations with two or more variables are lists of lists of the form \([x_1 = e_1, x_2 = e_2, \cdots, x_n = e_n] \), where the expressions \(e_1\) through \(e_n\) are free of the symbols \(x_1\) through \(x_n \). The order of variables in each solution is unspecified, and the order of the lists is unspecified.
+Solutions to equations with two or more variables are lists of lists of the form \([x_1 = e_1, x_2 = e_2,
+\cdots, x_n = e_n] \), where the expressions \(e_1\) through \(e_n\) are free of the symbols \(x_1\)
+through \(x_n \). The order of variables in each solution is unspecified, and the order of the lists is
+unspecified.
 
 \section{Keep float mechanism}
 
