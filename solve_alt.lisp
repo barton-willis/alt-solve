@@ -2,6 +2,7 @@
 ;;;; Common Lisp/Maxima code for symbolic solutions of equations.
 
 ;;;; This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+;;;; https://creativecommons.org/licenses/by-sa/4.0/
 
 (in-package :maxima)
 
@@ -38,8 +39,9 @@
 
 (declare-top (special
 			  *var
-		      *roots ;alternating list of solutions and multiplicities
-		      *failures
+		    *roots ;alternating list of solutions and multiplicities
+		    *failures
+				*defint-assumptions*
 			  xm* xn* mul*))
 
 ;; In expression e, convert all floats (binary64) and bigfloats to their exact rational value
@@ -82,7 +84,7 @@
 ;;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
-  ;(mtell "top of $solve ~M ~M ~%" eqlist varl)
+  ;;(mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
   (mfuncall '$reset $multiplicities)
 
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
@@ -604,19 +606,32 @@
 
 ;;; eqs is a CL list of Maxima sets; vars is a CL list of symbols
 (defun solve-triangular-system (eqs vars &optional (subs nil))
+  (mtell "Top of solve-triangular-system eqs = ~M  vars = ~M subs = ~M ~%" eqs vars subs)
+	(print `(eqs = ,eqs))
+	(print `(vars = ,vars))
+	(print `(subs = ,subs))
 	(let ((e) (eeqs) (x) ($listconstvars nil) (sol) (ssol) (acc (list (list 'mlist))))
 		 (cond ((null eqs)
-				(when (not ($listp subs))
-					(push '(mlist) subs))
-				subs)
+		    (print "Done!")
+				(print `(subs = ,subs))
+				;(when (not ($listp subs))
+				;	(push '(mlist) subs))
+			  ;(push '(mlist) subs)
+			  ;(push '(mlist) subs)
+				(list subs))
 			 (t
 			  (setq e (pop eqs))
+				(displa `((mequal) eeee ,e))
 			  (setq x (intersection (cdr ($listofvars e)) vars :test #'alike1))
+				(displa `((mequal) x ,x))
 			  (cond ((null (cdr x)) ; only one variable
+					(displa `((mequal) Xe ,e))
+					(print (first x))
 					 (setq sol (cdr ($solve e (first x))))
+					 (print `(sol = ,sol))
 					 (dolist (sx sol)
 						 (setq eeqs (mapcar #'(lambda (q) ($substitute sx q)) eqs))
-						 (setq ssol (solve-triangular-system eeqs vars (append subs (list sx))))
+						 (setq ssol (solve-triangular-system eeqs (rest vars) (append subs (list sx))))
 						 (cond ((list-of-list-p ssol)
 								(setq acc ($append ssol acc)))
 							 (t (setq acc ($cons ssol acc)))))
@@ -685,7 +700,7 @@
 	  			 (setq e ($setify e))
 	  			 (setq x ($setify x))
 	  			 (setq e (triangularize-eqs e x))
-					 (print `(e = ,e))
+					 (displa `((mequal) e ,e))
 	  			 (setq sol (let (($solve_ignores_conditions t)) (solve-triangular-system (cdr e) (cdr x))))
 					 (setq sol (mapcar #'unkeep-float sol))
 					 (if sol sol ee)))))
@@ -733,22 +748,24 @@
 			  (if sol sol ee)))))
 
 ;;; This is the entry-level function for system level calls to solve. Solutions are pushed into the
-;;; special variable *roots. Maybe this should call solve-single-equation instead of the top-level $solve?
-;;; Skipping $solve and going directly to solve-single-equation would sidestep the call to supercontext--that
-;;; would all assumptions made in the solve process to remain.
+;;; special variable *roots.
 
 ;;; The solve function is sometimes called from the integrate code. But the integration code doesn't tolerate
 ;;; things like solve(sin(x)=1/2,x) --> [x=(12*%pi*%z1+%pi)/6,x=(12*%pi*%z2+5*%pi)/6]. Thus we'll locally
 ;;; set $solve_inverse_package to *function-inverses-alt*.
 
-;;; When realonly is true, the testsuite has problems. Not sure--$realonly only affects algsys, not solve. So
-;;; I'm not sure...
 
-;;; The non-user level option variable *solve-factors-biquadratic* is a silly workaround.  The testsuite has a handful
-;;; of definite integration problems of the form integrate(1/(a + b*sin(x)^2,x, c,d). These lead to solving
-;;; biquadratics. Standard Maxima doesn't factor the biquadratic--that results in pairs of solutions of the
-;;; form +/-sqrt(XXX). For such definite integrals, factoring the biquadratic and solving yields solutions that are
-;;; arguably more complex than not factoring.
+;;; Locally $realonly is true--I once had problems running the testsuite without setting $realonly
+;;; to nil, but that's no longer true. Nevertheless, we set it to true.
+
+;;; The non-user level option variable *solve-factors-biquadratic* is a silly workaround.  The testsuite
+;;; has a handful of definite integration problems of the form integrate(1/(a + b*sin(x)^2,x, c,d). These
+;;; lead to solving biquadratics. Standard Maxima doesn't factor the biquadratic--that gives solutions
+;;; that are needlessly complicated. But for such definite integrals, factoring the biquadratic
+;;; and solving yields solutions that are arguably more complex than not factoring. So a weird trick--
+;;; factoring the biquadraic is controled with the option variable *solve-factors-biquadratic*. When
+;;; the global *defint-assumptions* is bound, set *solve-factors-biquadratic* to nil. This stupid
+;;; Maxima trick simply allows the testsuite to have fewer needless failures.
 
 ;;; I think solve isn't supposed to alter $multiplicities--it's a mess.
 
@@ -764,15 +781,15 @@
 
 (defvar *list-of-equations* nil)
 (defun solve (e x ms)
-  (mtell "top of ?solve ~M ~M ~M ~%" e x ms)
-	(push (list e x) *list-of-equations*)
+  ;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
+	(push (list e x) *list-of-equations*) ; debugging-like thing
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
 				($solve_ignores_conditions t)
 				($use_to_poly t)
 				($realonly nil)
 				($negdistrib t) ;not sure about this?
-				(*solve-factors-biquadratic* t)
+				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))

@@ -2,35 +2,39 @@
 ;;;; Common Lisp/Maxima code for symbolic solutions of polynomial equations.
 
 ;;;; This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+;;;; https://creativecommons.org/licenses/by-sa/4.0/
 
 (in-package :maxima)
 
 (defmvar *solve-factors-biquadratic* t)
 
-;;; Make an extra effort to simplify the expression e to zero, but respect the principal branch
+;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
 ;;; cuts (don't use radcan).
 (defun try-to-crunch-to-zero (e) "Ratsimp with algebraic = true and domain = complex."
 	(let (($algebraic t) ($domain '$complex)) (sratsimp e))) ; was (fullratsimp e)))
 
-;; Solve a*x + b = 0 for x. Return both the solution (-b/a) and a CL list of the multiplicity.
+;;; Solve a*x + b = 0 for x. Return both a CL list of the solution (-b/a) and a CL list of the multiplicity.
 (defun my-solve-linear (x a b) "Return solution and multiplicity of ax+b=0."
 	(values (list (take '(mequal) x (try-to-crunch-to-zero (div (mul -1 b) a)))) (list 1)))
 
 ;;; Return a CL list of the solutions to the quadratic equation ax^2+bx+c = 0 and a CL list of the
 ;;; multiplicities. The function simpnrt makes some effort to find even power factors.
+
+;;; We don't special case b = 0; arguably x = +/- sqrt(-c a)/a is simpler than is
+;;; x = +/- sqrt(c/a); additionally when I tried it, the testsuite had lots of problems.
 (defun my-solve-quadratic (x a b c) "Return solutions and multiplicities of ax^2+bx+c=0."
 	(let ((d (sub (mul b b) (mul 4 a c))))
 		 (setq d (try-to-crunch-to-zero d))
 		  (cond ((zerop1 d)
-			  	 ;(mtell "Found multiple root of quadratic ~%")
-				 (values (list (take '(mequal) x (div b (mul -2 a)))) (list 2)))
-		  	    (t
-				 (setq d (simpnrt d 2)) ;any branch is OK
-				 (values
-				    (list
-					 (take '(mequal) x (try-to-crunch-to-zero (mul -1 (div (add d b) (mul 2 a)))))
-					 (take '(mequal) x (try-to-crunch-to-zero (div (sub d b) (mul 2 a)))))
-				  (list 1 1))))))
+			   	 ;(mtell "Found multiple root of quadratic ~%")
+				    (values (list (take '(mequal) x (div b (mul -2 a)))) (list 2)))
+		  	   (t
+		   		  (setq d (simpnrt d 2)) ;any branch is OK
+			     	 (values
+			  	    (list
+			   		  (take '(mequal) x (try-to-crunch-to-zero (mul -1 (div (add d b) (mul 2 a)))))
+			   		  (take '(mequal) x (try-to-crunch-to-zero (div (sub d b) (mul 2 a)))))
+				      (list 1 1))))))
 
 ;;; Return a CL list of the solutions to the cubic equation a x^3 + b x^2 + c x + d= 0 and a CL list of the
 ;;; multiplicities.
@@ -68,7 +72,8 @@
 					   (push (take '(mequal) x (div (add b (mul xii K) (div d0 (mul xii K))) (mul -3 a))) sol))
 				(values sol (list 1 1 1))))))
 
-;;; solve the biquadratic p4 x^4 + p2 x^2 + p0 = 0. Return both a CL list of the solutions and the list of the multiplicities.
+;;; Solve the biquadratic p4 x^4 + p2 x^2 + p0 = 0. Return both a CL list of the solutions and
+;;; the list of the multiplicities.
 (defun my-solve-biquadratic (x p4 p2 p0) "Solve the biquadratic p4 x^4 + p2 x^2 + p0 = 0."
 	(multiple-value-bind (sol m) (my-solve-quadratic x p4 p2 p0)
 		(setq sol (mapcar #'third sol))
@@ -82,12 +87,13 @@
 ;;; to the cubic selects the least complicated solution to the cubic resolvent. Third solve two
 ;;; quadratic equations. And fourth and finally undo the translation x --> x - p3/4p4.
 
+;;; This code does not detect the quasi-palindromic case.
+
 ;;; Solve the quartic p4 x^4 + p3 x^3 + p2 x^2 + p1 x + p0=0. Return both a CL list of the solutions and the
 ;;; list of the multiplicities.
 (defun my-solve-quartic (v p4 p3 p2 p1 p0) "Return solutions and multiplicities of p4 v^4+p3 v^3+p2 v^2+ p1 v + p0=0."
-	;(mtell "solving quartic ~%")
+	(mtell "solving quartic ~%")
 	;(displa `((mlist) ,p4 ,p3 ,p2 ,p1 ,p0))
-	; (print "solving quartic" t)
 	(let ((pp4) (pp3) (pp2) (pp1) (pp0) (m) (g (gensym)) (x) (mm) (shift))
 
 		 (cond ((and (zerop1 p3) (zerop1 p1))
@@ -111,7 +117,6 @@
 			  ;; We would like the simpliest nonzero zero of m. Accordingly it behooves us to factor m.
 			  (setq m (polynomial-solve ($gfactor m) g)) ;was ($solve m g)
 			  (setq $multiplicities nil)
-
 			  (setq m (mapcar #'third (cdr m))) ;remove '(mlist) and extract $rhs
 			  ;; remove members that are explicitly zero and sort according to my-size.
 			  (setq m (sort (remove-if #'zerop1 m) #'(lambda(a b) (< (my-size a) (my-size b)))))
@@ -246,7 +251,6 @@
 		 ;; form ax^n+b with n > 4. We could allow n to be any positive integer, but this causes more testsuite
 		 ;; failures.
 		 (setq sol (solve-poly-x^n+b e x mx))
-		 ;(setq sol nil)
 		 (cond (sol
 				(simplifya (cons '(mlist) sol) t))
 			 (t
@@ -296,10 +300,6 @@
 									(values nil nil))
 								(t
 									(values (list (take '(mequal) 0 q)) (list 1))))))
-
-        ;  (print `(sol = ,sol))
-				;	(print `(mss = ,mss))
-				;	(print `(p-multiplicities = ,p-multiplicities))
 					(setq sol (append sol zzz))
 					(setq p-multiplicities (append p-multiplicities (mapcar #'(lambda (s) (mul s m)) mss)))))
 				  (setq $multiplicities (simplifya (cons '(mlist) p-multiplicities) t))
