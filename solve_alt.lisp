@@ -41,7 +41,7 @@
 			  *var
 		    *roots ;alternating list of solutions and multiplicities
 		    *failures
-				*defint-assumptions*
+    		*defint-assumptions*
 			  xm* xn* mul*))
 
 ;; In expression e, convert all floats (binary64) and bigfloats to their exact rational value
@@ -84,7 +84,8 @@
 ;;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
-  ;;(mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
+  ;(mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
+	;(print `(linsovle_params = ,$linsolve_params))
   (mfuncall '$reset $multiplicities)
 
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
@@ -123,7 +124,7 @@
 	 (when (some #'mnump varl)
 	   (merror (intl:gettext "Solve: all variables must not be numbers.~%")))
 
-	 ;; (setq eqlist (remove-if #'zerop1 eqlist))
+	 (setq eqlist (remove-if #'zerop1 eqlist))
 	 ;;Eliminate duplicate equations.
 	 ;;(setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
 
@@ -544,17 +545,42 @@
 		 checked-sol))
 
 ;;; Standard $linsolve bypasses $solve and calls solvex. That requires $linsolve/solvex to duplicate
-;;; some of the features of $solve (argument checking and non-atom solve, for example). instead, let's
+;;; some of the features of $solve (argument checking and non-atom solve, for example). Instead, let's
 ;;; route linsolve through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
 
 ;;; Eventually standard linsolve calls tfgeli. But there is a 2006 bug (#963: linsolve incorrect result)
-;;; that has gone unfixed for over ten years. Using $solve (and eventually $algys) fixes this bug. Possibly
-;;; tfgeli gives better performance--eventually it should be fixed. But until it is fixed, let's use
-;;; $solve/$algys.
+;;; that has gone unfixed for over ten years. Using $solve (and eventually $algys) fixes this bug. There
+;;; was, I think, a great deal of effort that went into tfgeli
+
+;;; This function $linsolve--defective ignores linsolve_params. And that breaks stuff. Maybe
+;;; tfgeli (or friends) need to be fixed and return to using it, or $linsolve needs a scheme to
+;;; comply with insolve_params.
+
 
 (defun $linsolve (e x)
-	(let ((sol ($solve e x)))
-		 (if (and ($listp sol) (not ($emptyp sol)) ($listp ($first sol))) ($first sol) sol)))
+  (let ((sol ($solve e x)) (n))
+     (cond ((and (not $linsolve_params) (not ($emptyp  $%rnum_list)))
+	          (mtell "Ugh: doing linsolve twice ~%")
+	    			(setq n (- (length x) (length $%rnum_list)))
+					  ;;	(print (subseq x 1 n))
+				    (let (($linsolve_params t))
+				       ($linsolve (second e) (cons '(mlist) (subseq x 1 (+ 1 n))))))
+          (t
+		        (if (and ($listp sol) (not ($emptyp sol)) ($listp ($first sol))) ($first sol) sol)))))
+
+(defmfun $linsolve-old (eql varl)
+		   (let (($ratfac))
+		     (setq eql (if ($listp eql) (cdr eql) (ncons eql)))
+		     (setq varl (if ($listp varl)
+		 		   (delete-duplicates (cdr varl) :test #'equal :from-end t)
+		 		   (ncons varl)))
+		     (do ((varl varl (cdr varl)))
+		 	((null varl))
+		       (when (mnump (car varl))
+		 	(merror (intl:gettext "solve: variable must not be a number; found: ~M") (car varl))))
+		     (if (null varl)
+		 	(make-mlist-simp)
+		 	(solvex (mapcar 'meqhk eql) varl (not $programmode) nil))))
 
 (defun equation-complexity-guess (a b) (< (my-size a) (my-size b))) ; my-size defined in trig_identities
 
@@ -606,10 +632,10 @@
 
 ;;; eqs is a CL list of Maxima sets; vars is a CL list of symbols
 (defun solve-triangular-system (eqs vars &optional (subs nil))
-  (mtell "Top of solve-triangular-system eqs = ~M  vars = ~M subs = ~M ~%" eqs vars subs)
-	(print `(eqs = ,eqs))
-	(print `(vars = ,vars))
-	(print `(subs = ,subs))
+  ;(mtell "Top of solve-triangular-system eqs = ~M  vars = ~M subs = ~M ~%" eqs vars subs)
+	;(print `(eqs = ,eqs))
+	;(print `(vars = ,vars))
+	;(print `(subs = ,subs))
 	(let ((e) (eeqs) (x) ($listconstvars nil) (sol) (ssol) (acc (list (list 'mlist))))
 		 (cond ((null eqs)
 		    (print "Done!")
@@ -642,8 +668,10 @@
 				   (if $solveexplicit (list (list 'mlist)) nil)))))))
 
 
-(defun solvex-old (eql varl ind flag &aux ($algebraic $algebraic))
+(defun solvex (eql varl ind flag &aux ($algebraic $algebraic))
+
   (declare (special xa*))
+	  (mtell "top of old solvex ~%")
   (prog (*varl ans varlist genvar xm* xn* mul*)
      (setq *varl varl)
      (setq eql (mapcar #'(lambda (x) ($ratdisrep ($ratnumer x))) eql))
@@ -705,7 +733,7 @@
 					 (setq sol (mapcar #'unkeep-float sol))
 					 (if sol sol ee)))))
 
-(defun solvex (e v &optional (ind nil) (flag nil))
+(defun solvex-new (e v &optional (ind nil) (flag nil))
   (declare (ignore ind flag))
 ;  (mtell "top of solvex ~%")
 ;	(mtell "e = ~M  v = ~M ~%" e v)
@@ -716,7 +744,7 @@
   ($solve e v))
 
 (defun solvex-xxx (e v &optional (ind nil) (flag nil))
-	(mtell "top of solvex eq = ~M x = ~M ind = ~M flag = ~M" e v ind flag)
+	;(mtell "top of solvex eq = ~M x = ~M ind = ~M flag = ~M" e v ind flag)
 	;;(declare (ignore foo baz))
 	(let ((ee) (sol))
 		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
