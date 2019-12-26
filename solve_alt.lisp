@@ -549,20 +549,16 @@
 ;;; route linsolve through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
 
 ;;; Eventually standard linsolve calls tfgeli. But there is a 2006 bug (#963: linsolve incorrect result)
-;;; that has gone unfixed for over ten years. Using $solve (and eventually $algys) fixes this bug. There
-;;; was, I think, a great deal of effort that went into tfgeli
-
-;;; This function $linsolve--defective ignores linsolve_params. And that breaks stuff. Maybe
-;;; tfgeli (or friends) need to be fixed and return to using it, or $linsolve needs a scheme to
-;;; comply with insolve_params.
-
+;;; that has gone unfixed for over 14 years. Using $solve (and eventually $algys) fixes this bug. There
+;;; was, I think, a great deal of effort that went into tfgeli--somebody ought to fix bug #963. For
+;;; now we workaround this bug by calling algsys instead of tfgeli. Getting this to work with the
+;; option variable linsolve_params is clumbsy.
 
 (defun $linsolve (e x)
   (let ((sol ($solve e x)) (n))
      (cond ((and (not $linsolve_params) (not ($emptyp  $%rnum_list)))
 	          (mtell "Ugh: doing linsolve twice ~%")
 	    			(setq n (- (length x) (length $%rnum_list)))
-					  ;;	(print (subseq x 1 n))
 				    (let (($linsolve_params t))
 				       ($linsolve (second e) (cons '(mlist) (subseq x 1 (+ 1 n))))))
           (t
