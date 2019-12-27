@@ -552,7 +552,9 @@
 ;;; that has gone unfixed for over 14 years. Using $solve (and eventually $algys) fixes this bug. There
 ;;; was, I think, a great deal of effort that went into tfgeli--somebody ought to fix bug #963. For
 ;;; now we workaround this bug by calling algsys instead of tfgeli. Getting this to work with the
-;; option variable linsolve_params is clumbsy.
+;;; option variable linsolve_params is clumbsy.
+
+;;; The algorithm for linsolve_params is bogus. Plus, I need to support backsubst.
 
 (defun $linsolve (e x)
   (let ((sol ($solve e x)) (n))
@@ -818,8 +820,8 @@
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
 				 ;(displa (mfuncall '$facts))
-				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom
-				 (setq sol (reverse (cdr sol))) ; maybe reverse makes this more consistent with standard solve.
+				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
+				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
 				 (setq m (cond (($listp $multiplicities)
 								(mapcar #'(lambda (q) (mul ms q)) (cdr $multiplicities)))
 							 (t
