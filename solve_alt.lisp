@@ -25,6 +25,7 @@
 	($load "trig_identities.lisp")
 	($load "polynomial-solve.lisp")
 	($load "in-domain.lisp")
+	($load "mylinsolve.lisp")
 	($load "grobner"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
@@ -543,42 +544,6 @@
 				 (mtell "used the to poly solver")))
 
 		 checked-sol))
-
-;;; Standard $linsolve bypasses $solve and calls solvex. That requires $linsolve/solvex to duplicate
-;;; some of the features of $solve (argument checking and non-atom solve, for example). Instead, let's
-;;; route linsolve through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
-
-;;; Eventually standard linsolve calls tfgeli. But there is a 2006 bug (#963: linsolve incorrect result)
-;;; that has gone unfixed for over 14 years. Using $solve (and eventually $algys) fixes this bug. There
-;;; was, I think, a great deal of effort that went into tfgeli--somebody ought to fix bug #963. For
-;;; now we workaround this bug by calling algsys instead of tfgeli. Getting this to work with the
-;;; option variable linsolve_params is clumbsy.
-
-;;; The algorithm for linsolve_params is bogus. Plus, I need to support backsubst.
-
-(defun $linsolve (e x)
-  (let ((sol ($solve e x)) (n))
-     (cond ((and (not $linsolve_params) (not ($emptyp  $%rnum_list)))
-	          (mtell "Ugh: doing linsolve twice ~%")
-	    			(setq n (- (length x) (length $%rnum_list)))
-				    (let (($linsolve_params t))
-				       ($linsolve (second e) (cons '(mlist) (subseq x 1 (+ 1 n))))))
-          (t
-		        (if (and ($listp sol) (not ($emptyp sol)) ($listp ($first sol))) ($first sol) sol)))))
-
-(defmfun $linsolve-old (eql varl)
-		   (let (($ratfac))
-		     (setq eql (if ($listp eql) (cdr eql) (ncons eql)))
-		     (setq varl (if ($listp varl)
-		 		   (delete-duplicates (cdr varl) :test #'equal :from-end t)
-		 		   (ncons varl)))
-		     (do ((varl varl (cdr varl)))
-		 	((null varl))
-		       (when (mnump (car varl))
-		 	(merror (intl:gettext "solve: variable must not be a number; found: ~M") (car varl))))
-		     (if (null varl)
-		 	(make-mlist-simp)
-		 	(solvex (mapcar 'meqhk eql) varl (not $programmode) nil))))
 
 (defun equation-complexity-guess (a b) (< (my-size a) (my-size b))) ; my-size defined in trig_identities
 
