@@ -1,0 +1,74 @@
+(reset(linsolve_params, globalsolve,programmode),0);
+0$
+
+block([linsolve_params : true], linsolve([x=a,y=b,z=0],[x,y]));
+[]$
+
+block([linsolve_params : false], linsolve([x=a,y=b,z=0],[x,y]));
+[]$
+
+block([linsolve_params : true], linsolve([x=a,y=b,z=0],[x,y,z]));
+[x=a,y=b,z=0]$
+
+block([linsolve_params : false], linsolve([x=a,y=b,z=0],[x,y,z]));
+[x=a,y=b,z=0]$
+
+block([linsolve_params : true], linsolve([],[]));
+[]$
+
+block([linsolve_params : false], linsolve([],[]));
+[]$
+
+block([linsolve_params : true, %rnum : -1], linsolve([],[x]));
+[x=%r0]$
+
+block([linsolve_params : false,%rnum : -1], linsolve([],[x]));
+[]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([],[x,y]));
+[x=%r1,y=%r0]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x=9],[x,y]));
+[x=9,y=%r0]$
+
+block([linsolve_params : false,%rnum : -1], linsolve([x=9],[x,y]));
+[x=9]$
+
+block([linsolve_params : false,%rnum : -1], linsolve([x=9,x=9],[x,y]));
+[x=9]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x=9,x=9],[x,y]));
+[x=9,y=%r0]$
+
+block([linsolve_params : false,%rnum : -1], linsolve([x=9,x=10],[x,y]));
+[]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x=9,x=10],[x,y]));
+[]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x=9],[x,x]));
+[x=9]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x=107,x=107],[x,x]));
+[x=107]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x=107,x=107],[x,y,x]));
+[x=107,y=%r0]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x=10],[x, rat(x)]));
+[x=10]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x+2*y+3*z=10, 4*x + 5*y + 6*z= 20, 7*x+8*y+9*z=30],[x,y,z]));
+[x=(3*%r0-10)/3,y=-(6*%r0-20)/3,z=%r0]$
+
+block([linsolve_params : false,%rnum : -1], linsolve([x+2*y+3*z=10, 4*x + 5*y + 6*z= 20, 7*x+8*y+9*z=30],[z,x,y]));
+[z=-(3*y-20)/6,x=-y/2]$
+
+block([linsolve_params : false,%rnum : -1], linsolve([x+2*y+3*z=10, 4*x + 5*y + 6*z= 20, 7*x+8*y+9*z=30],[z,z,x,y]));
+[z=-(3*y-20)/6,x=-y/2]$
+
+block([linsolve_params : false,%rnum : -1], linsolve([x+2*y+3*z=10, 4*x + 5*y + 6*z= 20, 7*x+8*y+9*z=30],[z,z,x,y,z]));
+[z=-(3*y-20)/6,x=-y/2]$
+
+block([linsolve_params : true,%rnum : -1], linsolve([x+2*y+3*z=10, 4*x + 5*y + 6*z= 21, 7*x+8*y+9*z=30],[x,y,z]));
+[]$

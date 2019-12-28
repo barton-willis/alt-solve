@@ -4,19 +4,18 @@
 ;;; route linsolve through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
 
 ;;; Eventually standard linsolve calls tfgeli. But there is a 2006 bug (#963: linsolve incorrect result)
-;;; that has gone unfixed for over 14 years. Using $solve (and eventually $algys) fixes this bug. There
-;;; was, I think, a great deal of effort that went into tfgeli--somebody ought to fix bug #963. For
-;;; now we workaround this bug by calling algsys instead of tfgeli. Getting this to work with the
-;;; option variable linsolve_params is clumbsy.
+;;; that has gone unfixed for over 14 years. There was, I think, a great deal of effort that went into
+;;; tfgeli--somebody ought to fix bug #963. For now.we workaround this bug by calour own linsolve.
 
-;;; OK linsolve needs to be OK with non-mapatom unknowns...
+;;; linsolve needs to be OK with non-mapatom unknowns...
 
-;;; The algorithm for linsolve_params is bogus. Plus, I need to support backsubst.
+;;; This code needs to support globalsolve & programmode.
 
 (defun $linsolve (e x)
      (let (($ratmx t) (mat) (sol nil) (s) (ssol nil) (k 0) (g) (vars nil) (nonatom-subs nil) ($scalarmatrixp nil))
 		 	    (setq x (copy-list (cdr x)))  ;cdr removes (mlist). Is copy-list needed? Not sure.
 				  (dolist (z x)
+             (setq ($ratdisrep z))
 					   (cond ((not ($mapatom z))
 						          (setq g (gensym))
 											(push g vars)

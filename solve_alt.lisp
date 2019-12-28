@@ -25,7 +25,7 @@
 	($load "trig_identities.lisp")
 	($load "polynomial-solve.lisp")
 	($load "in-domain.lisp")
-	($load "mylinsolve.lisp")
+	($load "linsolve.lisp")
 	($load "grobner"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
