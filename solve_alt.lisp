@@ -708,7 +708,7 @@
 
 (defun solvex-xxx (e v &optional (ind nil) (flag nil))
 	;(mtell "top of solvex eq = ~M x = ~M ind = ~M flag = ~M" e v ind flag)
-	;;(declare (ignore foo baz))
+	(declare (ignore ind flag))
 	(let ((ee) (sol))
 		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 		 (push '(mlist) e)
