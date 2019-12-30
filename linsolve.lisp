@@ -1,4 +1,5 @@
 ;;;; Author: Barton Willis
+;;;; 2019
 ;;;; Common Lisp/Maxima code for symbolic solutions of equations and systems of equations.
 
 ;;;; This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
@@ -8,7 +9,7 @@
 ;;; Allow %rnum to only be set to a nonnegative integer.
 (defun nonnegative-integer-assign (a b) "merror when b isn't a nonnegative integer"
 	(when (or (not (integerp b)) (< b 0))
-        (merror "The value of ~M must be a nonnegative integer, not ~M ~%" a b)))
+        (merror (intl:gettext "The value of ~M must be a nonnegative integer, not ~M ~%") a b)))
 
 (setf (get '$%rnum 'assign) #'nonnegative-integer-assign)
 
@@ -50,7 +51,7 @@
 
           ;; check that equations are all linear (affine) in the variables x.
           (when (some #'(lambda (q) (not ($affine_p (meqhk q) x))) (cdr e))
-             (merror (intl:gettext "Linsolve: equations must be linear")))
+             (merror (intl:gettext "linsolve: equations must be linear")))
 
           ;; construct a triangularized list of equations:
 				  (setq mat ($triangularize ($augcoefmatrix e x)))
@@ -90,8 +91,8 @@
                        subs))) ;no more equations, no more unknowns!
 
               ((zerop1 (first eqs)) ; first equation vanishes--move on to next equation
-                (when $linsolvewarn
-                  (mtell (intl:gettext "linsolve: dependent equations eliminated ~%")))
+                ;(when $linsolvewarn
+                ;  (mtell (intl:gettext "linsolve: dependent equations eliminated ~%")))
                 (solve-triangular-linear-system (rest eqs) vars subs parametrize-free-vars backsubst))
 
               ((null vars) ; no unknowns but remaining equations
