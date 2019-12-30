@@ -812,12 +812,13 @@
 ;;; lambert-w-solve is unable to solve x*exp(x)/2 = 10. When no solution is found, return nil. Of course,
 ;;; this function could be extended to solve more equations in terms of the Lambert W function.
 (defun lambert-w-solve (e x m) "solve x exp(x) = constant where m is the multiplicity so far"
-  (let ((cnst (sratsimp (sub (mult x (take '(mexpt) '$%e x)) e))))
+  (let ((sol) (cnst (sratsimp (sub (mult x (take '(mexpt) '$%e x)) e))))
 		(cond (($freeof x cnst) ; match with x*exp(x) = cnst
 			       (setq $multiplicities (take '(mlist) m))
-			       (cond ((eql $solve_inverse_package $multivalued_inverse)
+			       (setq sol (cond ((eql $solve_inverse_package $multivalued_inverse)
 		   	         		(take '(%generalized_lambert_w) ($new_variable '$integer) cnst))
 							    	(t (take '(%lambert_w) cnst))))
+						(opcons 'mlist (take '(mequal) x sol)))
 		    	(t nil))))
 
 ;;; Let's make sure that the old functions solvecubic and solvequartic are not called. So, replace the
