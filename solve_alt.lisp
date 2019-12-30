@@ -125,7 +125,7 @@
 	 (when (some #'mnump varl)
 	   (merror (intl:gettext "Solve: all variables must not be numbers.~%")))
 
-	 (setq eqlist (remove-if #'zerop1 eqlist))
+	 ;(setq eqlist (remove-if #'zerop1 eqlist))
 	 ;;Eliminate duplicate equations.
 	 ;;(setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
 

@@ -412,21 +412,21 @@ log(sqrt(2)+1)-log(1-sqrt(2))+log(-1)-sqrt(2)$
 
 
 algsys([x^2+y^2=1,(x-2)^2+(y-3)^2=9],[x,y]);
-[[x = (3^(5/2)+10)/26,y = -((2*3^(3/2)-15)/26)],
- [x = -((3^(5/2)-10)/26),y = (2*3^(3/2)+15)/26]]$
+[[x=-(3^(5/2)-10)/26,y=(2*3^(3/2)+15)/26],
+[x=(3^(5/2)+10)/26,y=-(2*3^(3/2)-15)/26]]$
 
 algsys([v^2-2*v+u^2+10*u+1,v^2-10*v+u^2+2*u+1],[v,u]);
 [[v=-((sqrt(34)-6)/2),u=(sqrt(34)-6)/2],[v=(sqrt(34)+6)/2,u=-((sqrt(34)+6)/2)]]$
 
 algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
-[[x = sqrt(2)*%i,y = -((sqrt(5)+1)/2),z = (sqrt(5)-1)/2],
- [x = sqrt(2)*%i,y = (sqrt(5)-1)/2,z = -((sqrt(5)+1)/2)],
- [x = -(sqrt(2)*%i),y = (sqrt(5)-1)/2,z = -((sqrt(5)+1)/2)],
- [x = -sqrt(2)*%i,y = -((sqrt(5)+1)/2),z = (sqrt(5)-1)/2],
- [x = sqrt(sqrt(5)-2),y = (sqrt(5)-1)/2,z = (sqrt(5)-1)/2],
- [x = -(sqrt(sqrt(5)-2)),y = (sqrt(5)-1)/2,z = (sqrt(5)-1)/2],
- [x = sqrt((-sqrt(5))-2),y = -((sqrt(5)+1)/2),z = -((sqrt(5)+1)/2)],
- [x = -sqrt((-sqrt(5))-2),y = -((sqrt(5)+1)/2),z = -((sqrt(5)+1)/2)]]$
+[[x=sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],
+[x=sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],
+[x=-sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],
+[x=-sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],
+[x=sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],
+[x=-sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],
+[x=sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2],
+[x=-sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2]]$
 
 algsys([2*v^2-12*v+1,v^2-2*v+u^2+10*u+1],[v,u]);
 [[v=-((sqrt(34)-6)/2),u=-((sqrt(34)+14)/2)],[v=(sqrt(34)+6)/2,u=(sqrt(34)-14)/2],[v=(sqrt(34)+6)/2,u=-((sqrt(34)+6)/2)],
@@ -444,19 +444,19 @@ ssolve(exp(4*x) = exp(4),x);
 ssolve(exp(4*x) = exp(-4),x);
 [x=(%i*%pi*%z0-2)/2]$
 
-solve(x^2+x+1=0,x);
+ssolve(x^2+x+1=0,x);
 [x=(sqrt(3)*%i-1)/2,x=-((sqrt(3)*%i+1)/2)]$
 
 multiplicities;
 [1,1]$
 
-solve((x^2+x+1)^4=0,x);
+ssolve((x^2+x+1)^4=0,x);
 [x=(sqrt(3)*%i-1)/2,x=-((sqrt(3)*%i+1)/2)]$
 
 multiplicities;
 [4,4]$
 
-solve(expand((x^2+x+1)^4)=0,x);
+ssolve(expand((x^2+x+1)^4)=0,x);
 [x=(sqrt(3)*%i-1)/2,x=-((sqrt(3)*%i+1)/2)]$
 
 multiplicities;
@@ -485,7 +485,7 @@ integrate(1/(x^4+3*x^2+1)^2,x,0,inf);
 (3*%pi)/(2*5^(3/2))$
 
 integrate(1/(sin(x)^2+1),x,0,2*%pi);
--(((2^(3/2)-2)*%pi)/(sqrt(2)-2))$
+sqrt(2)*%pi$
 
 solve(sqrt(x+1)=9,x);
 [x=80]$
@@ -510,7 +510,7 @@ block([cntx : newcontext()],
     block(
      activate(cntx),
      assume(a > 0),
-     solve(abs(x^2-1) = a,x)),
+     ssolve(abs(x^2-1) = a,x)),
   killcontext(cntx)));
   [x=-sqrt(1-a),x=sqrt(1-a),x=-sqrt(a+1),x=sqrt(a+1)]$
 
@@ -566,7 +566,7 @@ ssolve((x^2+x+1)^2 + x^2 + x -5/16,x);
 [x=-(1/2),x=(sqrt(10)*%i-1)/2,x=-((sqrt(10)*%i+1)/2)]$
 
 ssolve((x^2+1)^4 + (x^2  + 1)^2 + 1/4,x);
-[x=-sqrt((sqrt(2)*%i-2)/2),x=sqrt((sqrt(2)*%i-2)/2),x=-sqrt(-((sqrt(2)*%i+2)/2)),x=sqrt(-((sqrt(2)*%i+2)/2))]$
+[x=-sqrt((sqrt(2)*%i-2)/2),x=sqrt((sqrt(2)*%i-2)/2),x=-(sqrt(-(sqrt(2)*%i+2)/2)),x=sqrt(-(sqrt(2)*%i+2)/2)]$
 
 
 ssolve(cos(x)^2 + sin(x)^2=1,x);
@@ -594,13 +594,13 @@ ssolve(cosh(x) = a,x);
 [x=2*%i*%pi*%z1-acosh(a),x=acosh(a)+2*%i*%pi*%z0]$
 
 ssolve(sech(x) = a,x);
-[x=2*%i*%pi*%z1-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z0]$
+[x=2*%i*%pi*%z0-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z1]$
 
 ssolve(sinh(x) = a,x);
 [x=-asinh(a)+2*%i*%pi*%z1+%i*%pi,x=asinh(a)+2*%i*%pi*%z0]$
 
 ssolve(csch(x) = a,x);
-[x=-acsch(1/a)+2*%i*%pi*%z0+%i*%pi,x=acsch(1/a)+2*%i*%pi*%z1]$
+[x=-acsch(1/a)+2*%i*%pi*%z1+%i*%pi,x=acsch(1/a)+2*%i*%pi*%z0]$
 
 ssolve(tanh(x) = a,x);
 [x=atanh(a)+%i*%pi*%z0]$
@@ -879,7 +879,7 @@ ssolve(sin(x)=sin(2),x);
 ssolve(x=exp(9),x);
 [x = exp(9)]$
 
-block([solve_ignores_conditions : true], solve(sin(sqrt(x))=0,x));
+block([solve_ignores_conditions : true], ssolve(sin(sqrt(x))=0,x));
 [x = %pi^2*%z0^2]$
 
 ssolve(sin(a*x)=1/2,x);
@@ -922,7 +922,7 @@ block([cntx : newcontext(),domain : complex],
      assume(0 < a, a < 1/2),
      sol : ssolve([abs(1-abs(x))=abs(1-abs(a))],[x])),
   killcontext(cntx)));
-[x=2-a,x=a-2,x=a,x=-a]$
+[x=2-a,x=a-2,x=-a,x=a]$
 
 block([cntx : newcontext(),domain : complex],
   unwind_protect(
@@ -940,12 +940,12 @@ block([cntx : newcontext(),domain : complex],
      assume(a < -2),
      sol : solve([abs(1-abs(x))=abs(1-abs(a))],[x])),
   killcontext(cntx)));
-[x=a,x=-a]$
+[x=-a,x=a]$
 
 ssolve(x^(3/2)=(a)^(3/2),x);
 [x=a, x=-(sqrt(3)*%i*a)/2-a/2, x=(sqrt(3)*%i*a)/2-a/2]$
 
-solve(x^3=8,x);
+ssolve(x^3=8,x);
 [x=2,x=sqrt(3)*%i-1,x=-(sqrt(3)*%i)-1]$
 
 solve(x*(x-1)=0,x);
@@ -1098,7 +1098,7 @@ ssolve(%e^(2*x) + 2*%e^x + 1 = z,x);
 [x=log(-sqrt(z)-1)+2*%i*%pi*%z1,x=log(sqrt(z)-1)+2*%i*%pi*%z0]$
 
 ssolve(exp(2 - x^2) = exp(-x), x);
-[x=-(sqrt(8*%i*%pi*%z0+9)-1)/2,x=(sqrt(8*%i*%pi*%z0+9)+1)/2]$
+[x=-((sqrt(8*%i*%pi*%z0+9)-1)/2),x=(sqrt(8*%i*%pi*%z0+9)+1)/2]$
 
 ssolve((x - 2)/x^(1/3) = 0, x);
 [x=2]$
@@ -1214,7 +1214,7 @@ block(
         assume(a < 0),
         solve(a+x-sqrt(x),x)),
   killcontext(cntx)));
-  [x=-((2*a-sqrt(1-4*a)-1)/2)]$
+  [x=-(((2*a-sqrt(1-4*a)-1)/2))]$
 
 /* Thu, 24 Apr 2003 15:50:25 +0300 */
 ssolve(x - 2 * sqrt (x) = 10,x);
@@ -1283,7 +1283,7 @@ solve(x - 2 * sqrt (x) = 10,x);
 
 /* Wed Sep 20 11:41:42 CDT 2006 */
 ssolve(sin(x)+cos(x)=0,x);
-[x=2*%pi*%z0-%pi/4,x=2*%pi*%z0+(3*%pi)/4]$
+[x=2*%pi*%z0-%pi/4,x=2*%pi*%z1+(3*%pi)/4]$
 
 /* Fri Feb 1 05:31:56 CST 2008 changed 0.05 to 5/100) */
 ssolve(x*exp(-x)-5/100 = 0,x);
@@ -1309,10 +1309,7 @@ ssolve([x2=x*cos(phi)-y*sin(phi), y2=x*sin(phi)+y*cos(phi)], [x,y]);
 
 /* Thu May 25 09:22:09 CDT 2006 */
 ssolve(1+x^(5/2),x);
-[[x = -sqrt(5-sqrt(5))*sqrt(5)*%i/2^(5/2)
-                -sqrt(5-sqrt(5))*%i/2^(5/2)+sqrt(5)/4-1/4],
-             [x = sqrt(5-sqrt(5))*sqrt(5)*%i/2^(5/2)
-                +sqrt(5-sqrt(5))*%i/2^(5/2)+sqrt(5)/4-1/4]]$
+[x=%e^((2*%i*%pi)/5),x=\-%e^((3*%i*%pi)/5)]$
 
 /* Thu Oct 12 14:55:03 CDT 2006 */
 /* ----------------- NEEDS fixing
@@ -1392,8 +1389,8 @@ block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
 [[x = %r0,a = %i*%r0],[x = %r1,a = -%i*%r1]]$
 
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
-[[x = %r0,a = sqrt(-%i)*%r0],[x = %r1,a = -sqrt(-%i)*%r1],
- [x = %r2,a = -(-1)^(1/4)*%r2],[x = %r3,a = (-1)^(1/4)*%r3]]$
+[[x=%r0,a=(-1)^(1/4)*%r0],[x=%r1,a=sqrt(-%i)*%r1],
+[x=%r2,a=-(-1)^(1/4)*%r2],[x=%r2,a=-sqrt(-%i)*%r2]]$
 
 ssolve((x-1)/(x+1) = 1, [x]);
 []$
@@ -1411,9 +1408,9 @@ ssolve(cosh(x+a)=cosh(x),a);
 [a=-acosh(cosh(x))-x+2*%i*%pi*%z1,a=acosh(cosh(x))-x+2*%i*%pi*%z0]$
 
 ssolve(sin(x^2)=0,x);
-[x = sqrt(%pi)*sqrt(%z0)]$
+[x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
 
-solve(x^2+2*x+sqrt(5),x);
+ssolve(x^2+2*x+sqrt(5),x);
 [x=sqrt(1-sqrt(5))-1,x=-sqrt(1-sqrt(5))-1]$
 
 /* nonsymbol solve */
@@ -1482,10 +1479,7 @@ solve([x=1,x=2],x);
 
 /* [ 1452341 ] solve(x^(5/2)+1,x) produces incorrect roots */
 solve(1+x^(5/2),x);
-[[x = -sqrt(5-sqrt(5))*sqrt(5)*%i/2^(5/2)
-                -sqrt(5-sqrt(5))*%i/2^(5/2)+sqrt(5)/4-1/4],
-             [x = sqrt(5-sqrt(5))*sqrt(5)*%i/2^(5/2)
-                +sqrt(5-sqrt(5))*%i/2^(5/2)+sqrt(5)/4-1/4]]$
+[x=-%e^((3*%i*%pi)/5),x=%e^((2*%i*%pi)/5)]$
 
 
 /* [ 1105366 ] SOLVE gives a wrong answer */
@@ -1509,7 +1503,7 @@ solve([x=1],[x,x]);
 
 /* [ 589970 ] Solve of quadratic gives error */
 solve((4*k^2-4)*y^2 + (4-4*k^2)*y + 6*k^2-1,y);
-[y=-((sqrt(5)*k*sqrt(1-k^2)-k^2+1)/(2*k^2-2)) , y=(sqrt(5)*k*sqrt(1-k^2)+k^2-1)/(2*k^2-2)]$
+[y=-(k*sqrt(5-5*k^2)-k^2+1)/(2*k^2-2),y=(k*sqrt(5-5*k^2)+k^2-1)/(2*k^2-2)]$
 
 /* Lambert solver */
 
@@ -1517,7 +1511,7 @@ nicedummies(solve(x*exp(x) = a,x));
 [generalized_lambert_w(%z0,a)]$
 
 nicedummies(solve(exp(x) = a/x,x));
-[generalized_lambert_w(%z0,a)]$
+[x = lambert_w(a)]$
 
 solve(56 * %e^(x) * x - a,x);
 [x='lambert_w(a/56)]$
@@ -1545,7 +1539,7 @@ solve(x * log(x) = a,x);
 ssolve(exp(x) = exp(x^2-1),x);
 [x=-((sqrt(5-8*%i*%pi*%z0)-1)/2),x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
 
-ssolve(exp(x) - exp(x^2-1),x);
+solve(exp(x) - exp(x^2-1),x);
 [x=-((sqrt(5-8*%i*%pi*%z0)-1)/2),x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
 
 solve(x = sqrt(x) -1/4,x);
@@ -1588,7 +1582,7 @@ block([algebraic : true], solve(x^(3/2) = (-1 - %i) / sqrt(2),x));
 [x=%i/2-sqrt(3)/2,x=-%i]$
 
 block([algebraic : true], solve(x^(3/2) = - 1,x));
-[x=-(sqrt(3)*%i)/2-1/2,x=(sqrt(3)*%i)/2-1/2]$
+[x=-(sqrt(3)*%i+1)/2,x=(sqrt(3)*%i-1)/2]$
 
 block([algebraic : true], solve(x^(3/2) = 1,x));
 [x=1]$
@@ -1652,7 +1646,7 @@ solve(acos(x)=1/5,x);
 solve(taylor(cos(x),x,0,4),x);
 [x=sqrt(sqrt(6)+3)-sqrt(3-sqrt(6)),x=-sqrt(sqrt(6)+3)-sqrt(3-sqrt(6)),x=sqrt(sqrt(6)+3)+sqrt(3-sqrt(6)),x=sqrt(3-sqrt(6))-sqrt(sqrt(6)+3)]$
 
-solve(taylor(sin(x),x,0,4),x);
+ssolve(taylor(sin(x),x,0,4),x);
 [x=0,x=sqrt(6),x=-sqrt(6)]$
 
 solve(abs(x) = 0,x);
@@ -1743,7 +1737,7 @@ solve([sqrt(x-y) = 2, sqrt(x+y) = 5],[x,y]);
 
 /* problem from sage mailing list circa 2009-05-18 */
 
-ssolve (Q*sqrt(Q^2 + 2) - 1, Q);
+solve (Q*sqrt(Q^2 + 2) - 1, Q);
 [Q=(-sqrt(2)-1)*sqrt(1-sqrt(2)),Q=(sqrt(2)-1)*sqrt(sqrt(2)+1)]$
 
 /* source code comment in /solver/linsolve.mac */
@@ -1792,10 +1786,10 @@ solve(x * log(x) * (x-1),x);
 /* Sage Ticket 2617; see also Sage mailing list 18 March 2008 */
 
 block([assume_notequal : true], ssolve(sin(x^2)/x,x));
-[x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
+[x=sqrt(2)*sqrt(%pi)*sqrt(%z0),x=sqrt(2*%pi*%z1+%pi)]$
 
 block([assume_notequal : true], ssolve(sin(x^2)/x^2,x));
-[x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
+[x=-sqrt(%pi)*sqrt(%z1), x=sqrt(%pi)*sqrt(%z0)]$
 
 block([assume_notequal : true], ssolve(sin(x^2)/x^3,x));
 [x=sqrt(2)*sqrt(%pi)*sqrt(%z0),x=sqrt(2*%pi*%z1+%pi)]$
@@ -1820,8 +1814,8 @@ are other equations in this thread that the solve cannot do:
 ssolve([a=3+x,b=1-x,x=2],[x]);
 []$
 
-block([solve_ignores_conditions : true], solve( tan(a)=b,a));
-[a=atan(b)+%pi*%z2]$
+block([solve_ignores_conditions : true], ssolve( tan(a)=b,a));
+[a=atan(b)+%pi*%z0]$
 
 /* --------------------------- FIX ME SOON
 ssolve(sin(x) = sin(x - p[0]),x);
@@ -1877,9 +1871,8 @@ ssolve(2013*sin(x)*cos(x),x);
 ssolve(2013*sin(x)*cos(x)*sin(sqrt(5)*x),x);
 [x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1,x=(2*%pi*%z2)/sqrt(5)]$
 
-/* maybe this should be %union([x=-sqrt(%pi)*sqrt(%z0)],[x=sqrt(%pi)*sqrt(%z1)]) ... */
 ssolve(sin(x^2),x);
-[x=sqrt(2)*sqrt(%pi)*sqrt(%z0),x=sqrt(2*%pi*%z1+%pi)]$
+[x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
 
 ssolve(abs(x+7)*sin(x),x);
 [x=-7,x=%pi*%z0]$
@@ -1887,7 +1880,7 @@ ssolve(abs(x+7)*sin(x),x);
 ssolve(abs(x+7)*sin(x)*cos(x),x);
 [x=-7,x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1]$
 
-block([solve_ignores_conditions : true], solve(tan(x)=tan(zzz),x));
+block([solve_ignores_conditions : true], ssolve(tan(x)=tan(zzz),x));
 [x=atan(tan(zzz))+%pi*%z2]$
 
 ssolve(tan(x)=tan(%pi/4),x);
@@ -1935,7 +1928,7 @@ solve(eqns,[A,B,C,D,E,F]);
 /* #3312 solve does not identify multiplicities correctly */
 
 solve(subst(x= (-27/4)^(1/7), y^3 + x^3*y +x),y);
-[y=-(4^(2/7)*27^(5/7))/18,y=(4^(2/7)*27^(5/7))/9]$
+[y=-((4^(2/7)*27^(5/7))/18),y=(4^(2/7)*27^(5/7))/9]$
 
 multiplicities;
 [2,1]$
@@ -2119,7 +2112,7 @@ solve(sqrt(x^2/2+1/2) = 1);
 
 /* #3042 linsolve() incorrectly solves underdetermined linear system with symbolic coefficients */
 block([linsolve_params : true, %rnum : 0], linsolve([-((%i*(y+x)*f1*w)/(f*r)),((f*(y*l^2+y*l-4*z-2*y))/(r^3))]/f*r^3,[x,y,z]));
-[x=%r1,y=-%r1,z=-(%r1*(l^2+l-2))/4]$
+[x=-%r0,z=(%r0*l^2+%r0*l-2*%r0)/4,y=%r0]$
 
 /* #3030 solve entering endless loop on a kind of simple task */
 
@@ -2246,8 +2239,8 @@ nicedummies(solve(unit_step(x)=unit_step(a),x));
 [x=a]$
 */
 
-ssolve([2*x-3*y = 3,2*y-3*x = -4]);
-[[y = -1/5,x = 6/5]]$
+solve([2*x-3*y = 3,2*y-3*x = -4]);
+[[x=6/5,y=-(1/5)]]$
 
 /* From rtest15 */
 eigenvalues(matrix(
@@ -2368,10 +2361,10 @@ ode2('diff(x,t,2)+5*('diff(x,t,1))^3,x,t);
 [x=%k2-(sqrt(10)*sqrt(t+%k1))/5,x=(sqrt(10)*sqrt(t+%k1))/5+%k2]$
 
 algsys([x^4+1],[x]);
-[[x=(-1)^(1/4)],[x=(-(-1)^(1/4))*%i],[x=-(-1)^(1/4)],[x=sqrt(-%i)]]$
+[[x=(-1)^(1/4)],[x=-(-1)^(1/4)],[x=sqrt(-%i)],[x=-sqrt(-%i)]]$
 
-solve(x^6-1);
-[x=1/2-(sqrt(3)*%i)/2,x=-(sqrt(3)*%i)/2-1/2,x=-1,x=(sqrt(3)*%i)/2-1/2,x=(sqrt(3)*%i)/2+1/2,x=1]$
+ssolve(x^6-1);
+[x=(sqrt(3)*%i+1)/2,x=(sqrt(3)*%i-1)/2,x=-1,x=-(sqrt(3)*%i+1)/2,x=-(sqrt(3)*%i-1)/2,x=1]$
 
 ssolve(x^2-1,x);
 [x=-1,x=1]$
@@ -2392,7 +2385,7 @@ integrate(1/(x^4+3*x^2+1)^2,x,0,inf);
 (sqrt(3-sqrt(5))*(3*sqrt(2)*sqrt(5)+15*sqrt(2))*%pi+sqrt(sqrt(5)+3)*(15*sqrt(2)-3*sqrt(2)*sqrt(5))*%pi)/400$
 
 integrate(log(1+7/x^2),x,1,inf);
-(14*atan(sqrt(7))-sqrt(7)*log(8))/sqrt(7)$
+2*sqrt(7)*atan(sqrt(7))-log(8)$
 
 algsys(eqs:[y^2+x^2-(400-400/(2/q+1))^2=0,(-y-400/(2/q+1)+400)^2+x^2+(-640000)/(2/q+1)^2=0],[x,y]);
 [[x=-400*q*sqrt(-(q-2)/(q+2)),y=-(400*q^2-800)/(q+2)],[x=400*q*sqrt(-(q-2)/(q+2)),y=-(400*q^2-800)/(q+2)]]$
@@ -2411,26 +2404,15 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
  [x =   (25*2^(9/2))/3^(1/4),  y = 800/sqrt(3)]];
 
  algsys([v^2-2*v+u^2+10*u+1,v^2-10*v+u^2+2*u+1],[v,u]);
- [[v = -((sqrt(34)-6)/2), u =   (sqrt(2)*sqrt(17)-6)/2],
-  [v =   (sqrt(34)+6)/2,  u = -((sqrt(2)*sqrt(17)+6)/2)]];
+ [[v=-(sqrt(34)-6)/2,u=(sqrt(34)-6)/2],[v=(sqrt(34)+6)/2,u=-(sqrt(34)+6)/2]]$
 
   algsys([2*v^2-12*v+1,v^2-2*v+u^2+10*u+1],[v,u]);
+[[v=-(sqrt(34)-6)/2,u=-(sqrt(34)+14)/2],[v=(sqrt(34)+6)/2,u=(sqrt(34)-14)/2],[v=(sqrt(34)+6)/2,u=-(sqrt(34)+6)/2],[v=-(sqrt(34)-6)/2,u=(sqrt(34)-6)/2]]$
 
-  [[v = -((sqrt(2)*sqrt(17)-6)/2), u = -((sqrt(34)+14)/2)],
-   [v =   (sqrt(2)*sqrt(17)+6)/2,  u =   (sqrt(34)-14)/2],
-   [v =   (sqrt(2)*sqrt(17)+6)/2,  u = -((sqrt(34)+6)/2)],
-   [v = -((sqrt(2)*sqrt(17)-6)/2), u =   (sqrt(34)-6)/2]];
 
 
    algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
-   [[x =  sqrt(2)*%i,         y =   (sqrt(5)-1)/2,  z = -((sqrt(5)+1)/2)],
-    [x =  sqrt(2)*%i,         y = -((sqrt(5)+1)/2), z =   (sqrt(5)-1)/2],
-    [x = -sqrt(2)*%i,         y =   (sqrt(5)-1)/2,  z = -((sqrt(5)+1)/2)],
-    [x = -sqrt(2)*%i,         y = -((sqrt(5)+1)/2), z =   (sqrt(5)-1)/2],
-    [x =  sqrt((-sqrt(5))-2), y = -((sqrt(5)+1)/2), z = -((sqrt(5)+1)/2)],
-    [x = -sqrt((-sqrt(5))-2), y = -((sqrt(5)+1)/2), z = -((sqrt(5)+1)/2)],
-    [x =  sqrt(sqrt(5)-2),    y =   (sqrt(5)-1)/2,  z =   (sqrt(5)-1)/2],
-    [x = -sqrt(sqrt(5)-2),    y =   (sqrt(5)-1)/2,  z =   (sqrt(5)-1)/2]];
+[[x=sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2]]$
 
     eqs:[y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0];
     [y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0];
@@ -2455,12 +2437,8 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
     (assume(h<0),0);
     0;
     s:algsys(eqs,[x,y,z]);
-    [[x = -((%i*sqrt(-h))/sqrt(g)),
-      y = -((%i*sqrt(-h))/sqrt(g)),
-      z = -((sqrt(-h)*(%i*h-%i*g))/(sqrt(g)*h))],
-     [x = (%i*sqrt(-h))/sqrt(g),
-      y = (%i*sqrt(-h))/sqrt(g),
-      z = (sqrt(-h)*(%i*h-%i*g))/(sqrt(g)*h)]];
+    [[x=(sqrt(-g)*sqrt(-h))/g,y=(sqrt(-g)*sqrt(-h))/g,z=(sqrt(-g)*sqrt(-h)*(h-g))/(g*h)],[x=-(sqrt(-g)*sqrt(-h))/g,y=-(sqrt(-g)*sqrt(-h))/g,z=-(sqrt(-g)*sqrt(-h)*(h-g))/(g*h)]]$
+
     ratsimp(subst(s[1],eqs));
     [0=0, 0=0, 0=0];
     ratsimp(subst(s[2],eqs));
@@ -2480,7 +2458,7 @@ block([cntx : supcontext()], unwind_protect((assume(a > 0), solve(abs(x) = a,x))
 solve(6*x^2 = 28,x^2);
 [x^2=14/3]$
 
-solve(6*x^2 = 28/x^2,x^2);
+ssolve(6*x^2 = 28/x^2,x^2);
 [x^2=-sqrt(42)/3,x^2=sqrt(42)/3]$
 
 solve([6*x^2 = 28/x^2],[x^2,x^2]);
@@ -2494,14 +2472,6 @@ block([%rnum : 0], solve([x+y=1, x^2+y^2 = 1],[x,y]));
 
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
-
-/* See SF bug #3378 Epic 5.41 polynomial arithmetic bug. */
-solve(x*(x + 1)*(x + 2)*(x + 3) - 2^(1/2),x);
-[x=-(sqrt((sqrt(9-2^(9/2))+5)/2)+sqrt(-(sqrt(9-2^(9/2))-5)/2))/2-3/2,
-x=(sqrt((sqrt(9-2^(9/2))+5)/2)-sqrt(-(sqrt(9-2^(9/2))-5)/2))/2-3/2,
-x=-(sqrt((sqrt(9-2^(9/2))+5)/2)-sqrt(-(sqrt(9-2^(9/2))-5)/2))/2-3/2,
-x=(sqrt((sqrt(9-2^(9/2))+5)/2)+sqrt(-(sqrt(9-2^(9/2))-5)/2))/2-3/2]$
-
 
 (kill(ssolve), remvalue(thyme), reset(),0);
 0$
