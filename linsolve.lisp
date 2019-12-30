@@ -84,8 +84,8 @@
        (cond ((null eqs) ; no more equations
               (cond ((and vars $linsolve_params) ; parametrize free variables
                       (append
-												(reverse (mapcar #'(lambda (s) (take '(mequal) s (next-rnum-variable))) vars))
-												subs))
+												subs
+												(mapcar #'(lambda (s) (take '(mequal) s (next-rnum-variable))) vars)))
                      (t
                        subs))) ;no more equations, no more unknowns!
 
