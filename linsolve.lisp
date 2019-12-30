@@ -4,6 +4,14 @@
 ;;;; This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 ;;;; https://creativecommons.org/licenses/by-sa/4.0/
 
+
+;;; Allow %rnum to only be set to a nonnegative integer.
+(defun nonnegative-integer-assign (a b) "merror when b isn't a nonnegative integer"
+	(when (or (not (integerp b)) (< b 0))
+        (merror "The value of ~M must be a nonnegative integer, not ~M ~%" a b)))
+
+(setf (get '$%rnum 'assign) #'nonnegative-integer-assign)
+
 ;;; Standard $linsolve bypasses $solve and calls solvex. That requires $linsolve/solvex to duplicate
 ;;; some of the features of $solve (argument checking and non-atom solve, for example). Instead, let's
 ;;; route linsolve through $solve. Not sure why, but standard $linsolve sets $ratfac to nil.
@@ -16,17 +24,14 @@
 
 ;;; This code needs to support globalsolve & programmode.
 
-(defmvar $%rnum -1)
 (defun $linsolve (e x) "Solve list of linear equations e for the list of unknowns x."
      ;(mtell "Top of my linsolve ~%")
-     (setq $%rnum_list (mfuncall '$reset $%rnum_list))
-     (setq $%rnum -1)
+     (mfuncall '$reset $%rnum_list) ; reset %rnum_list to default.
      (let ((mat) (sol nil) (g) (xx nil) (nonatom-subs nil) ($scalarmatrixp nil))
-
 		 	    ;; Remove '(mlist), ratdisrep, and remove duplicates in list of unknowns.
           ;; We don't want x & rat(x) to be distinct variables, so we ratdisrep.
           (setq x (remove-duplicates (mapcar #'$ratdisrep (cdr x)) :test #'alike1 :from-end t))
-				  (dolist (z x) ; substitute gensyms for nonmaptoms & ratdisrep all unknowns
+				  (dolist (z x) ; substitute gensyms for nonmaptoms--collect these subs in a llist nonatom-subs
 					   (cond (($mapatom z)
                       (push z xx))
                    (t
@@ -37,22 +42,27 @@
 							      	(push g nonatom-subs))))
 					(setq x (cons '(mlist) (reverse xx)))
 
+          ;; check that equations are all linear (affine) in the variables x.
+          (when (some #'(lambda (q) (not ($affine_p (meqhk q) x))) (cdr e))
+             (merror (intl:gettext "Linsolve: equations must be linear")))
+
+          ;; construct a triangularized list of equations:
 				  (setq mat ($triangularize ($augcoefmatrix e x)))
-          ;; sol is now a CL list of triangularized equations
 		      (setq sol (take '(mnctimes) mat ($transpose ($append x (take '(mlist) 1)))))
 					(setq sol (reverse (mapcan #'cdr (cdr sol))))
           (setq x (reverse (cdr x)))
+
+          ;; solve the triangular system and revert the notatom subsitutions
           (setq sol (solve-triangular-linear-system sol x nil $linsolve_params $backsubst))
           (setq sol (simplifya (cons '(mlist) sol) t))
-          (dolist (sx nonatom-subs) ; revert nonatom subsitutions
+          (dolist (sx nonatom-subs)
              (setq sol ($substitute ($reverse sx) sol)))
           sol))
 
 (defun next-rnum-variable () "Increment %rnum, create new %rnum variable, push into %rnum_list, and
   return next %rnum variable"
-    (let ((g))
+    (let ((g ($concat '$%r $%rnum)))
       (incf $%rnum)
-      (setq g ($concat '$%r $%rnum))
       (setq $%rnum_list ($cons g $%rnum_list))
       g))
 
