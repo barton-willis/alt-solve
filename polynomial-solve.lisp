@@ -195,6 +195,7 @@
 ;;; integrate(integrate(sqrt(4*x^2-y^2),x,y,1),y,0,1);
 
 (defun solve-poly-x^n+b (p x &optional (mx 1)) "Solve a x^n + b = 0 for x."
+
 	(let ((a) (b) (sol nil) (n) (k 0) ($algebraic t) ($domain '$complex))
 		 (setq p ($expand p))
 		 (setq n ($hipow p x))
@@ -203,19 +204,20 @@
 			 (setq b (try-to-crunch-to-zero (mul -1 (sub p (mul a (power x n))))))
 
 			 (when ($freeof x b)
+			   (mtell "doing solve-poly-x^n+b; p = ~M  ~%" p)
 				 (setq $multiplicities nil)
 				 (cond ((zerop1 b) ;solve x^n=0
-						(push (take '(mequal) x 0) sol)
-						(push (mul mx n) $multiplicities))
+				    		(push (take '(mequal) x 0) sol)
+					    	(push (mul mx n) $multiplicities))
 
 				       (t
-						(setq b (simpnrt (try-to-crunch-to-zero (div b a)) n))
-						(while (< k n)
-							   (push (take '(mequal) x (mul b (power '$%e (div (mul 2 '$%pi '$%i k) n)))) sol)
-							   (push mx $multiplicities)
-							   (incf k))))
-				 (push '(mlist) $multiplicities)
-				 (setq $multiplicities (simplifya $multiplicities t))))
+				     		(setq b (simpnrt (try-to-crunch-to-zero (div b a)) n))
+					     	(while (< k n)
+						  	   (push (take '(mequal) x (mul b (power '$%e (div (mul 2 '$%pi '$%i k) n)))) sol)
+							     (push mx $multiplicities)
+							     (incf k))))
+				           (push '(mlist) $multiplicities)
+			          	 (setq $multiplicities (simplifya $multiplicities t))))
 	      sol))
 
 ;;; Solve e=0 for x, where e is a polynomial in x. The optional variable mx gives the multiplicity so far. To solve,
