@@ -208,7 +208,7 @@
 		  (list '%cos #'(lambda (q) (list (take '(%acos) q))))
 		  (list '%tan #'(lambda (q) (list (take '(%atan) q))))
 
-	      (list '%csc #'(lambda (q) (if (zerop1 q) (list) (list (take '(%acsc) q)))))
+	    (list '%csc #'(lambda (q) (if (zerop1 q) (list) (list (take '(%acsc) q)))))
 		  (list '%sec #'(lambda (q) (if (zerop1 q) (list) (list (take '(%asec) q)))))
 		  (list '%cot #'(lambda (q) (if (zerop1 q) (list ) (list (take '(%acot) q)))))
 
@@ -219,25 +219,25 @@
 								(cond ((zerop1 q) (list))
 									(t (list (take '(%cot) q))))))
 
-	      (list '%acsc #'(lambda (q) (list (take '(%csc) q))))
+	    (list '%acsc #'(lambda (q) (list (take '(%csc) q))))
 		  (list '%asec #'(lambda (q) (list (take '(%sec) q))))
 		  ;(list '%acot #'(lambda (q) (list (take '(%cot) q))))
 
     	  (list '%sinh #'(lambda (q) (list (take '(%asinh) q))))
     	  (list '%cosh #'(lambda (q) (list (take '(%acosh) q))))
- 		  (list '%tanh #'(lambda (q) (list (take '(%atanh) q))))
+ 		    (list '%tanh #'(lambda (q) (list (take '(%atanh) q))))
 
-	 	  (list '%csch #'(lambda (q) (list (take '(%acsch) q))))
+	 	    (list '%csch #'(lambda (q) (list (take '(%acsch) q))))
     	  (list '%sech #'(lambda (q) (list (take '(%asech) q))))
- 		  (list '%coth #'(lambda (q) (list (take '(%acoth) q))))
+ 		    (list '%coth #'(lambda (q) (list (take '(%acoth) q))))
 
 		  ;; not sure about all these....
  	      (list '%asinh #'(lambda (q) (list (take '(%sinh) q))))
     	  (list '%acosh #'(lambda (q) (list (take '(%cosh) q))))
- 		  (list '%atanh #'(lambda (q) (list (take '(%tanh) q))))
+ 		    (list '%atanh #'(lambda (q) (list (take '(%tanh) q))))
 
 	 	  (list '%acsch #'(lambda (q) (list (take '(%csch) q))))
-    	  (list '%asech #'(lambda (q) (list (take '(%sech) q))))
+    	(list '%asech #'(lambda (q) (list (take '(%sech) q))))
  		  (list '%acoth #'(lambda (q) (list (take '(%coth) q))))
 
 		  (list '%log  #'(lambda (q) (list (take '(mexpt) '$%e q))))

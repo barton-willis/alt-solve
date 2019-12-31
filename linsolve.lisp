@@ -83,7 +83,7 @@
      ;(displa `((mequal) vars ,(cons '(mlist) vars)))
      (let ((e) ($listconstvars nil) (solx) (x) (svars) (pending-subs nil))
        (cond ((null eqs) ; no more equations
-              (cond ((and vars $linsolve_params) ; parametrize free variables
+              (cond ((and vars parametrize-free-vars) ; parametrize free variables
                       (append
 												subs
 												(mapcar #'(lambda (s) (take '(mequal) s (next-rnum-variable))) vars)))
