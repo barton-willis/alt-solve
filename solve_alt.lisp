@@ -499,7 +499,7 @@
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
 		 (setq q (let ((errcatch t) ($errormsg nil)) (ignore-errors ($to_poly e (list '(mlist) x)))))
 
-		 ;;(mtell "doing to poly solve")
+		 (mtell "doing to poly solve ~%")
 
 		 (when (and q (< ($length ($third q)) 2))
 			 (setq checked-sol (list '(mlist)))
