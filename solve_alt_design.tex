@@ -4,11 +4,12 @@
 \usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
 \microtypecontext{spacing=nonfrench}
 \usepackage[american]{babel}
-\usepackage{fourier}
+\usepackage{mathptmx}
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{upgreek}
-\newlist{alphalist}{enumerate}{3}
+
+\newlist{alphalist}{enumerate}{5}
 \setlist[alphalist]{label=\alph*),before=\raggedright}
 
 \newcommand{\altsolve}{\texttt{solve\_alt}}
@@ -24,14 +25,13 @@
 \author{Barton Willis}
 \begin{document}
 
-
 \maketitle
 
 \section{Aims}
 
 The \altsolve\/ package aims to be a replacement for Maxima's solve function. The goals are
 
-\begin{alphalist}[noitemsep]
+\begin{alphalist}[]
 
 \item to support the needs for a variety users, including high school students, university students, mathematicians, engineers, statisticians, and scientists,
 
@@ -45,7 +45,7 @@ The \altsolve\/ package aims to be a replacement for Maxima's solve function. Th
 \end{alphalist}
 Additionally, \altsolve\/  aims to be compatible with Maxima's current solve function; by compatible, we require:
 
-\begin{alphalist}[noitemsep]
+\begin{alphalist}[]
 
 \item  Solutions are expressed as Maxima lists with solutions that invovle objects that Maxima understands.
 
@@ -57,7 +57,7 @@ all combinations of the primary option variables that effect functioning of \alt
 \item The code compiles with no errors and few warnings and runs under all supported Common Lisp versions that are supported by Maxima.
 \end{alphalist}
 We do \emph{not} aim
-\begin{alphalist}[noitemsep]
+\begin{alphalist}[]
 
 \item to solve inequalities, Diophantine equations, differential equations, recursion relations, or to dispatch numerical methods (the Newton method, for example),
 
@@ -216,7 +216,7 @@ It can, of course, happen that the simplification after conversion back to float
 \section{Solve function hierarchy}
 
  The top level function solve function:
- \begin{alphalist}[noitemsep]
+ \begin{alphalist}[]
    \item resets multiplicities to its default value,
    \item expunges constant variables and duplicates from the list of variables,
    \item checks for inequalities and signals an error when found,
@@ -244,7 +244,7 @@ variable \solveinversepackage\/ is the value of the current hashtable for the fu
 
 The zeros of polynomials of degree four or less are expressed in terms of radicals. Also  cyclotomic polynomials of degree six are solved in terms of radicals, as well as polynomial of degree five or greater that decompose into polynomials of degree four or less. \emph{Well there option variable solvedecomp controls using polynomial decomposition, but I think this option could be removed.}
 
-\begin{alphalist}[noitemsep]
+\begin{alphalist}[]
 
 \item  Polynomial coefficients that are not simplified to zero by the  general simplifier are assumed to be nonzero. Even if an atom has been declared to be zero, the general simplifier does not simplify  it to zero. Thus even if the atom \(a\) has been declared to be zero, the solution to \(a x = b\) is \(x = -b/a \).
 
