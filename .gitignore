@@ -29,3 +29,4 @@
 *.cb
 *.cb2
 .*.lb
+*.fbd_latexmk
