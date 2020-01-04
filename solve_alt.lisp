@@ -417,6 +417,7 @@
 		(setq e (sub e (mul x ($ratcoef e x)))))
 	(zerop1 ($ratdisrep e)))
 
+
 ;;; Try to find a kernel blob1^blob2 in ee such that ee is a function of constants (thing free of x)
 ;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
 
@@ -424,7 +425,7 @@
 
 	;;(declare (ignore m use-trigsolve)) ;likely this code should make use of m & use-tringsolve
 
-	;;(mtell "top of solve-mexpt-equation ~M ~M ~M ~M ~%" ee x m use-trigsolve)
+	(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
@@ -468,7 +469,7 @@
 
 			 	((and (eql 2 (length nvars)) ($freeof x (first e)) (homogeneous-linear-poly-p (first e) nvars))
 				 (let ((k1) (a) (k2) (b) (xx) (yy))
-					  ;;(mtell "doing new mexpt solver ~%")
+					  (mtell "doing new mexpt solver ~%")
 					  (setq e (first e))
 					  (setq k1 ($ratcoef e (first nvars)))
 					  (setq a (second (first kernels)))
@@ -658,7 +659,7 @@
 
 
 
-""(defun solvex (eql varl ind flag &aux ($algebraic $algebraic))
+(defun solvex (eql varl ind flag &aux ($algebraic $algebraic))
 
   (declare (special xa*))
 	  (mtell "top of old solvex ~%")
@@ -803,10 +804,10 @@
 ;; of the form <var>=<function of independent variables>, and *failures
 ;; contains equations which if solved would yield additional solutions.
 
-(defvar *list-of-equations* nil)
+(defvar $list_of_equations nil)
 (defun solve (e x ms)
   ;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
-	(push (list e x) *list-of-equations*) ; debugging-like thing
+	(push (list e x) $list_of_equations) ; debugging-like thing
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
 				($solve_ignores_conditions t)
