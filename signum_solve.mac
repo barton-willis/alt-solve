@@ -11,16 +11,16 @@ is_x(e) := if logical_p(e) then map('is, e) else is(e)$
 
 simp_cond(pred, a, b) := block([prederror : false, p : is_x(pred)],
    if p = true then a else if p = false then b else simpfuncall('cond,pred,a,b));
-   
+
 simplifying('cond, 'simp_cond);
 
 /* is e an inequation? */
 inequation_p(e) := not mapatom(e) and member(inpart(e,0),["=", "<", ">", "<=", ">=", "#"]);
 
 /* Resimplify an expression e using the current fact database and option variable settings. */
-resimplify(e) := expand(e,0,0); 
+resimplify(e) := expand(e,0,0);
 
-/* Convert signum, unit_step, and abs functions to a cond form. The conversion is supressed when 
+/* Convert signum, unit_step, and abs functions to a cond form. The conversion is suppressed when 
    the predicate is free of the members of the list X.*/
 
 convert_to_cond(e,X) := block([],
@@ -40,17 +40,17 @@ equation_convert(e,X) := block([ee, L, eqs : set(),cntx],
    for cnds in L do (
       unwind_protect(
         (cntx : newcontext(),
-        if not (member('inconsistent, apply('assume, listify(cnds)))) then (   
+        if not (member('inconsistent, apply('assume, listify(cnds)))) then (
           ee : resimplify(e),
           eqs : adjoin([xreduce("%and",cnds), ee], eqs))),
         killcontext(cntx))),
     eqs);
-    
+
 filter_solution(cnd, sol) := block([s, acc : %union()],
   for s in sol do (
     acc : %union(acc, cond(simp_inequality(subst(s, cnd)), s, %union()))),
- acc);   
- 
+ acc);
+
  /* Attempt to solve an equation or list of equations e for the variables in the list X.
    The equations can involve the abs, unit_step, and signum function. */
 
