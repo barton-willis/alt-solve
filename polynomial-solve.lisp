@@ -119,7 +119,7 @@
 			  (setq m (mapcar #'third (cdr m))) ;remove '(mlist) and extract $rhs
 			  ;; remove members that are explicitly zero and sort according to my-size.
 			  (setq m (sort (remove-if #'zerop1 m) #'(lambda(a b) (< (my-size a) (my-size b)))))
-			  (setq m (car m)) ;set m to the "simpliest" member of m
+			  (setq m (car m)) ;set m to the "simplest" member of m
 			  (setq x m)
 			  (setq mm (simpnrt (mul 2 m) 2))
 			  (multiple-value-bind (sol1 ms1)
