@@ -531,7 +531,7 @@
 	      	(setq e ($substitute subs e))
       		(setq base (second ($substitute (mfuncall '$map '$reverse subs) g)))
 	      	(when ($freeof x e)
-		         (setq sol (polynomial-solve e g m))
+		         (setq sol (solve-single-equation e g m))
 			       (setq sol ($substitute ($reverse ($first subs)) sol))
 		      	 (setq fn (gethash 'exponential-inverse $solve_inverse_package))
              (setq sol (mapcan #'(lambda (q) (funcall fn ($rhs q) base)) (cdr sol)))
