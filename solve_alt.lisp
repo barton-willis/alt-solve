@@ -6,6 +6,9 @@
 
 (in-package :maxima)
 
+(defmacro $show (e)
+   (displa `((mequal) e ,e)))
+
 ;;; Unrelated to solving equations...
 (dolist (e (list '$max '%acosh '%cos '%cosh '%lambert_w '%log '%sin '%sinh 'mabs 'rat))
 	(setf (get e 'msimpind) (list e 'simp)))
@@ -514,7 +517,7 @@
 		    (sol nil) (fn) (base))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
 		 (labels ((get-power (f g x) ($radcan (div (mul ($diff f x) g) (mul f ($diff g x))))))
-		   (when pterms
+		   (when (and pterms (rest pterms)) ;we need at least two exponential terms.
 				 (setq f (first pterms))
 		     (setq p-list (mapcar #'(lambda (g) (get-power g f x)) pterms))
 				 (cond ((every #'$ratnump p-list)
