@@ -8,7 +8,7 @@
 (defmvar *solve-factors-biquadratic* t)
 
 ;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
-;;; cuts (don't use radcan).
+;;; cuts (don't use radcan, for example).
 (defun try-to-crunch-to-zero (e) "Ratsimp with algebraic = true and domain = complex."
 	(let (($algebraic t) ($domain '$complex)) (sratsimp e))) ; was (fullratsimp e)))
 
@@ -20,7 +20,7 @@
 ;;; multiplicities. The function simpnrt makes some effort to find even power factors.
 
 ;;; We don't special case b = 0; arguably x = +/- sqrt(-c a)/a is simpler than is
-;;; x = +/- sqrt(c/a); additionally when I tried it, the testsuite had lots of problems.
+;;; x = +/- sqrt(c/a); additionally when I tried special casing b = 0, the testsuite had lots of problems.
 (defun my-solve-quadratic (x a b c) "Return solutions and multiplicities of ax^2+bx+c=0."
 	(let ((d (sub (mul b b) (mul 4 a c))))
 		 (setq d (try-to-crunch-to-zero d))
@@ -75,7 +75,7 @@
 ;;; the list of the multiplicities.
 (defun my-solve-biquadratic (x p4 p2 p0) "Solve the biquadratic p4 x^4 + p2 x^2 + p0 = 0."
 	(multiple-value-bind (sol m) (my-solve-quadratic x p4 p2 p0)
-		(setq sol (mapcar #'third sol))
+		(setq sol (mapcar #'third sol)) ; remove x = part of solutions
 		(setq sol (mapcan #'(lambda (q) (setq q (simpnrt q 2)) (list (mul -1 q) q)) sol))
 		(setq sol (mapcar #'(lambda (q) (take '(mequal) x q)) sol))
 		(setq m (mapcan #'(lambda (q) (list q q)) m))
@@ -192,10 +192,7 @@
 ;;; polynomials need to be solved by my-solve-linear & friends. That might allow equations to be represented
 ;;; in a less surprising way.
 
-;;; integrate(integrate(sqrt(4*x^2-y^2),x,y,1),y,0,1);
-
 (defun solve-poly-x^n+b (p x &optional (mx 1)) "Solve a x^n + b = 0 for x."
-
 	(let ((a) (b) (sol nil) (n) (k 0) ($algebraic t) ($domain '$complex))
 		 (setq p ($expand p))
 		 (setq n ($hipow p x))
@@ -220,8 +217,8 @@
 			          	 (setq $multiplicities (simplifya $multiplicities t))))
 	      sol))
 
-;;; Solve e=0 for x, where e is a polynomial in x. The optional variable mx gives the multiplicity so far. To solve,
-;;; for example, (x^2+x+1)^3, the variable mx would be 3 and the polynomial x^2+x+1.
+;;; Solve e=0 for x, where e is a polynomial in x. The optional variable mx gives the multiplicity so far.
+;;; To solve, for example, (x^2+x+1)^3, the variable mx would be 3 and the polynomial x^2+x+1.
 
 ;;; This function doesn't check that the input e is a polynomial.
 
