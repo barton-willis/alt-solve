@@ -311,6 +311,8 @@
 
 			((solve-mexpt-equation e x m use-trigsolve))
 
+			((solve-mexpt-equation-extra e x m use-trigsolve))
+
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
 
@@ -495,6 +497,46 @@
 												(mul -1 (car (funcall inverse-function -1 '$%e)))) x)))))))
 
 		 sol))
+;;; experimental code for solving equations of the form Polynomial(a^x) = 0.
+(defun gather-expt-terms (e x) "Gather terms in e that have the form a^x or products of such terms"
+	   (labels ((expt-match (q z) (and (mexptp q) ($freeof z (second q)) (not ($freeof z (third q))))))
+	     (cond (($mapatom e) nil)
+	 	    	((or (expt-match e x)
+	 					   (and (mtimesp e) (every #'(lambda (s) (or ($freeof x s) (expt-match s x))) (cdr e))))
+	 					(list e))
+	          ((and (consp e) (consp (car e)))
+	 					 (mapcan #'(lambda (s) (gather-expt-terms s x)) (cdr e)))
+	 				 (t nil))))
+
+(defun solve-mexpt-equation-extra (e x m use-trigsolve)
+  (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
+  (let ((pterms (gather-expt-terms e x)) (f) (p-list nil) (d) (g (gensym)) (subs)
+		    (sol nil) (fn) (base))
+	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
+		 (labels ((get-power (f g x) ($radcan (div (mul ($diff f x) g) (mul f ($diff g x))))))
+		   (when pterms
+				 (setq f (first pterms))
+		     (setq p-list (mapcar #'(lambda (g) (get-power g f x)) pterms))
+				 (cond ((every #'$ratnump p-list)
+			 	          (setq d (apply #'lcm (mapcar #'$denom p-list)))
+					        (setq p-list (mapcar #'(lambda (s) (mul d s)) p-list)))
+							 (t (setq p-list nil))))
+
+	      (when p-list
+          (setq subs (mapcar #'(lambda (a b) (take '(mequal) a (power g b))) pterms p-list))
+      		(setq subs (simplifya (cons '(mlist) subs) t))
+	      	(setq e ($substitute subs e))
+      		(setq base (second ($substitute (mfuncall '$map '$reverse subs) g)))
+	      	(when ($freeof x e)
+		         (setq sol (polynomial-solve e g m))
+			       (setq sol ($substitute ($reverse ($first subs)) sol))
+		      	 (setq fn (gethash 'exponential-inverse $solve_inverse_package))
+             (setq sol (mapcan #'(lambda (q) (funcall fn ($rhs q) base)) (cdr sol)))
+		      	 (setq sol (mapcar #'(lambda (q) (take '(mequal) x q)) sol))
+			       (setq sol (simplifya (cons '(mlist) sol) t))))
+		sol)))
+;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defun new-to-poly-solve (e x cnd)
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
