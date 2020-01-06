@@ -6,9 +6,6 @@
 
 (in-package :maxima)
 
-(defmacro $show (e)
-   (displa `((mequal) e ,e)))
-
 ;;; Unrelated to solving equations...
 (dolist (e (list '$max '%acosh '%cos '%cosh '%lambert_w '%log '%sin '%sinh 'mabs 'rat))
 	(setf (get e 'msimpind) (list e 'simp)))
@@ -501,38 +498,59 @@
 
 		 sol))
 ;;; experimental code for solving equations of the form Polynomial(a^x) = 0.
+
+;;; Return a CL list of all the terms in the expression e that have the form a^x, where a is freeof x,
+;;; or a constant times a product of one or  more terms of this form. The local predicate expt-match,
+;;; is true for any constant or any term of the form a^x.
 (defun gather-expt-terms (e x) "Gather terms in e that have the form a^x or products of such terms"
 	   (labels ((expt-match (q z) (and (mexptp q) ($freeof z (second q)) (not ($freeof z (third q))))))
 	     (cond (($mapatom e) nil)
-	 	    	((or (expt-match e x)
-	 					   (and (mtimesp e)
-								    (not ($freeof x e)) ; requre dependence on x
+	    	    	((or (expt-match e x)
+	 					     (and (mtimesp e)
+						 		    (not ($freeof x e)) ; require dependence on x
 							      (every #'(lambda (s) (or ($freeof x s) (expt-match s x))) (cdr e))))
-	 					(list e))
+	 		 			     (list e))
 	          ((and (consp e) (consp (car e)))
-	 					 (mapcan #'(lambda (s) (gather-expt-terms s x)) (cdr e)))
-	 				 (t nil))))
+	 			 		  (mapcan #'(lambda (s) (gather-expt-terms s x)) (cdr e)))
+	 			  	(t nil)))) ; likely the final clause should never happen?
+
+(defun $billy (e x kernel)
+   (let ((f) (g) (p-list) (d) (subs) (consts))
+      (labels ((get-power (f g x)
+               (let ((p ($radcan (div (mul ($diff f x) g) (mul f ($diff g x))))))
+                  (list p ($radcan (div f (take '(mexpt) g p)))))))
+      (setq f (first e))
+      ;;(setq base (second f)) ; f = a^x
+      (displa `((mequal) f ,f))
+      (setq p-list (mapcar #'(lambda (g) (get-power g f x)) e)) ; list of (powers,constants)
+      (setq consts (mapcar #'second p-list)) ;list of constants
+      (setq p-list (mapcar #'first p-list))  ;list of powers
+
+      ;; when every power is rational, multiply it by its lcm; otherwise set p-list to nil.
+      (cond ((every #'$ratnump p-list)
+                 (setq d (apply #'lcm (mapcar #'$denom p-list)))
+                 (setq p-list (mapcar #'(lambda (s) (mul d s)) p-list)))
+              (t (setq p-list nil)))
+
+    (setq subs (mapcar #'(lambda (a b c) (take '(mequal) a (mul c (power kernel b)))) e p-list consts))
+    (simplifya (cons '(mlist) subs) t))))
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
   (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
-  (let ((pterms (gather-expt-terms e x)) (f) (p-list nil) (d) (g (gensym)) (subs)
-		    (sol nil) (fn) (base))
+  (let ((pterms (gather-expt-terms e x)) (f) (p-list nil) (d) (g (gensym)) (subs) (p)
+		    (sol nil) (fn) (base) (cnsts))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
-		 (displa (cons '(mlist) pterms))
-		 (labels ((get-power (f g x) ($radcan (div (mul ($diff f x) g) (mul f ($diff g x))))))
-		   (when (and pterms (rest pterms)) ;we need at least two exponential terms.
-				 (setq f (first pterms))
-		     (setq p-list (mapcar #'(lambda (g) (get-power g f x)) pterms))
-				 (cond ((every #'$ratnump p-list)
-			 	          (setq d (apply #'lcm (mapcar #'$denom p-list)))
-					        (setq p-list (mapcar #'(lambda (s) (mul d s)) p-list)))
-							 (t (setq p-list nil))))
-
-	      (when p-list
-          (setq subs (mapcar #'(lambda (a b) (take '(mequal) a (power g b))) pterms p-list))
-      		(setq subs (simplifya (cons '(mlist) subs) t))
+     (setq subs ($billy pterms x g))
+     (displa `((mequal) subs ,subs))
+	   (when (cdr subs) ; subs is a Maxima list, so when subs is a non-empty Maxima list
 	      	(setq e ($substitute subs e))
-      		(setq base (second ($substitute (mfuncall '$map '$reverse subs) g)))
+          ;; find the base--
+          (setq f ($first subs))
+          (setq p ($hipow ($rhs f) g))
+          (setq f ($lhs f))
+          (setq base (take '(mexpt) '$%e ($radcan (div ($diff f x) f))))
+          (setq base (take '(mexpt) base (div 1 p)))
+
 	      	(when ($freeof x e)
 		         (setq sol (solve-single-equation e g m))
 			       (setq sol ($substitute ($reverse ($first subs)) sol))
@@ -540,9 +558,7 @@
              (setq sol (mapcan #'(lambda (q) (funcall fn ($rhs q) base)) (cdr sol)))
 		      	 (setq sol (mapcar #'(lambda (q) (take '(mequal) x q)) sol))
 			       (setq sol (simplifya (cons '(mlist) sol) t))))
-		sol)))
-;;;;;;;;;;;;;;;;;;;;;;;
-
+		sol))
 
 (defun new-to-poly-solve (e x cnd)
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))

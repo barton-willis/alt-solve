@@ -1,4 +1,4 @@
-/* Definite integration calls solve (not $solve). We include some definite integration to test solve.*/
+/* Definite integration calls solve (not $solve). Thus we include some definite integration to test solve.*/
 
 (reset(), load("unwind_protect"), solve_ignores_conditions : false, realonly : false,
 ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_run_time (), 0);
@@ -436,7 +436,7 @@ algsys([2*v^2-12*v+1,v^2-2*v+u^2+10*u+1],[v,u]);
 algsys([v^2-2*v+u^2+10*u+1,v^2-10*v+u^2+2*u+1],[v,u]);
 [[v=-((sqrt(34)-6)/2),u=(sqrt(34)-6)/2],[v=(sqrt(34)+6)/2,u=-((sqrt(34)+6)/2)]]$
 
-solve(4^x + 2^x + 1/4=0,x);
+ssolve(4^x + 2^x + 1/4=0,x);
 [x=(%i*%pi)/log(2)-1,x=(%i*%pi)/log(2)-1]$
 
 ssolve(exp(4*x) = exp(4),x);
