@@ -4,5 +4,10 @@ ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_r
 
 (ssolve(e,x) := block([sol : nicedummies(solve(e,x))], if listp(sol) then sort(sol) else sol),0);
 
+/* tests for the exponential solver */
+
 ssolve(2^x + 4^x = 6,x);
 [x=(2*%i*%pi*%z0+log(2))/log(2),x=(2*%i*%pi*%z1+log(-3))/log(2)]$
+
+ssolve(%e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2),yx);
+[yx=(2*%i*%pi*%z2+log(%i/sqrt(6)))/log(-4)]$

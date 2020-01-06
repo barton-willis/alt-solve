@@ -505,7 +505,9 @@
 	   (labels ((expt-match (q z) (and (mexptp q) ($freeof z (second q)) (not ($freeof z (third q))))))
 	     (cond (($mapatom e) nil)
 	 	    	((or (expt-match e x)
-	 					   (and (mtimesp e) (every #'(lambda (s) (or ($freeof x s) (expt-match s x))) (cdr e))))
+	 					   (and (mtimesp e)
+								    (not ($freeof x e)) ; requre dependence on x
+							      (every #'(lambda (s) (or ($freeof x s) (expt-match s x))) (cdr e))))
 	 					(list e))
 	          ((and (consp e) (consp (car e)))
 	 					 (mapcan #'(lambda (s) (gather-expt-terms s x)) (cdr e)))
@@ -516,6 +518,7 @@
   (let ((pterms (gather-expt-terms e x)) (f) (p-list nil) (d) (g (gensym)) (subs)
 		    (sol nil) (fn) (base))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
+		 (displa (cons '(mlist) pterms))
 		 (labels ((get-power (f g x) ($radcan (div (mul ($diff f x) g) (mul f ($diff g x))))))
 		   (when (and pterms (rest pterms)) ;we need at least two exponential terms.
 				 (setq f (first pterms))
