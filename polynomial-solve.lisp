@@ -193,10 +193,10 @@
 ;;; in a less surprising way.
 
 (defun solve-poly-x^n+b (p x &optional (mx 1)) "Solve a x^n + b = 0 for x."
-	(let ((a) (b) (sol nil) (n) (k 0) ($algebraic t) ($domain '$complex))
+	(let ((a) (b) (sol nil) (n) (k 0) ($algebraic t) ($domain '$complex) ($m1pbranch t))
 		 (setq p ($expand p))
 		 (setq n ($hipow p x))
-		 (when (> n 4)
+		 (when (> n 2)
 			 (setq a ($coeff p x n))
 			 (setq b (try-to-crunch-to-zero (mul -1 (sub p (mul a (power x n))))))
 
@@ -243,7 +243,7 @@
 ;;; using gfactor allows Maxima to solve this equation.
 
 (defun polynomial-solve (e x &optional (mx 1)) "Solve e=0 for x, where e is a polynomial in x and mx is a multiplicity."
-	(let ((n) (m) (sol) (k 0) (cfs) (xsol) ($domain '$complex) ($algebraic t) (p-multiplicities nil))
+	(let ((ee e) (n) (m) (sol) (k 0) (cfs) (xsol) ($domain '$complex) ($algebraic t) (p-multiplicities nil))
 	   ;; Build up the multiplicities in the CL list p-multiplicities.
 		 ;; Factoring isn't a universal win; for example x^105-1=0. So before we factor, look for equations of the
 		 ;; form ax^n+b with n > 4. We could allow n to be any positive integer, but this causes more testsuite
@@ -295,6 +295,7 @@
 						((> n 4)
 						  (cond
 								($solveexplicit
+									(mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") ee x)
 									(values nil nil))
 								(t
 									(values (list (take '(mequal) 0 q)) (list 1))))))
