@@ -6,7 +6,14 @@
 
 (in-package :maxima)
 
-(defun check-solution (eqs sol)
+;;; Attempt to verify that sol is a solution to the equations eqs. When sol is a solution, return
+;;; 'ok; when the solution is definitely spurious, return 'spurious; otherwise, return 'maybe.
+;;; eqs can be either a list of equations or a single equation.
+
+;;; To verify a solution, we use try-to-crunch-to-zero followed by trigsimp. We could, of course,
+;;; try other methods.
+
+(defun check-solution (eqs sol) "Attempt to verify that sol is a solution to the equations eqs "
    (setq eqs ($substitute sol eqs))
    (setq eqs (if ($listp eqs) (cdr eqs) (list eqs)))
    (setq eqs (mapcar #'(lambda (s) (mfuncall '$trigsimp (try-to-crunch-to-zero (meqhk s)))) eqs))
