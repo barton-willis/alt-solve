@@ -515,7 +515,7 @@
 	 			  	(t nil)))) ; likely the final clause should never happen?
 
 (defun get-algebraic-relations (e x kernel)
-   (let ((f) (g) (p-list) (d) (subs) (consts))
+   (let ((f) (p-list) (d) (subs) (consts))
       (labels ((get-power (f g x)
                (let ((p ($radcan (div (mul ($diff f x) g) (mul f ($diff g x))))))
                   (list p ($radcan (div f (take '(mexpt) g p)))))))
@@ -536,8 +536,7 @@
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
   (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
-  (let ((pterms (gather-expt-terms e x)) (f) (p-list nil) (d) (g (gensym)) (subs) (p)
-		    (sol nil) (fn) (base) (cnsts))
+  (let ((pterms (gather-expt-terms e x)) (f) (g (gensym)) (subs) (p) (sol nil) (fn) (base))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
      (setq subs (get-algebraic-relations pterms x g))
 	   (when (cdr subs) ; subs is a Maxima list, so when subs is a non-empty Maxima list
@@ -550,7 +549,7 @@
           (setq base (take '(mexpt) base (div 1 p)))
 
 	      	(when ($freeof x e)
-		         (setq sol (solve-single-equation e g m))
+		         (setq sol (solve-single-equation e g m use-trigsolve))
 			       (setq sol ($substitute ($reverse ($first subs)) sol))
 		      	 (setq fn (gethash 'exponential-inverse $solve_inverse_package))
              (setq sol (mapcan #'(lambda (q) (funcall fn ($rhs q) base)) (cdr sol)))
