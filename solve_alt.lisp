@@ -26,6 +26,7 @@
 	($load "polynomial-solve.lisp")
 	($load "in-domain.lisp")
 	($load "linsolve.lisp")
+	($load "solve_alt_top_level.lisp")
 	($load "grobner"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
@@ -538,16 +539,20 @@
   (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
   (let ((pterms (gather-expt-terms e x)) (f) (g (gensym)) (subs) (p) (sol nil) (fn) (base))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
+		 (displa (cons '(mlist) pterms))
      (setq subs (get-algebraic-relations pterms x g))
+		 (displa `((mequal) subs ,subs))
 	   (when (cdr subs) ; subs is a Maxima list, so when subs is a non-empty Maxima list
+			    (displa `((mequal) ebefore ,e))
 	      	(setq e ($substitute subs e))
+					(displa `((mequal) eafter ,e))
           ;; find the base--
           (setq f ($first subs))
           (setq p ($hipow ($rhs f) g))
           (setq f ($lhs f))
           (setq base (take '(mexpt) '$%e ($radcan (div ($diff f x) f))))
           (setq base (take '(mexpt) base (div 1 p)))
-
+          (displa `((mequal) base ,base))
 	      	(when ($freeof x e)
 		         (setq sol (solve-single-equation e g m use-trigsolve))
 			       (setq sol ($substitute ($reverse ($first subs)) sol))
