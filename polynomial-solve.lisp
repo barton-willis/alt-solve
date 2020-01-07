@@ -1,3 +1,4 @@
+
 ;;;; Author: Barton Willis
 ;;;; Common Lisp/Maxima code for symbolic solutions of polynomial equations.
 
@@ -6,7 +7,6 @@
 (in-package :maxima)
 
 (defmvar *solve-factors-biquadratic* t)
-
 ;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
 ;;; cuts (don't use radcan, for example).
 (defun try-to-crunch-to-zero (e) "Ratsimp with algebraic = true and domain = complex."

@@ -514,14 +514,13 @@
 	 			 		  (mapcan #'(lambda (s) (gather-expt-terms s x)) (cdr e)))
 	 			  	(t nil)))) ; likely the final clause should never happen?
 
-(defun $billy (e x kernel)
+(defun get-algebraic-relations (e x kernel)
    (let ((f) (g) (p-list) (d) (subs) (consts))
       (labels ((get-power (f g x)
                (let ((p ($radcan (div (mul ($diff f x) g) (mul f ($diff g x))))))
                   (list p ($radcan (div f (take '(mexpt) g p)))))))
       (setq f (first e))
       ;;(setq base (second f)) ; f = a^x
-      (displa `((mequal) f ,f))
       (setq p-list (mapcar #'(lambda (g) (get-power g f x)) e)) ; list of (powers,constants)
       (setq consts (mapcar #'second p-list)) ;list of constants
       (setq p-list (mapcar #'first p-list))  ;list of powers
@@ -540,8 +539,7 @@
   (let ((pterms (gather-expt-terms e x)) (f) (p-list nil) (d) (g (gensym)) (subs) (p)
 		    (sol nil) (fn) (base) (cnsts))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
-     (setq subs ($billy pterms x g))
-     (displa `((mequal) subs ,subs))
+     (setq subs (get-algebraic-relations pterms x g))
 	   (when (cdr subs) ; subs is a Maxima list, so when subs is a non-empty Maxima list
 	      	(setq e ($substitute subs e))
           ;; find the base--
