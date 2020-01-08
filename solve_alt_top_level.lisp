@@ -29,7 +29,7 @@
 ;;; solution.
 
 (defun $solve_checked (e x)
-  (let ((sol ($solve e x)) (ok-sol nil) (maybe-sol nil) (bogus-sol nil) (z) (chk))
+  (let ((sol ($solve e x)) (ok-sol nil) (maybe-sol nil) (bogus-sol nil) (chk))
      (cond (($listp sol)
               (setq sol (cdr sol)) ; remove '(mlist)
               (dolist (sx sol)

@@ -17,6 +17,14 @@
 ;;; When $solve_ignores_conditions is true, ....?
 (defmvar $solve_ignores_conditions nil)
 
+(defun my-new-variable (knd)
+	 (let ((cntx $context))
+				(unwind-protect
+					(progn
+						(msetq $context '$initial)
+						($new_variable knd))
+				(msetq $context cntx))))
+
 (eval-when
 	(:compile-toplevel :load-toplevel :execute)
 	($load "to_poly_solve")
@@ -28,6 +36,8 @@
 	($load "linsolve.lisp")
 	($load "solve_alt_top_level.lisp")
 	($load "grobner"))
+
+
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
 (defun polynomialp (p vars coeffp exponp)

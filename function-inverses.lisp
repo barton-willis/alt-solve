@@ -55,7 +55,7 @@
 		 (list 'exponential-inverse #'(lambda (q a)
 											  (cond ((zerop1 q) nil)
 												  	(t (list (div (add (take '(%log) q) (mul 2 '$%pi '$%i
-																						($new_variable '$integer)))
+																						(my-new-variable '$integer)))
 																  (take '(%log) a)))))))
 
 		  ; x^a=q --> x=q^(1/a)
@@ -69,50 +69,50 @@
 												   (t
 													(list (take '(mexpt) '$%e (take '(%lambert_w)
 															(add (take '(%log) q)
-																		(mul 2 '$%pi '$%i ($new_variable '$integer))))))))))
+																		(mul 2 '$%pi '$%i (my-new-variable '$integer))))))))))
 
 
 
 
 		  (list '%sin #'(lambda (q)
 								(cond ((zerop1 q)
-										(list (mul '$%pi ($new_variable '$integer))))
+										(list (mul '$%pi (my-new-variable '$integer))))
 									   ((onep1 q)
-										(list (add (div '$%pi 2) (mul 2 '$%pi ($new_variable '$integer)))))
+										(list (add (div '$%pi 2) (mul 2 '$%pi (my-new-variable '$integer)))))
 									   (t
 										(list
-										 (add (mul 2 '$%pi ($new_variable '$integer)) (take '(%asin) q))
-										 (add (mul 2 '$%pi ($new_variable '$integer)) (sub '$%pi (take '(%asin) q))))))))
+										 (add (mul 2 '$%pi (my-new-variable '$integer)) (take '(%asin) q))
+										 (add (mul 2 '$%pi (my-new-variable '$integer)) (sub '$%pi (take '(%asin) q))))))))
 
 		 (list '%csc #'(lambda (q)
 							   (if (zerop1 q)
 								   (list)
 								   (list
-									(add (mul 2 '$%pi ($new_variable '$integer)) (take '(%acsc) q))
-									(add (mul 2 '$%pi ($new_variable '$integer)) (sub '$%pi (take '(%acsc) q)))))))
+									(add (mul 2 '$%pi (my-new-variable '$integer)) (take '(%acsc) q))
+									(add (mul 2 '$%pi (my-new-variable '$integer)) (sub '$%pi (take '(%acsc) q)))))))
 
 		  (list '%cos #'(lambda (q)
-								(if (eql q 1) (list (mul 2 '$%pi ($new_variable '$integer)))
+								(if (eql q 1) (list (mul 2 '$%pi (my-new-variable '$integer)))
 								(list
-								 (add (mul 2 '$%pi ($new_variable '$integer)) (take '(%acos) q))
-								 (sub (mul 2 '$%pi ($new_variable '$integer)) (take '(%acos) q))))))
+								 (add (mul 2 '$%pi (my-new-variable '$integer)) (take '(%acos) q))
+								 (sub (mul 2 '$%pi (my-new-variable '$integer)) (take '(%acos) q))))))
 
 		 (list '%sec #'(lambda (q)
 							   (if (eql q 0) (list)
 								(list
-								 (add (mul 2 '$%pi ($new_variable '$integer)) (take '(%asec) q))
-								 (sub (mul 2 '$%pi ($new_variable '$integer)) (take '(%asec) q))))))
+								 (add (mul 2 '$%pi (my-new-variable '$integer)) (take '(%asec) q))
+								 (sub (mul 2 '$%pi (my-new-variable '$integer)) (take '(%asec) q))))))
 
 		 (list '%tan #'(lambda (q)
 							   (cond
 								   ((zerop1 (add 1 (mul q q))) (list))
-								   (t (list (add (mul '$%pi ($new_variable '$integer)) (take '(%atan) q)))))))
+								   (t (list (add (mul '$%pi (my-new-variable '$integer)) (take '(%atan) q)))))))
 
 		 (list '%cot #'(lambda (q)
 							   (cond
 								   ((zerop1 (add 1 (mul q q))) (list))
 								   (t
-									(list (add (mul '$%pi ($new_variable '$integer)) (take '(%acot) q)))))))
+									(list (add (mul '$%pi (my-new-variable '$integer)) (take '(%acot) q)))))))
 
 		 ;; This is OK if asin is multivalued, I guess. Otherwise, it needs to be conditionalized in
 		 ;; a fairly crabbed way--would need -pi/2 < Re(q) < pi/2 or Re(q)=-pi/2 and Im(q) >= 0 or
@@ -128,34 +128,34 @@
 
 
 		 (list '%sinh #'(lambda (q) (list
-									 (add (mul 2 '$%pi '$%i ($new_variable '$integer)) (take '(%asinh) q))
-									 (add (mul 2 '$%pi '$%i ($new_variable '$integer)) (mul '$%pi '$%i)
+									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%asinh) q))
+									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (mul '$%pi '$%i)
 										  (mul -1 (take '(%asinh) q))))))
 
 		 (list '%cosh #'(lambda (q) (list
-									 (add (mul 2 '$%pi '$%i ($new_variable '$integer)) (take '(%acosh) q))
-		 							 (sub (mul 2 '$%pi '$%i ($new_variable '$integer)) (take '(%acosh) q)))))
+									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%acosh) q))
+		 							 (sub (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%acosh) q)))))
 
 		 (list '%sech #'(lambda (q)
 								(if (zerop1 q)
 									(list)
 									(list
-									 (add (mul 2 '$%pi '$%i ($new_variable '$integer)) (take '(%acosh) (div 1 q)))
-									 (sub (mul 2 '$%pi '$%i ($new_variable '$integer)) (take '(%acosh) (div 1 q)))))))
+									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%acosh) (div 1 q)))
+									 (sub (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%acosh) (div 1 q)))))))
 
 
 		 (list '%csch #'(lambda (q) (list
-									 (add (mul 2 '$%pi '$%i ($new_variable '$integer)) (take '(%acsch) (div 1 q)))
-									 (sub (mul '$%pi '$%i (add 1 (mul 2 ($new_variable '$integer)))) (take '(%acsch) (div 1 q))))))
+									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%acsch) (div 1 q)))
+									 (sub (mul '$%pi '$%i (add 1 (mul 2 (my-new-variable '$integer)))) (take '(%acsch) (div 1 q))))))
 
 		 (list '%tanh #'(lambda (q)
 								(if (or (onep q) (onep (mul -1 q))) (list)
-									(list (add (mul '$%pi '$%i ($new_variable '$integer)) (take '(%atanh) q))))))
+									(list (add (mul '$%pi '$%i (my-new-variable '$integer)) (take '(%atanh) q))))))
 
 
 		 (list '%coth #'(lambda (q)
 								(if (or (onep q) (onep (mul -1 q))) (list)
-								(list (add (mul '$%pi '$%i ($new_variable '$integer)) (take '(%acoth) q))))))
+								(list (add (mul '$%pi '$%i (my-new-variable '$integer)) (take '(%acoth) q))))))
 
 		 (list '$conjugate #'(lambda (q) (list (take '($conjugate) q))))
 
@@ -201,7 +201,7 @@
 												   (t
 													(list (take '(mexpt) '$%e (take '(%lambert_w)
 															(add (take '(%log) q)
-																		(mul 2 '$%pi '$%i ($new_variable '$integer))))))))))
+																		(mul 2 '$%pi '$%i (my-new-variable '$integer))))))))))
 
 
 		  (list '%sin #'(lambda (q) (list (take '(%asin) q))))
