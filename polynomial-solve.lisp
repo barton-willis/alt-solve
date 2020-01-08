@@ -192,6 +192,7 @@
 ;;; polynomials need to be solved by my-solve-linear & friends. That might allow equations to be represented
 ;;; in a less surprising way.
 
+(print "OK")
 (defun solve-poly-x^n+b (p x &optional (mx 1)) "Solve a x^n + b = 0 for x."
 	(let ((a) (b) (sol nil) (n) (k 0) ($algebraic t) ($domain '$complex) ($m1pbranch t))
 		 (setq p ($expand p))
@@ -199,22 +200,27 @@
 		 (when (> n 2)
 			 (setq a ($coeff p x n))
 			 (setq b (try-to-crunch-to-zero (mul -1 (sub p (mul a (power x n))))))
-
 			 (when ($freeof x b)
 			   (mtell "doing solve-poly-x^n+b; p = ~M  ~%" p)
 				 (setq $multiplicities nil)
 				 (cond ((zerop1 b) ;solve x^n=0
-				    		(push (take '(mequal) x 0) sol)
-					    	(push (mul mx n) $multiplicities))
+				    	  	 (push (take '(mequal) x 0) sol)
+					    	   (push (mul mx n) $multiplicities))
+
+								((> n 12) ; magic numbers 12 for no particular reason
+		 		 					 (setq $multiplicities (list 1))
+		 		 					 (setq sol (mul (take '(mexpt) '$%e (div (mul 2 '$%pi '$%i (my-new-variable '$integer)) n))
+		 		 								(simpnrt (div b a) n)))
+		 		 						(setq sol (list (take '(mequal) x sol))))
 
 				       (t
-				     		(setq b (simpnrt (try-to-crunch-to-zero (div b a)) n))
-					     	(while (< k n)
-						  	   (push (take '(mequal) x (mul b (power '$%e (div (mul 2 '$%pi '$%i k) n)))) sol)
-							     (push mx $multiplicities)
-							     (incf k))))
-				           (push '(mlist) $multiplicities)
-			          	 (setq $multiplicities (simplifya $multiplicities t))))
+				     	  	(setq b (simpnrt (try-to-crunch-to-zero (div b a)) n))
+					       	(while (< k n)
+						  	     (push (take '(mequal) x (mul b (power '$%e (div (mul 2 '$%pi '$%i k) n)))) sol)
+							       (push mx $multiplicities)
+							       (incf k))))
+				      (push '(mlist) $multiplicities)
+			        (setq $multiplicities (simplifya $multiplicities t))))
 	      sol))
 
 ;;; Solve e=0 for x, where e is a polynomial in x. The optional variable mx gives the multiplicity so far.

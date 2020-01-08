@@ -17,7 +17,9 @@
 ;;; When $solve_ignores_conditions is true, ....?
 (defmvar $solve_ignores_conditions nil)
 
-(defun my-new-variable (knd)
+;;; Wrap $new_variable that autodeclares the type in the context initial. Return the varikable and return to the
+;;; previous context.
+(defun my-new-variable (knd) "wrap $new_variable that autodeclares the type in the context initial."
 	 (let ((cntx $context))
 				(unwind-protect
 					(progn

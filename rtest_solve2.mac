@@ -4,6 +4,24 @@ ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_r
 
 (ssolve(e,x) := block([sol : nicedummies(solve(e,x))], if listp(sol) then sort(sol) else sol),0);
 
+/* Test for bug #4 desolve('diff(f(x),x,2)+f(x)=2*x,f(x)); */
+desolve('diff(f(x),x,2)+f(x)=2*x,f(x));
+f(x)=sin(x)*(at('diff(f(x),x,1),x=0)-2)+f(0)*cos(x)+2*x$
+
+/* tests for bug # 5 (autodeclare %Zxxx and %Cxxx variables doesn't work) */
+
+(sol : solve(sin(x)=1/2,x),0);
+0$
+
+trigexpand(expand(subst(first(sol),sin(x)=1/2)));
+1/2 = 1/2$
+
+(sol : solve(tan(x)=1,x),0)
+0$
+
+trigexpand(expand(subst(first(sol),tan(x) = 1)));
+1 = 1$
+
 /* tests for the exponential solver */
 
 ssolve(2^x + 4^x = 6,x);
