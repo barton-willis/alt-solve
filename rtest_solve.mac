@@ -525,7 +525,7 @@ block([cntx : newcontext()],
 []$
 
 block([solve_ignores_conditions : true], ssolve((cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1),x));
-[x=2*%pi*%z1-%pi,x=2*%pi*%z2+%pi]$
+[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi]$
 
 ssolve(abs(5 + abs(x-1)) = 15,x);
 [x=-9,x=11]$
@@ -561,13 +561,13 @@ ssolve(exp(x) + exp(2*x) = 2,x);
 [x=2*%i*%pi*%z0,x=2*%i*%pi*%z1+log(-2)]$
 
 ssolve(exp(x) + 1/exp(x) = 2,x);
-[x=2*%i*%pi*%z0]$
+[x=-2*%i*%pi*%z0]$
 
 ssolve((x^2+x+1)^2 + x^2 + x -5/16,x);
 [x=-(1/2),x=(sqrt(10)*%i-1)/2,x=-((sqrt(10)*%i+1)/2)]$
 
 ssolve((x^2+1)^4 + (x^2  + 1)^2 + 1/4,x);
-[x=-(sqrt((sqrt(2)*%i-2)/2)),x=sqrt((sqrt(2)*%i-2)/2),x=-((sqrt(-(sqrt(2)*%i+2)/2))),x=sqrt(-(sqrt(2)*%i+2)/2)]$
+[x=-(sqrt((sqrt(2)*%i-2)/2)),x=sqrt((sqrt(2)*%i-2)/2),x=-((sqrt(-((sqrt(2)*%i+2)/2)))),x=sqrt(-((sqrt(2)*%i+2)/2))]$
 
 
 ssolve(cos(x)^2 + sin(x)^2=1,x);
@@ -595,7 +595,7 @@ ssolve(cosh(x) = a,x);
 [x=2*%i*%pi*%z1-acosh(a),x=acosh(a)+2*%i*%pi*%z0]$
 
 ssolve(sech(x) = a,x);
-[x=2*%i*%pi*%z0-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z1]$
+[x=2*%i*%pi*%z1-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z0]$
 
 ssolve(sinh(x) = a,x);
 [x=-asinh(a)+2*%i*%pi*%z1+%i*%pi,x=asinh(a)+2*%i*%pi*%z0]$
@@ -1201,7 +1201,7 @@ nicedummies(solve(imagpart(z) / realpart(z)= 12,z));
 block([eqn1 :   x +   y +   z =  6,
        eqn2 : 2*x +   y + 2*z = 10,
        eqn3 :   x + 3*y +   z = 10,
-       %rnum : -1],
+       %rnum : 0],
 ssolve([eqn1, eqn2, eqn3], [x, y, z]));
 [[x=%r0,y=2,z=4-%r0]]$
 
@@ -1215,7 +1215,7 @@ block(
         assume(a < 0),
         solve(a+x-sqrt(x),x)),
   killcontext(cntx)));
-  [x=-(((2*a-sqrt(1-4*a)-1)/2))]$
+  [x=(-2*a+sqrt(1-4*a)+1)/2]$
 
 /* Thu, 24 Apr 2003 15:50:25 +0300 */
 ssolve(x - 2 * sqrt (x) = 10,x);
@@ -1224,7 +1224,7 @@ ssolve(x - 2 * sqrt (x) = 10,x);
 
 /* Thu, Aug 28, 2008 at 8:57 AM, sage-support */
 ssolve([x=0, 1-exp(y)=0],[x,y]);
-[x=0,y=2*%i*%pi*%z0]$
+[[y=2*%i*%pi*%z0,x=0]]$
 
 ssolve([y*sin(x)=0, cos(x)=0],[x,y]);
 [x=(2*%pi*%z0+%pi)/2,y=0]$
@@ -1247,7 +1247,7 @@ block(
         assume(a < 0),
         solve(x - sqrt(x) + a,x)),
   killcontext(cntx)));
-  [x=-((2*a-sqrt(1-4*a)-1)/2)]$
+  [x=(-2*a+sqrt(1-4*a)+1)/2]$
 
 /* Tue Apr 3 10:18:12 CDT 2007 */
 solve([x=2, y=3], [x]);
@@ -1387,11 +1387,11 @@ ssolve(a*x=b, x);
 [x=b/a]$
 
 block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
-[[x = %r0,a = %i*%r0],[x = %r1,a = -%i*%r1]]$
+[[x=%r1,a=%i*%r1],[x=%r2,a=-%i*%r2]]$
 
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
-[[x=%r0,a=(-1)^(1/4)*%r0],[x=%r1,a=sqrt(-%i)*%r1],
-[x=%r2,a=-(-1)^(1/4)*%r2],[x=%r2,a=-sqrt(-%i)*%r2]]$
+[[x=%r1,a=((sqrt(2)*%i+sqrt(2))*%r1)/2],[x=%r2,a=((sqrt(2)*%i-sqrt(2))*%r2)/2],
+[x=%r3,a=-((sqrt(2)*%i+sqrt(2))*%r3)/2],[x=%r4,a=-((sqrt(2)*%i-sqrt(2))*%r4)/2]]$
 
 ssolve((x-1)/(x+1) = 1, [x]);
 []$
@@ -1441,7 +1441,7 @@ think that solve fixes these bugs. */
 
 /*  [ 2041214 ] unable solve */
 ssolve([x+y=1,sqrt(x+1)=1],[x,y]);
-[x=0,y=1]$
+[[y=1,x=0]]$
 
 /* [ 1852178 ] Another solve() problem */
 ssolve([x^2+y^2=2^2,(x-1)^2+(y-1)^2=2^2],[x,y]);
@@ -1687,7 +1687,7 @@ solve(z*conjugate(z)+3*(z-conjugate(z))=13+12*%i, z);
 -------------------------------------*/
 
 ssolve(x^(3)=1,x);
-[x=1,x=(sqrt(3)*%i-1)/2,x=-((sqrt(3)*%i+1)/2)]$
+[x=1,x=-(sqrt(3)*%i)/2-1/2,x=(sqrt(3)*%i)/2-1/2]$
 
 ssolve(x^(3)+x^2 + x + 1,x);
 [x=-1,x=-%i,x=%i]$
@@ -1882,7 +1882,7 @@ ssolve(abs(x+7)*sin(x)*cos(x),x);
 [x=-7,x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1]$
 
 block([solve_ignores_conditions : true], ssolve(tan(x)=tan(zzz),x));
-[x=atan(tan(zzz))+%pi*%z2]$
+[x=atan(tan(zzz))+%pi*%z0]$
 
 ssolve(tan(x)=tan(%pi/4),x);
 [x=(4*%pi*%z0+%pi)/4]$
@@ -1929,7 +1929,7 @@ solve(eqns,[A,B,C,D,E,F]);
 /* #3312 solve does not identify multiplicities correctly */
 
 solve(subst(x= (-27/4)^(1/7), y^3 + x^3*y +x),y);
-[y=-((4^(2/7)*27^(5/7))/18),y=(4^(2/7)*27^(5/7))/9]$
+[y=(4^(2/7)*27^(5/7))/9,y=-(4^(2/7)*27^(5/7))/18]$
 
 multiplicities;
 [2,1]$
@@ -2066,7 +2066,7 @@ block([use_to_poly : true, solve_inverse_package : single_valued_inverse], solv
 
 /* #3538 solver doesn't solve simple alg/ system */
 ssolve([a=1,exp(b)=2],[a,b]);
-[[a=1,b=2*%i*%pi*%z0+log(2)]]$
+[[b=2*%i*%pi*%z0+log(2),a=1]]$
 
 /* #3490 redundant questions from solve */
 solve(x^(13/q)=a,x);
@@ -2113,7 +2113,7 @@ solve(sqrt(x^2/2+1/2) = 1);
 
 /* #3042 linsolve() incorrectly solves underdetermined linear system with symbolic coefficients */
 block([linsolve_params : true, %rnum : 0], linsolve([-((%i*(y+x)*f1*w)/(f*r)),((f*(y*l^2+y*l-4*z-2*y))/(r^3))]/f*r^3,[x,y,z]));
-[x=-%r0,z=(%r0*l^2+%r0*l-2*%r0)/4,y=%r0]$
+[x=-%r1,y=%r1,z=(%r1*l^2+%r1*l-2*%r1)/4]$
 
 /* #3030 solve entering endless loop on a kind of simple task */
 
