@@ -659,13 +659,12 @@ solve(abs(x) = -1,x);
 ssolve(abs(x) = 1,x);
 [x=-1, x = 1]$
 
-/*  FIX ME SOON ---------------------------------------------
 block([keepfloat : true], ssolve(abs(x) = 42.1,x));
 [x= -42.1, x = 42.1]$
 
 ssolve(abs(x) = -42.1,x);
 []$
------------------------------------------------------------- */
+
 block(
    supcontext(cntx, global),
    activate(cntx, global),
@@ -1749,10 +1748,8 @@ ssolve([x+y=p1-p2, x+3*y=p2-p3, 3*x-y=p1+p2+p3], [x,y]);
 solve(log(x + sqrt(x^2-1))=1,x);
 [x=(%e^(-1)*(%e^2+1))/2]$
 
-/* ---- FIX ME SOON ------
 solve(log(x+1)+log(x) = log(6)+log(5),x);
 [x = -6,x = 5]$
--------------------------*/
 
 /* From RJF, Maxima mailing list, Tuesday, September 01, 2009 12:54PM */
 solve((x-%pi)/sin(x)=0, x);
@@ -1761,10 +1758,8 @@ solve((x-%pi)/sin(x)=0, x);
 solve((sqrt(x)-1)/(x-1),x);
 []$
 
-/*  -- FIX ME -----------------------
-ssolve((x^2 - 2) * (sqrt(x)-1)/(x-1),x);
+block([solve_ignores_conditions : false], ssolve((x^2 - 2) * (sqrt(x)-1)/(x-1),x));
 [x = -sqrt(2),x = sqrt(2)]$
-*/
 
 block([assume_notequal : true], ssolve(sin(x)/x,x));
 [x=%pi*%z0]$
@@ -1798,30 +1793,40 @@ block([assume_notequal : true], ssolve(sin(x^2)/x^3,x));
 ssolve(x^a = 1,x);
 [x = %e^(2*%i*%pi*%z0/a)]$
 
-/*------------- FIX ME SOON -------------
-ssolve(x^(2*a) + 2 * x^a + 1,x);
-[x = (-1)^(1/a)*%e^(2*%i*%pi*%z0/a)]$
+/*not sure about the need for assume(x >0) */
+block([cntx : newcontext()],
+   unwind_protect(
+       (assume(a > 0), assume(x > 0), ssolve(x^(2*a) + 2 * x^a + 1,x)),
+   killcontext(cntx)));
+[x=%i*sin(%pi/a)+cos(%pi/a)]$
 
 ssolve((x^a-1)/(x^2 + 1),x);
 [x = %e^(2*%i*%pi*%z0/a)]$
------------------------------------------ */
+
 /* Two equations from Axiom Developer mailing list Fri, 02 Oct 2009 13:29:29 -0600. There
 are other equations in this thread that the solve cannot do:
 
   solve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]),
   solve([bt=atan((a*r)/(s*(r-d))),x=100*cos(bt),y=d*sin(bt)],[x,y,bt]).
+
+I have inserted these equations--I think the answers are OK, but I need to check them.
 */
 
-ssolve([a=3+x,b=1-x,x=2],[x]);
-[]$
+solve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
+[[y=d*sin(atan((a*r)/((r-d)*s))+%pi*%z21),x=100*cos(atan((a*r)/((r-d)*s))+%pi*%z21),bt=atan((a*r)/((r-d)*s))+%pi*%z21]]$
+
+solve([bt=atan((a*r)/(s*(r-d))),x=100*cos(bt),y=d*sin(bt)],[x,y,bt]);
+[[y=(a*d*r)/((r-d)*s*sqrt(((r^2-2*d*r+d^2)*s^2+a^2*r^2)/((r^2-2*d*r+d^2)*s^2))),x=100/sqrt(((r^2-2*d*r+d^2)*s^2+a^2*r^2)/((r^2-2*d*r+d^2)*s^2)),bt=atan((a*r)/((r-d)*s))]]$
+
+solve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
+[[y=d*sin(atan((a*r)/((r-d)*s))+%pi*%z1),x=100*cos(atan((a*r)/((r-d)*s))+%pi*%z1),bt=atan((a*r)/((r-d)*s))+%pi*%z1]]$
 
 block([solve_ignores_conditions : true], ssolve( tan(a)=b,a));
 [a=atan(b)+%pi*%z0]$
 
-/* --------------------------- FIX ME SOON
 ssolve(sin(x) = sin(x - p[0]),x);
 [x = (2*%pi*%z0+p[0]-%pi)/2]$
------------------------------------------- */
+
 ssolve(sin(x) = cos(x),x);
 [x = (4*%pi*%z0+%pi)/4]$
 
@@ -2019,7 +2024,7 @@ ssolve([x^3-x*4=0], [x]);
 solve(((x - 1)^(3/2) - (x + 1)*sqrt(x - 1))/sqrt((x - 1)*(x + 1)),x);
 []$ /* not sure about correct solution */
 
-/* FIX ME soon
+/* FIX ME soon--looks like an infinite loop!
 /* #2178 to_poly_solve -- spurious complex solution */
 block(
   supcontext(cntx, global),
