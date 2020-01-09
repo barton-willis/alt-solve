@@ -192,7 +192,6 @@
 ;;; polynomials need to be solved by my-solve-linear & friends. That might allow equations to be represented
 ;;; in a less surprising way.
 
-(print "OK")
 (defun solve-poly-x^n+b (p x &optional (mx 1)) "Solve a x^n + b = 0 for x."
 	(let ((a) (b) (sol nil) (n) (k 0) ($algebraic t) ($domain '$complex) ($m1pbranch t))
 		 (setq p ($expand p))
