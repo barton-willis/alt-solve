@@ -17,8 +17,10 @@
 ;;; When $solve_ignores_conditions is true, ....?
 (defmvar $solve_ignores_conditions nil)
 
-;;; Wrap $new_variable that autodeclares the type in the context initial. Return the varikable and return to the
-;;; previous context.
+;;; Wrap $new_variable into a function that switches to the context 'initial' before declaring
+;;; the type. After the declaration, return to the orginial context. Maybe this fuctionality
+;;; should be blended into $new_variable. Finally, I'm not sure the unwind_protect is really
+;;; need--but it's OK.
 (defun my-new-variable (knd) "wrap $new_variable that autodeclares the type in the context initial."
 	 (let ((cntx $context))
 				(unwind-protect
