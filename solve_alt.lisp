@@ -176,8 +176,7 @@
 			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation, one unknown
 			   (setq eqlist (keep-float (car eqlist)))
 			   (setq sol ($substitute nonatom-subst (solve-single-equation eqlist (car varl))))
-			   (setq eqlist (unkeep-float eqlist))
-		 	   (setq sol (unkeep-float sol)))
+				 (unkeep-float sol))
 
 			  ((null (cdr varl)) ;one unknown, more than one equation
 			   (redundant-equation-solve (cons '(mlist) eqlist) (car varl)))
