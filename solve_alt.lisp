@@ -190,7 +190,7 @@
 			   ;(setq sol (solvex eqlist varl nil nil))
 			   ;(when (not (every #'$listp (cdr sol))) ;;this is unfortunate?
 				 ;  (setq sol `((mlist) ,sol)))
-				($substitute nonatom-subst sol))))
+			 	($substitute nonatom-subst sol))))
 	  ($killcontext cntx))))
 
 ;;; Do basic simplifications of an equation. In particular:
