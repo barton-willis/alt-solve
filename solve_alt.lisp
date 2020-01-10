@@ -325,12 +325,14 @@
 
 			((solve-mexpt-equation e x m use-trigsolve))
 
-			((solve-mexpt-equation-extra e x m use-trigsolve))
+			((solve-by-kernelize e x m))
+
+			((solve-mexpt-equation-extra e x m t))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
 
-			((solve-by-kernelize e x m))
+			;;((solve-by-kernelize e x m))
 
 		    ;;((and use-trigsolve (trigsolve e x)))
 
@@ -547,7 +549,14 @@
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
   ;(mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
-  (let ((pterms (gather-expt-terms e x)) (f) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil))
+	(let ((pterms) (f) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
+        (when use-trigsolve
+	      	(setq e ($exponentialize e))
+	      	(setq e (apply-identities e *pythagorean-identities*))
+      		(setq e (apply-identities-xxx e *to-cos/sin-identities*))
+					(setq do-rectform t))
+
+     (setq pterms (gather-expt-terms e x))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
      (setq subs (get-algebraic-relations pterms x g))
 		 ;; look for a subsitution that is linear in g--call it submin.
@@ -568,7 +577,9 @@
 						 (dolist (sx sol)
 						    (setq sx ($substitute sx submin))
 								(setq sol-all (append (cdr (solve-single-equation sx x m use-trigsolve)) sol-all)))
-			       (setq sol (simplifya (cons '(mlist) sol-all) t))))
+			       (setq sol (simplifya (cons '(mlist) sol-all) t)))
+					(when do-rectform
+						(setq sol ($rectform sol))))
 		sol))
 
 (defun new-to-poly-solve (e x cnd)
