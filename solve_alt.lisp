@@ -579,7 +579,7 @@
 								(setq sol-all (append (cdr (solve-single-equation sx x m use-trigsolve)) sol-all)))
 			       (setq sol (simplifya (cons '(mlist) sol-all) t)))
 					(when do-rectform
-						(setq sol ($rectform sol))))
+						(setq sol (sratsimp ($rectform sol)))))
 		sol))
 
 (defun new-to-poly-solve (e x cnd)

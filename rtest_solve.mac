@@ -437,7 +437,7 @@ algsys([v^2-2*v+u^2+10*u+1,v^2-10*v+u^2+2*u+1],[v,u]);
 [[v=-((sqrt(34)-6)/2),u=(sqrt(34)-6)/2],[v=(sqrt(34)+6)/2,u=-((sqrt(34)+6)/2)]]$
 
 ssolve(4^x + 2^x + 1/4=0,x);
-[x=(2*%i*%pi*%z0-2*log(2)+log(-2))/log(2)]$
+[x=(2*%i*%pi*%z0-log(2)+%i*%pi)/log(2)]$
 
 ssolve(exp(4*x) = exp(4),x);
 [x=(%i*%pi*%z0+2)/2]$
@@ -558,7 +558,7 @@ ssolve(%e^x/(%e^x+5)=%e^107/(%e^107+5),x);
 [x=2*%i*%pi*%z0+107]$
 
 ssolve(exp(x) + exp(2*x) = 2,x);
-[x=2*%i*%pi*%z0,x=2*%i*%pi*%z1+log(-2)]$
+[x=2*%i*%pi*%z0,x=2*%i*%pi*%z1+log(2)+%i*%pi]$
 
 ssolve(exp(x) + 1/exp(x) = 2,x);
 [x=-2*%i*%pi*%z0]$
@@ -789,8 +789,8 @@ ssolve(x + sqrt(x) = 2, x);
 ssolve(2*sqrt(x) + 3*x^(1/4) - 2 = 0, x);
 [x=1/16]$
 
-ssolve(x = 1/sqrt(1 + x^2), x);
-[x=1/sqrt(-((sqrt(5)-1)/2)),x=1/sqrt((sqrt(5)+1)/2)]$
+expand(ssolve(x = 1/sqrt(1 + x^2), x),0,0);
+[x=-(sqrt(2)*%i)/sqrt(sqrt(5)-1),x=sqrt(2)/sqrt(sqrt(5)+1)]$
 
 ssolve(sqrt(x)-sqrt(1-x) = 0,x);
 [x=1/2]$
@@ -946,7 +946,7 @@ ssolve(x^(3/2)=(a)^(3/2),x);
 [x=a, x=-(sqrt(3)*%i*a)/2-a/2, x=(sqrt(3)*%i*a)/2-a/2]$
 
 ssolve(x^3=8,x);
-[x=2,x=-sqrt(3)*%i-1,x=sqrt(3)*%i-1]$
+[x=2,x=2*(-(sqrt(3)*%i)/2-1/2),x=2*((sqrt(3)*%i)/2-1/2)]$
 
 solve(x*(x-1)=0,x);
 [x=1, x=0]$
@@ -1059,7 +1059,7 @@ ssolve(cosh(x) - sinh(2*x)/2 = 0,x);
  x = 2*%i*%pi*%z2+log(sqrt(2)+1),x = 2*%i*%pi*%z3+log(1-sqrt(2))]$
 
 ssolve(sinh(x) + cosh(x) = 1,x);
-[x=2*%i*%pi*%z0]$
+[x=-2*%i*%pi*%z0]$
 
 /* miscellaneous */
 
@@ -1081,7 +1081,7 @@ ssolve(cos(3*x)-2*cos(2*x)+cos(x)=1/2,x);
        [x = 2*%pi*%z5+%pi/3]$
 
 ssolve(sin(2*x) + cos(2*x) = 1,x);
-[x=%pi*%z0,x=%pi*%z1+%pi/4]$
+[x=-%pi*%z0,x=-(4*%pi*%z1-%pi)/4]$
 
 ssolve(sin(x) * (x + 1), x);
 [x=-1, x=%pi*%z0]$
@@ -1130,13 +1130,12 @@ ssolve(1 - abs(x) = max(-x - 2, x - 2), x);
 [x=-3/2, x=3/2]$
 
 ssolve( (x + 1)*(sin(x)^2 + 1)^2*cos(3*x)^3 = 0,x );
-[[x = -1],[x = 2*%pi*%z0-%i*(log(sqrt(2)+1)+%i*%pi)],
-             [x = 2*%pi*%z1-%i*(log(sqrt(2)-1)+%i*%pi)],
-             [x = 2*%pi*%z2-%i*log(sqrt(2)-1)],
-             [x = 2*%pi*%z3-%i*log(sqrt(2)+1)],[x = 2*%pi*%z4-%pi/2],
-             [x = 2*%pi*%z5+%pi/2],[x = 2*%pi*%z6+5*%pi/6],
-             [x = 2*%pi*%z7-%pi/6],[x = 2*%pi*%z8-5*%pi/6],
-             [x = 2*%pi*%z9+%pi/6]]$
+[x=-1,x=2*%pi*%z0-%i*asinh(1),
+  x=2*%pi*%z1+%i*asinh(1)+%pi,
+  x=2*%pi*%z2+%i*asinh(1),
+  x=2*%pi*%z3-%i*asinh(1)+%pi,
+  x=(4*%pi*%z4+%pi)/6,
+  x=(4*%pi*%z5-%pi)/6]$
 
 ssolve(%e^z = 1,z);
 [z = 2*%i*%pi*%z0]$
@@ -1144,7 +1143,7 @@ ssolve(%e^z = 1,z);
 ssolve(tan(x) = 1,x);
 [x=(4*%pi*%z0+%pi)/4]$
 
-block([solve_ignores_conditions : true], solve( sin(x) = tan(x),x));
+block([solve_ignores_conditions : true], ssolve( sin(x) = tan(x),x));
 [x = 2*%pi*%z0,x = 2*%pi*%z1+%pi,x = 2*%pi*%z2,x = 2*%pi*%z3+%pi]$
 
 ssolve(sqrt(log(x)) = log(sqrt(x)),x);
@@ -1202,7 +1201,7 @@ block([eqn1 :   x +   y +   z =  6,
        eqn3 :   x + 3*y +   z = 10,
        %rnum : 0],
 ssolve([eqn1, eqn2, eqn3], [x, y, z]));
-[[x=%r0,y=2,z=4-%r0]]$
+[[x=%r1,y=2,z=4-%r1]]$
 
 /* from Maxima and Sage mailing lists */
 
@@ -1283,7 +1282,7 @@ solve(x - 2 * sqrt (x) = 10,x);
 
 /* Wed Sep 20 11:41:42 CDT 2006 */
 ssolve(sin(x)+cos(x)=0,x);
-[x=2*%pi*%z0-%pi/4,x=2*%pi*%z1+(3*%pi)/4]$
+[x=-(8*%pi*%z0+%pi)/4,x=-(8*%pi*%z1-3*%pi)/4]$
 
 /* Fri Feb 1 05:31:56 CST 2008 changed 0.05 to 5/100) */
 ssolve(x*exp(-x)-5/100 = 0,x);
@@ -1389,8 +1388,10 @@ block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
 [[x=%r1,a=%i*%r1],[x=%r2,a=-%i*%r2]]$
 
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
-[[x=%r1,a=((sqrt(2)*%i+sqrt(2))*%r1)/2],[x=%r2,a=((sqrt(2)*%i-sqrt(2))*%r2)/2],
-[x=%r3,a=-((sqrt(2)*%i+sqrt(2))*%r3)/2],[x=%r4,a=-((sqrt(2)*%i-sqrt(2))*%r4)/2]]$
+[[x=%r0,a=-((sqrt(2)*%i-sqrt(2))*%r0)/2],
+[x=%r1,a=((sqrt(2)*%i+sqrt(2))*%r1)/2],
+[x=%r2,a=((sqrt(2)*%i-sqrt(2))*%r2)/2],
+[x=%r3,a=-((sqrt(2)*%i+sqrt(2))*%r3)/2]]$
 
 ssolve((x-1)/(x+1) = 1, [x]);
 []$
@@ -1872,7 +1873,7 @@ ssolve(sin(5*x+7),x);
 [x = (%pi*%z0-7)/5]$
 
 ssolve(2013*sin(x)*cos(x),x);
-[x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1]$
+[x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2,x=%pi*%z2,x=(%pi*%z3)/sqrt(5)]$
 
 ssolve(2013*sin(x)*cos(x)*sin(sqrt(5)*x),x);
 [x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1,x=(2*%pi*%z2)/sqrt(5)]$
@@ -1884,7 +1885,7 @@ ssolve(abs(x+7)*sin(x),x);
 [x=-7,x=%pi*%z0]$
 
 ssolve(abs(x+7)*sin(x)*cos(x),x);
-[x=-7,x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1]$
+[x=-7,x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2,x=%pi*%z2]$
 
 block([solve_ignores_conditions : true], ssolve(tan(x)=tan(zzz),x));
 [x=atan(tan(zzz))+%pi*%z0]$
