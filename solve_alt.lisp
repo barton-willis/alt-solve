@@ -472,7 +472,7 @@
 						  	 (gethash 'lambert-like-inverse $solve_inverse_package))))
 
 				(when inverse-function
-					(setq sol ($solve (first e) nvars))
+					(setq sol (solve-single-equation (first e) nvars)) ;was ($solve (first e) nvars))
 					(cond
 						((eql sol '$all) '$all)
 						(t
