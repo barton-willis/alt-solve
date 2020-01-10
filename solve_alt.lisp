@@ -550,29 +550,28 @@
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
   (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
-  (let ((pterms (gather-expt-terms e x)) (f) (g (gensym)) (subs) (p) (sol nil) (fn) (base))
+  (let ((pterms (gather-expt-terms e x)) (f) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
-		 (displa (cons '(mlist) pterms))
      (setq subs (get-algebraic-relations pterms x g))
-		 (displa `((mequal) subs ,subs))
-	   (when (cdr subs) ; subs is a Maxima list, so when subs is a non-empty Maxima list
-			    (displa `((mequal) ebefore ,e))
+		 ;; look for a subsitution that is linear in g--call it submin.
+		 (when (cdr subs)
+      	(setq submin (first (remove-if #'(lambda (s) (> ($hipow s g) 1)) (cdr subs)))))
+		 ;; When there is a subsitution that is linear in g, we:
+		 ;; (1)	substitute subs into the equation
+		 ;; (2) when the result is free of x (only unknown is g) we
+		 ;; (3) solve for g
+		 ;; (4) for each of these solutions, substitute it into submin; and
+     ;; (5) solve for the unknown collecting the solutions
+	   (when submin
 	      	(setq e ($substitute subs e))
-					(displa `((mequal) eafter ,e))
-          ;; find the base--
-          (setq f ($first subs))
-          (setq p ($hipow ($rhs f) g))
-          (setq f ($lhs f))
-          (setq base (take '(mexpt) '$%e ($radcan (div ($diff f x) f))))
-          (setq base (take '(mexpt) base (div 1 p)))
-          (displa `((mequal) base ,base))
 	      	(when ($freeof x e)
 		         (setq sol (solve-single-equation e g m use-trigsolve))
-			       (setq sol ($substitute ($reverse ($first subs)) sol))
-		      	 (setq fn (gethash 'exponential-inverse $solve_inverse_package))
-             (setq sol (mapcan #'(lambda (q) (funcall fn ($rhs q) base)) (cdr sol)))
-		      	 (setq sol (mapcar #'(lambda (q) (take '(mequal) x q)) sol))
-			       (setq sol (simplifya (cons '(mlist) sol) t))))
+						 (setq sol (cdr sol))
+						 (setq sol-all nil)
+						 (dolist (sx sol)
+						    (setq sx ($substitute sx submin))
+								(setq sol-all (append (cdr (solve-single-equation sx x m use-trigsolve)) sol-all)))
+			       (setq sol (simplifya (cons '(mlist) sol-all) t))))
 		sol))
 
 (defun new-to-poly-solve (e x cnd)
