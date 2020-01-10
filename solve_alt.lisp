@@ -808,48 +808,6 @@
 					; (setq sol (unkeep-float sol))
 					 (if sol sol ee)))))
 
-(defun solvex-new (e v &optional (ind nil) (flag nil))
-  (declare (ignore ind flag))
-;  (mtell "top of solvex ~%")
-;	(mtell "e = ~M  v = ~M ~%" e v)
-;	(print `(e = ,e))
-;	(print `(v = ,v))
-	(push '(mlist) e)
-	(push '(mlist) v)
-  ($solve e v))
-
-(defun solvex-xxx (e v &optional (ind nil) (flag nil))
-	;(mtell "top of solvex eq = ~M x = ~M ind = ~M flag = ~M" e v ind flag)
-	(declare (ignore ind flag))
-	(let ((ee) (sol))
-		 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
-		 (push '(mlist) e)
-		 (push '(mlist) v)
-
-		 (cond
-			 ;; when every member of e is a polynomial, dispatch algsys.
-
-			 (($emptyp e)
-			  `((mlist)))
-
-			 ((every #'(lambda (q) (polynomialp q v
-				    #'(lambda (s) ($lfreeof v s))
-			      #'(lambda (s)  (and (integerp s) (>= s 0))))) (cdr e))
-			  (mtell "dispatching $algsys ~%")
-			  (let (($algexact nil))
-					(displa `((mequal) e ,e))
-					(displa `((mequal) v ,v))
-				   ;(displa (mfuncall '$reset))
-				   ($algsys e v))) ;previously set $solveradcan to nil, but not sure why
-
-			 (t
-			  (setq ee e)
-			  (setq e ($setify e))
-			  (setq v ($setify v))
-			  (setq e (triangularize-eqs e v))
-			  (setq sol (solve-triangular-system (cdr e) (cdr v)))
-			  (if sol sol ee)))))
-
 ;;; This is the entry-level function for system level calls to solve. Solutions are pushed into the
 ;;; special variable *roots.
 
