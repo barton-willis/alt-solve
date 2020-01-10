@@ -438,10 +438,7 @@
 ;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
 
 (defun solve-mexpt-equation (ee x m use-trigsolve)
-
-	;;(declare (ignore m use-trigsolve)) ;likely this code should make use of m & use-tringsolve
-
-	(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
+	;(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
@@ -549,7 +546,7 @@
     (simplifya (cons '(mlist) subs) t))))
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
-  (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
+  ;(mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
   (let ((pterms (gather-expt-terms e x)) (f) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil))
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
      (setq subs (get-algebraic-relations pterms x g))
