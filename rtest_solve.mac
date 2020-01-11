@@ -1151,7 +1151,7 @@ ssolve(tan(x) = 1,x);
 [x=(4*%pi*%z0+%pi)/4]$
 
 block([solve_ignores_conditions : true], ssolve( sin(x) = tan(x),x));
-[x = 2*%pi*%z0,x = 2*%pi*%z1+%pi,x = 2*%pi*%z2,x = 2*%pi*%z3+%pi]$
+[x=-2*%pi*%z0-%pi,x=-2*%pi*%z1]$
 
 ssolve(sqrt(log(x)) = log(sqrt(x)),x);
 [x=1,x=%e^4]$
@@ -1176,9 +1176,10 @@ block(
   supcontext(cntx,global),
   activate(cntx, global),
   unwind_protect(
-      block(declare(x,complex), solve(conjugate(x+8)+%i,conjugate(x))),
+      block(declare(x,complex),
+      is([conjugate(x)=-%i-8] =  solve(conjugate(x+8)+%i,conjugate(x)))),
       killcontext(cntx)));
-[x= -(%i)-8]$
+true$
 
 /*-------------------------------------------------------------------------
 (declare(z, complex), solve((1 + %i)*z + (2 - %i)*conjugate(z) = -3*%i,z));
@@ -1611,9 +1612,8 @@ ssolve ('[x = 1], '[x, x]);
 ssolve ('[u = v], '[u, u, u, u]);
 [u = v]$
 
-/* The use_grobner is a workaround for an algsys bug, I think.*/
 ssolve(asin(cos(x)),x);
-[x=(2*%pi*%z0+%pi)/2]$
+[x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2]$
 
 ssolve ([x + 2*y = 5, 2*x - y = 5], [x, y]);
 [[x = 3, y = 1]]$
@@ -1777,7 +1777,7 @@ thread is -3 + cosh(x) - cos(x) = 0. The solve either takes a long time or
 gets stuck on -3 + cosh(x) - cos(x) = 0.*/
 
 ssolve(-3+cosh(x)-sinh(x)/tanh(x) = 0,x);
-[x=%i*%pi*%z0]$
+[x=-2*%i*%pi*%z0-%i*%pi,x=-2*%i*%pi*%z1]$
 
 /* From Sage Mailing list 8 Oct 2009, 3:21 a.m */
 
@@ -1836,7 +1836,7 @@ ssolve(sin(x) = sin(x - p[0]),x);
 [x = (2*%pi*%z0+p[0]-%pi)/2]$
 
 ssolve(sin(x) = cos(x),x);
-[x = (4*%pi*%z0+%pi)/4]$
+[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
 
 ssolve(sin(x-5) - sin(5-x),x);
 [x=%pi*%z0+5]$
@@ -1845,7 +1845,8 @@ ssolve(cos(x-5) - cos(5-x),x);
 [x = %r0]$
 
 ssolve(cos(x^2-1)=0,x);
-[x=sqrt(4*%pi*%z0+%pi+2)/sqrt(2),x=sqrt(4*%pi*%z1-%pi+2)/sqrt(2)]$
+[x=-sqrt(4*%pi*%z0+%pi+2)/sqrt(2),x=sqrt(4*%pi*%z0+%pi+2)/sqrt(2),
+x=-sqrt(%pi*(4*%z1-1)+2)/sqrt(2),x=sqrt(%pi*(4*%z1-1)+2)/sqrt(2)]$
 
 solve(log(x-sqrt(x-1)) = 0,x);
 [x=1,x=2]$
@@ -1880,10 +1881,10 @@ ssolve(sin(5*x+7),x);
 [x = (%pi*%z0-7)/5]$
 
 ssolve(2013*sin(x)*cos(x),x);
-[x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2,x=%pi*%z2,x=(%pi*%z3)/sqrt(5)]$
+[x=-(4*%pi*%z0+%pi)/2,x=-2*%pi*%z1,x=-(4*%pi*%z2-%pi)/2,x=-2*%pi*%z3-%pi]$
 
 ssolve(2013*sin(x)*cos(x)*sin(sqrt(5)*x),x);
-[x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1,x=(2*%pi*%z2)/sqrt(5)]$
+[x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2,x=%pi*%z2,x=(%pi*%z3)/sqrt(5)]$
 
 ssolve(sin(x^2),x);
 [x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
@@ -1949,7 +1950,7 @@ multiplicities;
 
 /* #3276 regression in to_poly_solve */
 solve(Q*sqrt(Q^2 + 2)=1,Q);
-[Q = - sqrt((- sqrt(2)) - 1)]$ /* not sure */
+[Q=(-sqrt(2)-1)*sqrt(1-sqrt(2)),Q=(sqrt(2)-1)*sqrt(sqrt(2)+1)]$
 
 /* #3234 solve with list of vars */
 
@@ -1969,8 +1970,8 @@ solve(x*acot(x)=0,x);
 []$
 
 /* #2779 %solve(sin(x)=tan(x),x) fails  */
-block([solve_ignores_conditions : true], solve(sin(x)=tan(x),x));
-[x = 2*%pi*%z0,x = 2*%pi*%z1+%pi,x = 2*%pi*%z2,x = 2*%pi*%z3+%pi]$
+block([solve_ignores_conditions : true], ssolve(sin(x)=tan(x),x));
+[x=-2*%pi*%z0-%pi,x=-2*%pi*%z1]$
 
 /* #2773 Spurious solution using arc-trig */
 block([assume_notequal : true], ssolve(sin(cos(x))/cos(x) = 0, x));
