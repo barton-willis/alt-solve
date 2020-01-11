@@ -566,8 +566,9 @@ ssolve(exp(x) + 1/exp(x) = 2,x);
 ssolve((x^2+x+1)^2 + x^2 + x -5/16,x);
 [x=-(1/2),x=(sqrt(10)*%i-1)/2,x=-((sqrt(10)*%i+1)/2)]$
 
-ssolve((x^2+1)^4 + (x^2  + 1)^2 + 1/4,x);
-[x=-(sqrt((sqrt(2)*%i-2)/2)),x=sqrt((sqrt(2)*%i-2)/2),x=-((sqrt(-((sqrt(2)*%i+2)/2)))),x=sqrt(-((sqrt(2)*%i+2)/2))]$
+ratsimp(ssolve((x^2+1)^4 + (x^2  + 1)^2 + 1/4,x));
+[x=-sqrt(sqrt(2)*%i-2)/sqrt(2),x=sqrt(sqrt(2)*%i-2)/sqrt(2),
+x=-sqrt(-sqrt(2)*%i-2)/sqrt(2),x=sqrt(-sqrt(2)*%i-2)/sqrt(2)]$
 
 
 ssolve(cos(x)^2 + sin(x)^2=1,x);
@@ -730,8 +731,9 @@ block(
 ssolve(max(2 - x^2, x) = max(-x, x^3/9), x);
 [x=-1, x=3]$
 
+/*This problem is tricky--Maxima must recognize that a cubic has a real root.*/
 ssolve(max(2 - x^2, x) = x^3/9, x);
-[x=-3, x=-1.55489417989418, x=3]$
+[x=-3, -((3*(-sqrt(3)*%i-1)*(9*(sqrt(5)*%i+2))^(1/3))/2+54/((-sqrt(3)*%i-1)*(9*(sqrt(5)*%i+2))^(1/3))+9)/3, x=3]$
 
 ssolve(max(x,x^2)=1, x);
 [x=-1, x=1]$
@@ -835,7 +837,7 @@ ssolve(cos(x)=1/2,x);
 [x=(6*%pi*%z0+%pi)/3,x=(6*%pi*%z1-%pi)/3]$
 
 ssolve(sin(x) = cos(x), x);
-[x=(8*%pi*%z0+%pi)/4,x=(8*%pi*%z1+3*%pi)/4,x=(8*%pi*%z2-%pi)/4,x=(8*%pi*%z3+5*%pi)/4]$
+[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
 
 ssolve(tan(x) = 1, x);
 [x=(4*%pi*%z0+%pi)/4]$
@@ -869,7 +871,7 @@ ssolve(cos(x)^2 + sin(x)^2 = 1,x);
 /* trig polynomials */
 
 ssolve(sin(x) * cos(x) = sin(%pi/4) * cos(%pi/4),x);
-[x=(8*%pi*%z0+%pi)/4,x=(8*%pi*%z1+3*%pi)/4,x=(8*%pi*%z2-%pi)/4,x=(8*%pi*%z3+5*%pi)/4]$
+[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
 
 ssolve(sin(x)=sin(2),x);
 [x=2*%pi*%z0+%pi-2,x=2*%pi*%z1+2]$
@@ -1055,8 +1057,8 @@ ssolve(cosh(x) = 0,x);
 [x=2*%i*%pi*%z0-(%i*%pi)/2,x=2*%i*%pi*%z1+(%i*%pi)/2]$
 
 ssolve(cosh(x) - sinh(2*x)/2 = 0,x);
-[x = 2*%i*%pi*%z0+log(-%i),x = 2*%i*%pi*%z1+log(%i),
- x = 2*%i*%pi*%z2+log(sqrt(2)+1),x = 2*%i*%pi*%z3+log(1-sqrt(2))]$
+[x=-(4*%i*%pi*%z0+%i*%pi)/2,x=-(4*%i*%pi*%z1-%i*%pi)/2,x=-2*%i*%pi*%z2-log(sqrt(2)+1)-%i*%pi,
+x=-2*%i*%pi*%z3-log(sqrt(2)-1)]$
 
 ssolve(sinh(x) + cosh(x) = 1,x);
 [x=-2*%i*%pi*%z0]$
@@ -1064,21 +1066,26 @@ ssolve(sinh(x) + cosh(x) = 1,x);
 /* miscellaneous */
 
 ssolve(sin(x) = cos(x), x);
-[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi,x=2*%pi*%z2-acos(1/3)+%pi,x=2*%pi*%z3+acos(1/3)-%pi,x=%pi*%z4]$
+[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
 
 ssolve(42*cos(x)+sin(x)=42*cos(%pi/4)+sin(%pi/4),x);
-[x=2*%pi*%z0-asin(43/sqrt(3530))-atan(42)+%pi,x=2*%pi*%z1+asin(43/sqrt(3530))-atan(42)]$
+[x=-2*%pi*%z0-atan(1679/1847),x=-(8*%pi*%z1-%pi)/4]$
 
 ssolve(sin(x)*cos(x) = 1/2, x);
-[x=(8*%pi*%z0-%pi)/4,x=(8*%pi*%z1+5*%pi)/4,x=(8*%pi*%z2+%pi)/4,x=(8*%pi*%z3+3*%pi)/4]$
+[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
+
+trigrat(subst(x=-(8*%pi*%z0-%pi)/4,sin(x)*cos(x) = 1/2));
+1/2=1/2$
+
+trigrat(subst(x=-(8*%pi*%z1+3*%pi)/4,sin(x)*cos(x) = 1/2));
+1/2=1/2$
 
 ssolve(cos(3*x)-2*cos(2*x)+cos(x)=1/2,x);
-[x = 2*%pi*%z0-atan(sqrt(sqrt(13)/2+1/2)/(1/2-sqrt(13)/2))-%pi],
-       [x = 2*%pi*%z1+atan(sqrt(sqrt(13)/2+1/2)/(1/2-sqrt(13)/2))+%pi],
-       [x = 2*%pi*%z2-%i*log(sqrt(13)/4-sqrt(sqrt(13)/2-1/2)/2+1/4)],
-       [x = 2*%pi*%z3-%i*log(sqrt(13)/4+sqrt(sqrt(13)/2-1/2)/2+1/4)],
-       [x = 2*%pi*%z4-%pi/3],
-       [x = 2*%pi*%z5+%pi/3]$
+[x=-(6*%pi*%z0-%pi)/3,x=-(6*%pi*%z1+%pi)/3,
+x=-2*%pi*%z2-atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))-%pi,
+x=-2*%pi*%z3+atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))-%pi,
+x=%i*log((sqrt(13)-2*sqrt((sqrt(13)-1)/2)+1)/4)-2*%pi*%z4,
+x=%i*log((sqrt(13)+2*sqrt((sqrt(13)-1)/2)+1)/4)-2*%pi*%z5]$
 
 ssolve(sin(2*x) + cos(2*x) = 1,x);
 [x=-%pi*%z0,x=-(4*%pi*%z1-%pi)/4]$
@@ -1171,7 +1178,7 @@ block(
   unwind_protect(
       block(declare(x,complex), solve(conjugate(x+8)+%i,conjugate(x))),
       killcontext(cntx)));
-[conjugate(x)= -(%i)-8]$
+[x= -(%i)-8]$
 
 /*-------------------------------------------------------------------------
 (declare(z, complex), solve((1 + %i)*z + (2 - %i)*conjugate(z) = -3*%i,z));
