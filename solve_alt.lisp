@@ -725,14 +725,14 @@
 	                     (push sol subs)) ; push the solution into subs
 
 	               (setq e (pop eqs)) ; the cdr removes '($set)
-								 (mtell "Going to solve ~M for ~M ~%" e x)
+								 ;;(mtell "Going to solve ~M for ~M ~%" e x)
 	              ;; (setq sol (redundant-equation-solve e x)) ; finally get to solve an equation!
 							   (setq sol (cond ((eql 1 ($cardinality e))
 								                  (mtell "dispatch solve-single-equation on ~M ~%" e)
 								                  (solve-single-equation (cadr e) x))
 																(t
 																	(redundant-equation-solve e x))))
-								 (mtell "Got a solution; it is ~M ~%" sol)
+								 ;;(mtell "Got a solution; it is ~M ~%" sol)
 							   (setq sol (cdr sol)) ; remove (mlist)
 								 (setq ssol nil)
 	               (dolist (sx sol)
