@@ -31,12 +31,22 @@ trigexpand(expand(subst(first(sol),tan(x) = 1)));
 map(lambda([s], radcan(rectform(subst(s, 2^x+4^x=6)))), sol);
 [6=6,6=6]$
 
-ssolve(%e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2),yx);
-[yx=(2*%i*%pi*%z2+log(%i/sqrt(6)))/log(-4)]$
+sol : ssolve(%e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2),yx);
+[yx=4*%i*%pi*%z0+2*log(2)+2*%i*%pi,yx=4*%i*%pi*%z1+2*log(2)]$
+
+/* and let's check these soltuions!*/
+trigsimp(rectform(subst(first(sol), %e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2))));
+0$
+
+trigsimp(rectform(subst(second(sol), %e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2))));
+0$
+
+(remvalue(sol),0);
+0$
 
 /* Equation Hall of Shame: my most wanted */
 ssolve([y*sin(x)=0,cos(x)=0],[x,y]);
-[[y=0,x=(4*%pi*%z0+%pi)/2],[y=0,x=(4*%pi*%z1-%pi)/2]]$
+[[x=(4*%pi*%z0+%pi)/2,y=0],[x=(4*%pi*%z1-%pi)/2,y=0]]$
 
 ssolve(0.004*(8*%e^((-300)*t)-8*%e^((-1200)*t))*(720000*%e^((-300)*t)-11520000*%e^((-1200)*t))+0.004*(9600*%e^((-1200)*t)-2400*%e^((-300)*t))^2,t);
 0$
