@@ -108,25 +108,25 @@ To be compatible with Maxima, solutions to equations with one variable have the 
 (%o2)	true
 \end{verbatim}
 
-The solutions should involve objects that Maxima functions such as simplification, sign, mapatom, featurep, and declare understand. Although it's tempting to, for example, invent objects such as
-\(x = (1 ... \infty) \uppi\) to represent \(\uppi\) times a nonnegative integer, but then
-\(\sin \left ((1 ... \infty) \uppi \right) \) would not simplify to zero. Not being able to verify a
-solution is undesirble. Thus we attempt to represent solutions as standard Maxima objects.
+The solutions should involve objects that Maxima's core functions such as simplification, sign, mapatom, featurep, and declare understand. Although it's tempting to, for example, invent objects such as
+\(x = (1 ... \infty) \uppi\) to represent \(\uppi\) times a nonnegative integer, but without modifing
+Maxima's simplifer for sine, (\sin \left ((1 ... \infty) \uppi \right) \) would not simplify to zero. This is undesirble. Thus we attempt to represent solutions as standard Maxima objects.
 
-Atoms of the form \%zk, \%rk, and \%ck, where k is a nonnegative integer, represent arbitrary integers, real numbers, and complex numbers, respectively. Here is an example of a solution that involves and arbitrary integer:
+Mapatoms of the form \%zk, \%rk, and \%ck, where k is a nonnegative integer, represent arbitrary integers, real numbers, and complex numbers, respectively. Here is an example of a solution that involves and arbitrary integer:
 \begin{verbatim}
   (%i2)	solve(sin(x)=0,x);
   (%o2)	[x=%pi*%z1]
 \end{verbatim}
-The fact that \%z1 is a declared integer is automatically entered into the fact database.
-
-
+The fact that \%z1 is a declared integer is automatically entered into the fact database into the context 'initial.'
 
 \section{Option variables}
 
+For compatibilty, the goal is to support most of the option variables that directly affect the solve process. These are:
 \begin{description}
 
-\item [breakup ] For now, \altsolve\/ does not implement the breakup option variable.
+\item [algexact] For now, \altsolve\/ does not implement the breakup option variable.
+
+\item [breakup] For now, \altsolve\/ does not implement the breakup option variable.
 
 \item [globalsolve] For now, \altsolve\/ does not implement the globalsolve option variable.
 
