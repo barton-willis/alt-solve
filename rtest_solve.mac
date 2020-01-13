@@ -1950,7 +1950,7 @@ multiplicities;
 
 /* #3276 regression in to_poly_solve */
 solve(Q*sqrt(Q^2 + 2)=1,Q);
-[Q=(-sqrt(2)-1)*sqrt(1-sqrt(2)),Q=(sqrt(2)-1)*sqrt(sqrt(2)+1)]$
+[Q=(sqrt(2)-1)*sqrt(sqrt(2)+1),Q=(-sqrt(2)-1)*sqrt(1-sqrt(2))]$
 
 /* #3234 solve with list of vars */
 
@@ -2196,7 +2196,7 @@ block([solveexplicit : true],
   []$
 
   /* #2779 %solve(sin(x)=tan(x),x) fails */
-  block([solve_ignores_conditions : true], solve(sin(x)=tan(x),x));
+  block([solve_ignores_conditions : true], ssolve(sin(x)=tan(x),x));
   [x=%pi*%z1]$
 
   /* #2773 Spurious solution using arc-trig */

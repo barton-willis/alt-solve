@@ -39,9 +39,8 @@
 	($load "in-domain.lisp")
 	($load "linsolve.lisp")
 	($load "solve_alt_top_level.lisp")
-	($load "grobner"))
-
-
+	($load "grobner")
+	($load "myalgsys"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
 (defun polynomialp (p vars coeffp exponp)
@@ -680,69 +679,67 @@
 	 ($listp e)
 	 (every #'$listp (cdr e))))
 
-(defun mequalp (e)
+;; not sure about when e is CRE?
+(defun mequalp (e) "True iff e is an mequal expression"
   (and (consp e) (consp (car e)) (eql (caar e) 'mequal)))
 
 ;;; Solve a triangular system of equations eqs for the variables vars. Specifially, eqs is a CL
-;; list of Maxima sets; vars is a CL list of mapatoms; and subs is a CL list of solutions so far.
-(defun solve-triangular-system (eqs vars &optional (subs nil))
-    (assert (every #'$setp eqs))
-		(assert (every #'$mapatom vars))
-    (assert (every #'mequalp subs))
+;;; list of Maxima sets and vars is a CL list of mapatoms. We return a CL list of CL lists of the form
+;;; ((x=5,y=42), (x=107,y=12)), for example. The CL list of Maxima sets eqs has a special structure.
+;;; The set of variables in the n-th set is a proper subset of the set of variables in all
+;;; subsquent sets.
+(defun solve-triangular-system (eqs vars)
+		;(mtell "Top of solve-triangular-system ~%")
+	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars) (freesol nil))
 
-		(mtell "Top of solve-triangular-system ~%")
+		   (cond ((null eqs)
+				        ;; No equations to solve, so all variables are free.
+								;; Return ((var1 = %r1 var2 = %r2...varn = %rn))
+				        ;; (mtell "null equations ~%")
+								(list (mapcar #'(lambda (s) (take '(mequal) s (next-rnum-variable))) vars)))
 
-	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (freevars) (ssol nil))
-
-	     (cond ((null eqs) ; no more equations-all variables are free. So append them to subs and return
-				        (mtell "null equations ~%")
-	              (append subs (mapcar #'(lambda (s) (take '(mequal) s (next-rnum-variable))) vars)))
-
-	           ((every #'zerop1 (cdr (first eqs))); first equation is a set of zeros--move on to next equation
+	           ((every #'zerop1 (cdr (first eqs)))
+						     ;; The first equation is a set of zeros--move on to next equation
 							   (mtell "trival equation = ~M ~%" (first eqs))
-	               (solve-triangular-system (rest eqs) vars subs))
+	               (solve-triangular-system (rest eqs) vars)) ; remove first equation & solve the rest
 
-	           ((null vars)
-               (mtell "null vars ~%")
-							 nil) ; no unknowns but remaining nontrival equation(s)--return nil
+						 (t
+							 ;; find intersection of variables in 1st equation and the unknowns.
+							 (setq eqvars ($intersection
+								            ($setify ($listofvars (first eqs)))
+											  		(simplifya (cons '($set) vars) t)))
 
-	           (($freeof (first vars) (first eqs)) ; first equation is freeof the first variable
-							    (mtell "equation ~M is free of ~M ~%" (first eqs) (first vars))
-	                (setq x (pop vars)) ; x is a free variable, pop it off & solve it
-	                (setq sol (take '(mequal) x (next-rnum-variable))) ; x = %rXXX
-	                (setq eqs (mapcar #'(lambda (q) ($substitute sol q)) eqs))
-	                (push sol subs) ;push sol into substitute & call solve-triangular-system
-	                (solve-triangular-system eqs vars subs))
+							 (cond (($emptyp eqvars)
+						        	 ;; No unknowns but remaining nontrival equation(s), so return nil
+					        		 (mtell "assuming nonzero ~M ~%" (cons '(mlist) eqs))
+					       	 	   nil)
+										 (t
+											 (setq vars (simplifya (cons '($set) vars) t))  ; vars is now a set.
+									     (setq vars ($setdifference vars eqvars)) ; remove eqvars from unknowns
+											 (setq vars (cdr vars)) ;return vars to a CL list.
+											 (setq eqvars (cdr eqvars)) ;return eqvars to a CL list
+	               			 (setq x (pop eqvars)) ; could choose any variable?
+	               			 (setq e (pop eqs))
+											 (setq free-sol nil)
+											 (dolist (ex eqvars) ;all remaining variables in eqvars are free!
+											    (push (take '(mequal) ex (next-rnum-variable)) free-sol))
 
-	            (t ; first equation depends on first variable
-	                (setq x (pop vars))
-	                ;; find all free variables in first equation
-	                (setq freevars (delete x (intersection (cdr ($listofvars (first eqs))) vars)))
-	                (dolist (xf freevars)
-	                     (setq vars (delete xf vars)) ; xf is free--remove it from list of unknowns
-	                     (setq sol (take '(mequal) xf (next-rnum-variable)))
-	                     (setq eqs (mapcar #'(lambda (s) ($substitute sol s)) eqs))
-	                     (push sol subs)) ; push the solution into subs
-
-	               (setq e (pop eqs)) ; the cdr removes '($set)
-								 (mtell "Going to solve ~M for ~M ~%" e x)
-	              ;; (setq sol (redundant-equation-solve e x)) ; finally get to solve an equation!
-							   (setq sol (cond ((eql 1 ($cardinality e))
-								                  (mtell "dispatch solve-single-equation on ~M ~%" e)
+					        		 (setq sol (cond ((eql 1 ($cardinality e))
+								                  ;(mtell "dispatch solve-single-equation on ~M ~%" e)
 								                  (solve-single-equation (cadr e) x))
 																(t
 																	(redundant-equation-solve e x))))
-								 (mtell "Got a solution; it is ~M ~%" sol)
-							   (setq sol (cdr sol)) ; remove (mlist)
-								 (setq ssol nil)
-	               (dolist (sx sol)
-	                   (setq ssol (append
-	                                 ssol
-	                                 (solve-triangular-system
-	                                    (mapcar #'(lambda (s) ($substitute sx s)) eqs) vars (cons sx subs)))))
-
-	               ssol))))
-
+			 		        	   (setq sol (cdr sol)) ; remove (mlist)
+					      			 (setq sol (append free-sol sol)) ;bogus?
+						    		   (setq ssol nil)
+	                     (dolist (sx sol)
+								          ;; Don't panic! We have popped one equation and at least one variable.
+								           (setq ssol
+								   	    		 (append ssol
+								        	   (mapcar #'(lambda (q) (cons sx q))
+							    	        	  (solve-triangular-system
+												         	(mapcar #'(lambda (s) ($substitute sx s)) eqs) vars)))))
+	                       ssol))))))
 
 
 (defun solvex (eql varl ind flag &aux ($algebraic $algebraic))
@@ -797,7 +794,7 @@
   	(cond  ((every #'(lambda (q) ($polynomialp q x
 			    	#'(lambda (s) ($lfreeof x s))
 	   			  #'(lambda (s) (and (integerp s) (>= s 0))))) (cdr e))
-						(mtell "solve-multiple-equations is dispatching algsys ~%")
+						;(mtell "solve-multiple-equations is dispatching algsys ~%")
 						(setq sol ($algsys e x))
 						(unkeep-float sol))
 		 		(t
@@ -805,16 +802,9 @@
 	  			 (setq e ($setify e))
 	  			 (setq x ($setify x))
 	  			 (setq e (triangularize-eqs e x))
-					 ;;(displa `((mequal) e ,e))
 	  			 (setq sol (let (($solve_ignores_conditions t)) (solve-triangular-system (cdr e) (cdr x))))
-					 ;;(print "returned from solve-triangular-system")
-					 ;;(print `(sol1 = ,sol))
-					 (setq sol (cons '(mlist) sol))
-					 (setq sol (cons '(mlist) (list sol)))
-					 ;;(setq sol (mapcar #'(lambda (s) (cons '(mlist) s)) sol))
-					 ;;(print `(sol2 = ,sol))
-					; (setq sol (unkeep-float sol))
-					 (if sol sol ee)))))
+					 (setq sol (mapcar #'(lambda (q) (cons '(mlist) q)) sol))
+					 (if sol (simplifya (cons '(mlist) sol) t) ee)))))
 
 ;;; This is the entry-level function for system level calls to solve. Solutions are pushed into the
 ;;; special variable *roots.
@@ -850,7 +840,7 @@
 
 (defvar $list_of_equations nil)
 (defun solve (e x ms)
-  ;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
+  ;;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
 	(push (list e x) $list_of_equations) ; debugging-like thing
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
@@ -862,9 +852,10 @@
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
-				 ;(displa (mfuncall '$facts))
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
+				 (mtell "solution  = ~M ~%" sol)
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
+
 				 (setq m (cond (($listp $multiplicities)
 								(mapcar #'(lambda (q) (mul ms q)) (cdr $multiplicities)))
 							 (t

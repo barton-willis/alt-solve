@@ -3,6 +3,7 @@ ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_r
 0$
 
 (ssolve(e,x) := block([sol : nicedummies(solve(e,x))], if listp(sol) then sort(sol) else sol),0);
+0$
 
 /* Test for bug #4 desolve('diff(f(x),x,2)+f(x)=2*x,f(x)); */
 desolve('diff(f(x),x,2)+f(x)=2*x,f(x));
@@ -16,7 +17,7 @@ f(x)=sin(x)*(at('diff(f(x),x,1),x=0)-2)+f(0)*cos(x)+2*x$
 trigexpand(expand(subst(first(sol),sin(x)=1/2)));
 1/2 = 1/2$
 
-(sol : solve(tan(x)=1,x),0)
+(sol : solve(tan(x)=1,x),0);
 0$
 
 trigexpand(expand(subst(first(sol),tan(x) = 1)));
@@ -24,8 +25,57 @@ trigexpand(expand(subst(first(sol),tan(x) = 1)));
 
 /* tests for the exponential solver */
 
-ssolve(2^x + 4^x = 6,x);
-[x=(2*%i*%pi*%z0+log(2))/log(2),x=(2*%i*%pi*%z1+log(-3))/log(2)]$
+(sol : ssolve(2^x + 4^x = 6,x),0);
+0$
 
-ssolve(%e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2),yx);
-[yx=(2*%i*%pi*%z2+log(%i/sqrt(6)))/log(-4)]$
+map(lambda([s], radcan(rectform(subst(s, 2^x+4^x=6)))), sol);
+[6=6,6=6]$
+
+sol : ssolve(%e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2),yx);
+[yx=4*%i*%pi*%z0+2*log(2)+2*%i*%pi,yx=4*%i*%pi*%z1+2*log(2)]$
+
+/* and let's check these soltuions!*/
+trigsimp(rectform(subst(first(sol), %e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2))));
+0$
+
+trigsimp(rectform(subst(second(sol), %e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2))));
+0$
+
+(remvalue(sol),0);
+0$
+
+/* Equation Hall of Shame: my most wanted */
+ssolve([y*sin(x)=0,cos(x)=0],[x,y]);
+[[x=(4*%pi*%z0+%pi)/2,y=0],[x=(4*%pi*%z1-%pi)/2,y=0]]$
+
+ssolve(0.004*(8*%e^((-300)*t)-8*%e^((-1200)*t))*(720000*%e^((-300)*t)-11520000*%e^((-1200)*t))+0.004*(9600*%e^((-1200)*t)-2400*%e^((-300)*t))^2,t);
+0$
+
+ssolve([abs(a00-4*a02)=1,abs(a00-4*a01+4*a02)=1,abs(a00+4*a01+4*a02)=1],[a00,a01,a02]);
+[[a00=-1,a01=0,a02=0],[a00=(-1)/2,a01=(-1)/4,a02=1/8],[a00=(-1)/2,a01=1/4,a02=1/8],[a00=0,a01=0,a02=(-1)/4],[a00=0,a01=0,a02=1/4],[a00=1/2,a01=(-1)/4,a02=(-1)/8],[a00=1/2,a01=1/4,a02=(-1)/8],[a00=1,a01=0,a02=0]]$
+
+/* fixing this requires (a) rethinking the keep-float, unkeep-float mechanism. The
+function algsys can't deal with the polynomial with a boxed number all that well. Also,
+I think that the system for checking that denominators don't vanish is turned off--so
+q=-3 and q=3 are solutions.  Finally, algsys gets a 6th degree polynomial that is
+solvable in terms of radials, but algsys gives up. So lots of issues to resolve. */
+ssolve([(10*q)/sqrt(q^2+3)-(5*q^3)/(q^2+3)^(3/2)=5.07],[q]);
+[q=1.423962227031281,q=10.01077844311377,q=(-2.201201253088263)*%i]$
+
+ssolve([x2=x*cos(phi)-y*sin(phi),y2=x*sin(phi)+y*cos(phi)],[x,y])$
+[[x=sin(phi)*y2+cos(phi)*x2,y=cos(phi)*y2-sin(phi)*x2]]$
+
+ssolve([x+3*y=5,sqrt(x+y)-1=y],[x,y]);
+[[x=11-6*sqrt(2),y=2*sqrt(2)-2]]$
+
+ssolve([abs(x*y-1)=a,a^2-x*y],[x*y,a]);
+[[x*y=-(sqrt(5)-3)/2,a=(sqrt(5)-1)/2],[x*y=(sqrt(5)+3)/2,a=(sqrt(5)+1)/2]]$
+
+block([keepfloat:true],solve(%e^(0.0057195*x)+%e^((-0.0057195)*x)=1,x));
+[x=174.8404580820002*log((sqrt(3)*%i+1)/2),x=174.8404580820002*log((-(sqrt(3)*%i-1))/2)]$
+
+block([solve_inverse_package:single_valued_inverse],solve([x/(x+y),x/(x+y)+log(x+y)],[x,y]));
+[[x=0,y=1]]$
+
+solve([x=p*cos(q),y=p*sin(q)],[p,q]);
+[p=sqrt(x^2+y^2) and q=atan2(y,x)]$
