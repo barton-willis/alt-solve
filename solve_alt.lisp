@@ -216,12 +216,10 @@
 
 (defun equation-simplify (e &optional (m 1))
 	(setq e ($ratdisrep (meqhk e))) ;do a=b -->a-b & convert to general form
-
 	(when $solveradcan ;unsure when is the best time to do this...let's get it done.
 		(setq e ($radcan e)))
-
 	(cond
-		((and (mexptp e) (integerp (third e)) (> (third e) 0)) ; do z^n --> z when n is a positive integer
+		((and (mexptp e) (mnump (third e)) (mgrp (third e) 0)) ; do z^n --> z when n is a positive integer
 		 (equation-simplify (second e) (mul m (third e))))
 
 		(t
@@ -744,9 +742,12 @@
 												         	(mapcar #'(lambda (s) ($substitute sx s)) eqs) vars)))))
 	                       ssol))))))
 
-
-(defun solvex (eql varl ind flag &aux ($algebraic $algebraic))
-   (merror "Called old solvex--this is a bug."))
+;;; We replace solvex with a call to $solve -- I need to look up the meanings of ind and flag.
+(defun solvex (eql varl ind flag)
+	(mtell "Top of solvex ind = ~M flag = ~M ~%" ind flag)
+	(setq eql (simplifya (cons '(mlist) eql) t))
+	(setq varl (simplifya (cons '(mlist) varl) t))
+   ($solve eql varl))
 
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
@@ -822,7 +823,7 @@
 				($use_to_poly t)
 				($realonly nil)
 				($negdistrib t) ;not sure about this?
-				(*solve-factors-biquadratic* t) ;;(not (boundp '*defint-assumptions*)))
+				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
