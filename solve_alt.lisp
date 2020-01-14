@@ -219,7 +219,7 @@
 	(when $solveradcan ;unsure when is the best time to do this...let's get it done.
 		(setq e ($radcan e)))
 	(cond
-		((and (mexptp e) (mnump (third e)) (mgrp (third e) 0)) ; do z^n --> z when n is a positive integer
+		((and (mexptp e) (mnump (third e)) (mgrp (third e) 0)) ; do z^n --> z when n is a positive mnump
 		 (equation-simplify (second e) (mul m (third e))))
 
 		(t
