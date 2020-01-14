@@ -822,6 +822,7 @@
 				($use_to_poly t)
 				($realonly nil)
 				($negdistrib t) ;not sure about this?
+				(*solve-factors-biquadratic* t) ;;(not (boundp '*defint-assumptions*)))
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
