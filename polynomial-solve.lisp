@@ -253,6 +253,7 @@
 		 ;; Factoring isn't a universal win; for example x^105-1=0. So before we factor, look for equations of the
 		 ;; form ax^n+b with n > 4. We could allow n to be any positive integer, but this causes more testsuite
 		 ;; failures.
+
 		 (setq sol (solve-poly-x^n+b e x mx))
 		 (cond (sol
 				(simplifya (cons '(mlist) sol) t))
@@ -275,6 +276,8 @@
 						 (incf k 1))
 
 				  (push x cfs)
+
+
 				(multiple-value-bind (zzz mss)
 					(cond
 						((eql n 0)

@@ -28,9 +28,12 @@
 						(msetq $context '$initial)
 						($new_variable knd))
 				(msetq $context cntx))))
-
-(eval-when
-	(:compile-toplevel :load-toplevel :execute)
+;;; For testing, we need to be sure to expunge all current solve code. To do this with SBCL, I think
+;;; we need to set SBCL to INTERPRET mode and load solve and algsys.
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  #+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
+	($load "solve")
+	($load "algsys")
 	($load "to_poly_solve")
 	($load "function-inverses.lisp")
 	(setq $solve_inverse_package $multivalued_inverse)
@@ -743,36 +746,7 @@
 
 
 (defun solvex (eql varl ind flag &aux ($algebraic $algebraic))
-
-  (declare (special xa*))
-	  (mtell "top of old solvex ~%")
-  (prog (*varl ans varlist genvar xm* xn* mul*)
-     (setq *varl varl)
-     (setq eql (mapcar #'(lambda (x) ($ratdisrep ($ratnumer x))) eql))
-     (cond ((atom (ignore-rat-err (formx flag 'xa* eql varl)))
-	    ;; This flag is T if called from SOLVE
-	    ;; and NIL if called from LINSOLVE.
-	    (cond (flag (return ($algsys (make-mlist-l eql)
-					 (make-mlist-l varl))))
-		  (t (merror (intl:gettext "linsolve: cannot solve a nonlinear equation."))))))
-     (setq ans (tfgeli 'xa* xn* xm*))
-     (if (and $linsolvewarn (car ans))
-	 (mtell (intl:gettext "~&solve: dependent equations eliminated: ~A~%") (car ans)))
-     (if (cadr ans)
-	 (return '((mlist simp))))
-     (do ((j 0 (1+ j)))
-	 ((> j xm*))
-       ;;I put this in the value cell--wfs
-       (setf (aref xa* 0 j) nil))
-     (ptorat 'xa* xn* xm*)
-     (setq varl
-	   (xrutout 'xa* xn* xm*
-		    (mapcar #'(lambda (x) (ith varl x))
-			    (caddr ans))
-		    ind))
-     (if $programmode
-	 (setq varl (make-mlist-l (linsort (cdr varl) *varl))))
-     (return varl)))
+   (merror "Called old solvex--this is a bug."))
 
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
@@ -848,12 +822,11 @@
 				($use_to_poly t)
 				($realonly nil)
 				($negdistrib t) ;not sure about this?
-				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
-				 (mtell "solution  = ~M ~%" sol)
+				 ;(mtell "solution  = ~M ~%" sol)
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
 
 				 (setq m (cond (($listp $multiplicities)

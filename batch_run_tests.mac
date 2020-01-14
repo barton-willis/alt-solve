@@ -1,8 +1,4 @@
 build_info();
-_
-:lisp(setq sb-ext:*evaluator-mode* :INTERPRET)
-
-load(solve)$
 
 load(solve_alt)$
 
