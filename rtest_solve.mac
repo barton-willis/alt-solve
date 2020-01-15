@@ -837,7 +837,7 @@ ssolve(cos(x)=1/2,x);
 [x=(6*%pi*%z0+%pi)/3,x=(6*%pi*%z1-%pi)/3]$
 
 ssolve(sin(x) = cos(x), x);
-[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
+[x=-((8*%pi*%z0-%pi)/4),x=-((8*%pi*%z1+3*%pi)/4)]$
 
 ssolve(tan(x) = 1, x);
 [x=(4*%pi*%z0+%pi)/4]$
@@ -871,7 +871,7 @@ ssolve(cos(x)^2 + sin(x)^2 = 1,x);
 /* trig polynomials */
 
 ssolve(sin(x) * cos(x) = sin(%pi/4) * cos(%pi/4),x);
-[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
+[x=-((8*%pi*%z0-%pi)/4),x=-((8*%pi*%z1+3*%pi)/4)]$
 
 ssolve(sin(x)=sin(2),x);
 [x=2*%pi*%z0+%pi-2,x=2*%pi*%z1+2]$
@@ -1057,7 +1057,7 @@ ssolve(cosh(x) = 0,x);
 [x=2*%i*%pi*%z0-(%i*%pi)/2,x=2*%i*%pi*%z1+(%i*%pi)/2]$
 
 ssolve(cosh(x) - sinh(2*x)/2 = 0,x);
-[x=-(4*%i*%pi*%z0+%i*%pi)/2,x=-(4*%i*%pi*%z1-%i*%pi)/2,x=-2*%i*%pi*%z2-log(sqrt(2)+1)-%i*%pi,
+[x=-((4*%i*%pi*%z0+%i*%pi)/2),x=-((4*%i*%pi*%z1-%i*%pi)/2),x=-2*%i*%pi*%z2-log(sqrt(2)+1)-%i*%pi,
 x=-2*%i*%pi*%z3-log(sqrt(2)-1)]$
 
 ssolve(sinh(x) + cosh(x) = 1,x);
@@ -1066,13 +1066,13 @@ ssolve(sinh(x) + cosh(x) = 1,x);
 /* miscellaneous */
 
 ssolve(sin(x) = cos(x), x);
-[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
+[x=-((8*%pi*%z0-%pi)/4),x=-((8*%pi*%z1+3*%pi)/4)]$
 
 ssolve(42*cos(x)+sin(x)=42*cos(%pi/4)+sin(%pi/4),x);
-[x=-2*%pi*%z0-atan(1679/1847),x=-(8*%pi*%z1-%pi)/4]$
+[x=-2*%pi*%z0-atan(1679/1847),x=-((8*%pi*%z1-%pi)/4)]$
 
 ssolve(sin(x)*cos(x) = 1/2, x);
-[x=-(8*%pi*%z0-%pi)/4,x=-(8*%pi*%z1+3*%pi)/4]$
+[x=-((8*%pi*%z0-%pi)/4),x=-((8*%pi*%z1+3*%pi)/4)]$
 
 trigrat(subst(x=-(8*%pi*%z0-%pi)/4,sin(x)*cos(x) = 1/2));
 1/2=1/2$
@@ -1088,7 +1088,7 @@ x=%i*log((sqrt(13)-2*sqrt((sqrt(13)-1)/2)+1)/4)-2*%pi*%z4,
 x=%i*log((sqrt(13)+2*sqrt((sqrt(13)-1)/2)+1)/4)-2*%pi*%z5]$
 
 ssolve(sin(2*x) + cos(2*x) = 1,x);
-[x=-%pi*%z0,x=-(4*%pi*%z1-%pi)/4]$
+[x=-%pi*%z0,x=-((4*%pi*%z1-%pi)/4)]$
 
 ssolve(sin(x) * (x + 1), x);
 [x=-1, x=%pi*%z0]$
@@ -1230,10 +1230,10 @@ ssolve(x - 2 * sqrt (x) = 10,x);
 
 /* Thu, Aug 28, 2008 at 8:57 AM, sage-support */
 ssolve([x=0, 1-exp(y)=0],[x,y]);
-[[y=2*%i*%pi*%z0,x=0]]$
+[[x=0,y=2*%i*%pi*%z0]]$
 
 ssolve([y*sin(x)=0, cos(x)=0],[x,y]);
-[x=(2*%pi*%z0+%pi)/2,y=0]$
+[[x=(4*%pi*%z0+%pi)/2,y=0],[x=(4*%pi*%z1-%pi)/2,y=0]]$
 
 ssolve(0.004*(8*%e^(-300*t)-8*%e^(-1200*t))*(720000*%e^(-300*t)-11520000*%e^(-1200*t))+0.004*(9600*%e^(-1200*t)-2400*%e^(-300*t))^2,t);
 [t=(2*%i*%pi*%z0+log(25/4-(3*sqrt(41))/4))/900,t=(2*%i*%pi*%z1+log((3*sqrt(41))/4+25/4))/900]$
