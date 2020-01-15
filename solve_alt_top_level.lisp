@@ -49,3 +49,22 @@
                 (intl:gettext
                    (mtell "Solve: returning nonlist solution to equation ~M for unknown ~M ~%" e x))
                 sol))))
+
+;;; Experimental function that solves an equation and attemps to determine if each solution
+;;; is consistent with the fact database. We use featurep to decide check declared facts--especially
+;; for real values, featurep isn't all that smart.
+(defun $solve_filter (e x)
+  (let ((sol (cdr ($solve e x))) (fcts) (ssol nil) (chk) ($opsubst t))
+     (setq x (if (or ($listp x) ($setp x)) (cdr x) (list x)))
+     (setq fcts (simplifya (cons '(mand) (mapcan #'(lambda (q) (cdr ($facts q))) x)) t))
+     (dolist (sx sol)
+        (setq chk ($substitute sx fcts))
+        (setq chk ($substitute '$featurep '$kind chk))
+        (setq chk (mfuncall '$maybe chk))
+        (cond ((eql chk t)
+               (push sx ssol))
+              ((eql chk '$unknown)
+                (intl:gettext
+                  (mtell "Solve: unable to verify solution ~M is consistent with fact database ~%" sx))
+                (push sx ssol))))
+      (simplifya (cons '(mlist) ssol) t)))

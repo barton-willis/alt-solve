@@ -4,7 +4,9 @@ load(solve_alt)$
 
 file_search_tests : append(file_search_maxima, file_search_tests)$
 
-/*push("rtest_solve", testsuite_files)$
+push("rtest_solve2", testsuite_files)$
+
+push("rtest_solve", testsuite_files)$
 
 push("rtest_linsolve", testsuite_files)$
 
@@ -15,6 +17,6 @@ share_testsuite_files : delete(["rtest_sym",[15]], share_testsuite_files)$
 share_testsuite_files : delete("rtest_diff_form", share_testsuite_files)$
 
 /* slow & likely cases an error break ? */
-share_testsuite_files : delete(["rtest_simplify_sum",[57]], share_testsuite_files)$ */
+share_testsuite_files : delete(["rtest_simplify_sum",[57]], share_testsuite_files)$
 
- run_testsuite();
+ run_testsuite(share_tests=true);

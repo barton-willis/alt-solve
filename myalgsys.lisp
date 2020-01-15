@@ -8,7 +8,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
    ($load "grobner"))
 
-(defun $algsys (ee x)
+(defun $myalgsys (ee x)
    (mtell "Top of my algsys; eq = ~M  x = ~M  ~%" ee x)
    (setq ee (unkeep-float ee))
    ;;merror when ee or x isn't a Maxima list.

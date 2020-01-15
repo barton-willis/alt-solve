@@ -64,11 +64,12 @@ We do \emph{not} aim
 \item to build a platform that could be used to display the steps done to find the solution.
 
 \end{alphalist}
+
 Our development priorities are (in order from highest to least)
 
 \begin{alphalist}[]
 
-\item to write source code (Common Lisp) that is easy to extend and to fix,
+\item to write  Common Lisp source codethat is easy to extend and to fix,
 
 \item to have a modest code size,
 
@@ -83,14 +84,28 @@ Our development priorities are (in order from highest to least)
 
 Type declarations on the unknown do not limit the solution set to include only the declared type. For
 example if \(x\) is declared to be an integer, a solution set for an equation involving \(x\) may include
-noninteger values. In such cases, the user will need to filter the solution set for the solutions that are
-consistent with declared type. The function \texttt{sublist} can help with filtering.
+noninteger values. Within the solve process, a type declaration might be used during simplification. So it is possible that a type declaration for an unknown will alter the solution set, but again, the solution set is free to contain members that do not satisfy the declared types (if any) of the unknowns.
 
-Within the solve process, the type declaration might be used during simplification. So it is possible
-that a type declaration for an unknown will alter the solution set, but again, the solution set is free
-to contain members that do not satisfy the declared types (if any) of the unknowns.
+Setting the option variable \texttt{domain} to real (its default) does not limit the solution set to contain only real values. Again, internal to the solve process, the value of \texttt{domain} might affect simplications--so it is possible that the value of \texttt{domain} will affect a solution set.
 
 Similarly, inequality assumptions on the unknown (for example assume( \(0 < x, x < 1\)) do not limit the solution set to values that satisfy the assumptions in the fact database. But again, simplifications that are done in the solve process may use the fact database.
+
+An experimental function \texttt{solve\_filter} attemps to filter out solutions that are inconsistent with the fact database. Especially for deciding if a solution is real, the \texttt{featurep} based mechanism is weak.
+
+\begin{verbatim}
+  (%i2)	declare(x, real)$
+
+  (%i3)	solve_filter(x^3 + x + 9=0,x);
+  (%o3)	[x=-(((3*(sqrt(6573)+81))/2)^(1/3)-3/((3*(sqrt(6573)+81))/2)^(1/3))/3]
+
+  (%i4)	solve_filter(x^2 + x + a = 0,x);
+  (%o4)	[]
+
+  (%i5)	assume(0<a, a<1/4)$
+
+  (%i6)	solve_filter(x^2 + x+ a,x);
+  (%o6)	[x=(sqrt(1-4*a)-1)/2,x=-(sqrt(1-4*a)+1)/2]
+\end{verbatim}
 
 \section{Solve is an ordinary function}
 
