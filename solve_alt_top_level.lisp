@@ -52,7 +52,9 @@
 
 ;;; Experimental function that solves an equation and attemps to determine if each solution
 ;;; is consistent with the fact database. We use featurep to decide check declared facts--especially
-;; for real values, featurep isn't all that smart.
+;;; for real values, featurep isn't all that smart.
+
+;;; One issue: when sol = $all
 (defun $solve_filter (e x)
   (let ((sol (cdr ($solve e x))) (fcts) (ssol nil) (chk) ($opsubst t))
      (setq x (if (or ($listp x) ($setp x)) (cdr x) (list x)))
@@ -68,3 +70,12 @@
                   (mtell "Solve: unable to verify solution ~M is consistent with fact database ~%" sx))
                 (push sx ssol))))
       (simplifya (cons '(mlist) ssol) t)))
+
+(defun sort-lists (e)
+   (cond (($listp e)
+          ($sort (cons '(mlist) (mapcar #'sort-lists (cdr e)))))
+        (t e)))
+        
+;;; Solve and sort solutions
+(defun $ssolve (e x)
+   (let (($%rnum 0)) (sort-lists ($nicedummies ($solve e x)))))
