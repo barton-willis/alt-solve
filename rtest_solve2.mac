@@ -2,9 +2,6 @@
 ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_run_time (), 0);
 0$
 
-(ssolve(e,x) := block([sol : nicedummies(solve(e,x))], if listp(sol) then sort(sol) else sol),0);
-0$
-
 /* Test for bug #4 desolve('diff(f(x),x,2)+f(x)=2*x,f(x)); */
 desolve('diff(f(x),x,2)+f(x)=2*x,f(x));
 f(x)=sin(x)*(at('diff(f(x),x,1),x=0)-2)+f(0)*cos(x)+2*x$

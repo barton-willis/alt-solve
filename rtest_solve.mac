@@ -88,9 +88,6 @@ ratsimp(subst(linsolve(eqs,[x,y,z]),eqs));
 contexts;
 [initial,global]$
 
-(ssolve(e,x) := block([sol : nicedummies(solve(e,x))], if listp(sol) then sort(sol) else sol),0);
-0$
-
 errcatch(solve());
 []$
 

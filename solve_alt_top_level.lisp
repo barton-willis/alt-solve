@@ -75,7 +75,7 @@
    (cond (($listp e)
           ($sort (cons '(mlist) (mapcar #'sort-lists (cdr e)))))
         (t e)))
-        
-;;; Solve and sort solutions
+
+;;; Solve and sort solutions--especially useful for rtest files
 (defun $ssolve (e x)
    (let (($%rnum 0)) (sort-lists ($nicedummies ($solve e x)))))
