@@ -8,8 +8,18 @@
 
 (defvar *function-inverses* (make-hash-table))
 
+(defun power-inverse-standard-xxx (q a)
+  (mtell "top of power-inverse-standard q = ~M  a = ~M ~%" q a)
+	(let ((mag-q (take '(mexpt) (mul q (take '($conjugate) q)) (div 1 2)))
+	      (ph (take '($parg) q)))
+
+      (mtell "mag-q = ~M  phase = ~M ~%" mag-q ph)
+			(list (mul (take '(mexpt) mag-q (div 1 a))
+				(take '(mexpt) '$%e (mul '$%i (div (add ph
+					(mul 2 '$%pi (my-new-variable '$integer))) a)))))))
+
 (defun power-inverse-standard (q a)
-  ;(mtell "top of power-inverse-standard q = ~M  a = ~M ~%" q a)
+  (mtell "top of power-inverse-standard q = ~M  a = ~M ~%" q a)
 	(let ((kmax) (kmin) (sol nil) (xxx) (ph) (cnd) (ok) ($m1pbranch t) ($domain '$complex))
 
 		 (cond
@@ -35,6 +45,7 @@
 			  (setq kmax (take '($floor) (sub (div (take '(mabs) a) 2) (div (take '($parg) q) (mul 2 '$%pi)))))
 			  (setq kmin (sub (div (take '(mabs) a) -2) (div (take '($parg) q) (mul 2 '$%pi))))))
 
+     (displa `((mlist) ,kmin ,kmax))
 		 (cond
 			 ((and (zerop1 q) (mgrp a 0)) (list 0)) ;x^a = 0, where a >0
 			 ((and (zerop1 q) (mgrp 0 a)) nil) ;x^a = 0, where a < 0
@@ -46,6 +57,7 @@
 			  sol)
 
 			 (t
+				 (mtell "doing plain power")
 			  ;;; problem: solve(abs(x^2-1) = ha ,x)
 			  (list (take '(mexpt) q (div 1 a)))))))
 

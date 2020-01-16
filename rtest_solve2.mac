@@ -76,3 +76,9 @@ block([solve_inverse_package:single_valued_inverse],solve([x/(x+y),x/(x+y)+log(x
 
 solve([x=p*cos(q),y=p*sin(q)],[p,q]);
 [p=sqrt(x^2+y^2) and q=atan2(y,x)]$
+
+ssolve([x+10*y,z+w,(z-2*z)^2,(z-w)^2],[w,x,y,z]);
+[[w = 0, x = %r1 , y = -(%r1/10), z = 0]]$
+
+algsys([x+10*y,sqrt(5)*(z-w),(y-2*z)^2,sqrt(10)*(x-w)^2],[w,x,y,z]);
+[[w=0,x=0,y=0,z=0]]$

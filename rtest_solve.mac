@@ -1078,9 +1078,9 @@ trigrat(subst(x=-(8*%pi*%z1+3*%pi)/4,sin(x)*cos(x) = 1/2));
 1/2=1/2$
 
 ssolve(cos(3*x)-2*cos(2*x)+cos(x)=1/2,x);
-[x=-(6*%pi*%z0-%pi)/3,x=-(6*%pi*%z1+%pi)/3,
-x=-2*%pi*%z2-atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))-%pi,
-x=-2*%pi*%z3+atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))-%pi,
+[x=-((6*%pi*%z0-%pi)/3),x=-((6*%pi*%z1+%pi)/3),
+x=-(2*%pi*%z2)-atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))-%pi,
+x=-(2*%pi*%z3)+atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))-%pi,
 x=%i*log((sqrt(13)-2*sqrt((sqrt(13)-1)/2)+1)/4)-2*%pi*%z4,
 x=%i*log((sqrt(13)+2*sqrt((sqrt(13)-1)/2)+1)/4)-2*%pi*%z5]$
 
@@ -1390,13 +1390,13 @@ ssolve(a*x=b, x);
 [x=b/a]$
 
 block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
-[[x=%r1,a=%i*%r1],[x=%r2,a=-%i*%r2]]$
+[[a=%i*%r1,x=%r1],[a=-%i*%r2,x=%r2]]$
 
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
-[[x=%r0,a=-((sqrt(2)*%i-sqrt(2))*%r0)/2],
-[x=%r1,a=((sqrt(2)*%i+sqrt(2))*%r1)/2],
-[x=%r2,a=((sqrt(2)*%i-sqrt(2))*%r2)/2],
-[x=%r3,a=-((sqrt(2)*%i+sqrt(2))*%r3)/2]]$
+[[a=-(((sqrt(2)*%i-sqrt(2))*%r0)/2),x=%r0],
+[a=((sqrt(2)*%i+sqrt(2))*%r1)/2,x=%r1],
+[a=((sqrt(2)*%i-sqrt(2))*%r2)/2,x=%r2],
+[a=-(((sqrt(2)*%i+sqrt(2))*%r3)/2),x=%r3]]$
 
 ssolve((x-1)/(x+1) = 1, [x]);
 []$
@@ -1422,7 +1422,7 @@ ssolve(x^2+2*x+sqrt(5),x);
 /* nonsymbol solve */
 
 ssolve([x^2 + y^2 + x*y = 1, x^2 * y^2 = 2],[x^2 + y^2, x*y]);
-[[x*y=-(x^4-x^2+2)/x^2,y^2+x^2=(x^4+2)/x^2]]$
+[[x*y=-((x^4-x^2+2)/x^2),y^2+x^2=(x^4+2)/x^2]]$
 
 ssolve([x + x*y = a, x*y = 8],[x,x*y]);
 [[x=a-8,x*y=8]]$
@@ -1543,10 +1543,10 @@ solve(x * log(x) = a,x);
 /* one-to-one cruncher & related */
 
 ssolve(exp(x) = exp(x^2-1),x);
-[x=-((sqrt(5-8*%i*%pi*%z0)-1)/2),x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
+[x=-((sqrt(-8*%i*%pi*%z0-8*log(-1)+5)-1)/2),x=(sqrt(-8*%i*%pi*%z0-8*log(-1)+5)+1)/2]$
 
-solve(exp(x) - exp(x^2-1),x);
-[x=-((sqrt(5-8*%i*%pi*%z0)-1)/2),x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
+ssolve(exp(x) - exp(x^2-1),x);
+[x=-((sqrt(-8*%i*%pi*%z0-8*log(-1)+5)-1)/2),x=(sqrt(-8*%i*%pi*%z0-8*log(-1)+5)+1)/2]$
 
 solve(x = sqrt(x) -1/4,x);
 [x=1/4]$
@@ -2043,7 +2043,7 @@ block(
 
 /* #2038 Elementary Algsys/Solve bug */
 ssolve([y^2+x^2-1,y^2+(1-sqrt(3))*y+x^2+2],[y,x]);
-[[y=(3^(3/2)+3)/2,x=-sqrt(-2*3^(5/2)-32)/2],[y=(3^(3/2)+3)/2,x=sqrt(-2*3^(5/2)-32)/2]]$
+[[x=-(sqrt(-2*(3^(5/2))-32)/2),y=(3^(3/2)+3)/2],[x=sqrt(-2*(3^(5/2))-32)/2,y=(3^(3/2)+3)/2]]$
 
 /* #1988 solve returns nonlinear solution to linear equations */
 block([%rnum : 0], solve([-(y*A)/sqrt(2*A^2+1)-(x*A)/sqrt(2*A^2+1)+A/sqrt(2*A^2+1)+z/sqrt(2*A^2+1),x],[x,y,z]));
