@@ -547,8 +547,15 @@
     (setq subs (mapcar #'(lambda (a b c) (take '(mequal) a (mul c (power kernel b)))) e p-list consts))
     (simplifya (cons '(mlist) subs) t))))
 
+(defun checked-subst (eq e)
+   (let ((cnd (in-domain e)))
+			(setq cnd (mfuncall '$is ($substitute eq cnd)))
+			(if (not cnd) (displa "Caught one!!!!!!!!!!"))
+			(if cnd ($substitute eq e) nil)))
+
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
-  ;(mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
+  (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
+	(print `(e = ,e))
 	(let ((pterms) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
         (when use-trigsolve
 	      	(setq e ($exponentialize e))
@@ -568,13 +575,15 @@
 		 ;; (3) solve for g
 		 ;; (4) for each of these solutions, substitute it into submin; and
      ;; (5) solve for the unknown collecting the solutions
+
 	   (when submin
-	      	(setq e ($substitute subs e))
-	      	(when ($freeof x e)
+	      	(setq e (checked-subst subs e))
+	      	(when (and e ($freeof x e))
 		         (setq sol (solve-single-equation e g m use-trigsolve))
 						 (setq sol (cdr sol))
 						 (setq sol-all nil)
 						 (dolist (sx sol)
+						    (mtell "solution sx = ~M submin = ~M ~%" sx submin)
 						    (setq sx ($substitute sx submin))
 								(setq sol-all (append (cdr (solve-single-equation sx x m use-trigsolve)) sol-all)))
 			       (setq sol (simplifya (cons '(mlist) sol-all) t)))
