@@ -308,7 +308,7 @@
 				 ;; silently change the multiplicities to a list of $not_yet_set.
 			   (when (not (and ($listp $multiplicities) (eql (length sol) (length $multiplicities))))
 				        (mtell "warning: unsilently setting multiplicities to not_yet_set ~%")
-					      (setq $multiplicities (mapcar #'(lambda (q) (ignore q) '$not_yet_set) (cdr sol)))
+					      (setq $multiplicities (mapcar #'(lambda (q) (declare (ignore q)) '$not_yet_set) (cdr sol)))
 						  	(push '(mlist) $multiplicities))
        		;; First build an association list of solution.multiplicity. Second call filter-solution.
 		  		;; And third re-consitute Maxima lists for the solution and the
@@ -335,16 +335,16 @@
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (polynomial-solve e x m))
 
-			((solve-mexpt-equation e x m use-trigsolve))
+			((filter-solution-x (solve-mexpt-equation e x m use-trigsolve) cnd))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
-			((solve-mexpt-equation-extra e x m t))
+			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
 
-		  ((lambert-w-solve e x m))
+		  ((filter-solution-x (lambert-w-solve e x m) cnd))
 
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
