@@ -28,6 +28,7 @@
 ;;; and for each purely spurious solution. The spurious solutions are excluded from the returned
 ;;; solution.
 
+;;; Issue is that solutions & multiplicities get jumbled!
 (defun $solve_checked (e x)
   (let ((sol ($solve e x)) (ok-sol nil) (maybe-sol nil) (bogus-sol nil) (chk))
      (cond (($listp sol)
@@ -54,7 +55,8 @@
 ;;; is consistent with the fact database. We use featurep to decide check declared facts--especially
 ;;; for real values, featurep isn't all that smart.
 
-;;; One issue: when sol = $all
+;;; One issue: when sol = $all. Another issue is that solutions & multiplicities get jumbled!
+
 (defun $solve_filter (e x)
   (let ((sol (cdr ($solve e x))) (fcts) (ssol nil) (chk) ($opsubst t))
      (setq x (if (or ($listp x) ($setp x)) (cdr x) (list x)))

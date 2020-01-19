@@ -14,7 +14,7 @@ f(x)=sin(x)*(at('diff(f(x),x,1),x=0)-2)+f(0)*cos(x)+2*x$
 trigexpand(expand(subst(first(sol),sin(x)=1/2)));
 1/2 = 1/2$
 
-(sol : solve(tan(x)=1,x),0);
+(sol : block([solve_ignores_conditions : true], solve(tan(x)=1,x)),0);
 0$
 
 trigexpand(expand(subst(first(sol),tan(x) = 1)));
@@ -82,3 +82,9 @@ ssolve([x+10*y,z+w,(z-2*z)^2,(z-w)^2],[w,x,y,z]);
 
 algsys([x+10*y,sqrt(5)*(z-w),(y-2*z)^2,sqrt(10)*(x-w)^2],[w,x,y,z]);
 [[w=0,x=0,y=0,z=0]]$
+
+(print("run time = ",elapsed_run_time() - thyme),0);
+0$
+
+(reset(), solve_ignores_conditions : true, remvalue(thyme), 0);
+0$

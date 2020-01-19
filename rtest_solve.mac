@@ -311,19 +311,19 @@ block([triginverses : false], ssolve(sin(x)=sin(a),x));
 block([triginverses : all], ssolve(2*sin(x)=sin(a),x));
 [x=-asin(sin(a)/2)+2*%pi*%z1+%pi,x=asin(sin(a)/2)+2*%pi*%z0]$
 
-ssolve(tan(x)=1,x);
+block([solve_ignores_conditions : true], solve(tan(x)=1,x));
 [x=(4*%pi*%z0+%pi)/4]$
 
 multiplicities;
 [1]$
 
-block([triginverses : all], ssolve(tan(x)=tan(a),x));
+block([triginverses : all,solve_ignores_conditions : true], ssolve(tan(x)=tan(a),x));
 [x=a+%pi*%z0]$
 
-block([triginverses : false], ssolve(tan(x)=tan(a),x));
+block([triginverses : false,solve_ignores_conditions : true], ssolve(tan(x)=tan(a),x));
 [x=atan(tan(a))+%pi*%z0]$
 
-block([triginverses : all], ssolve(2*tan(x)=tan(a),x));
+block([triginverses : all,solve_ignores_conditions : true], ssolve(2*tan(x)=tan(a),x));
 [x=atan(tan(a)/2)+%pi*%z0]$
 
 /* bugs with standard solve */
@@ -364,7 +364,7 @@ unwind_protect(block(
 (%pi)/sqrt(1-r^2)$
 
 */
-ssolve(tan(x-atan(a/b))=0,x);
+block([solve_ignores_conditions : true], ssolve(tan(x-atan(a/b))=0,x));
 [x=atan(a/b)+%pi*%z0]$
 
 block([solveexplicit : false], ssolve(asin(cos(3*x))*(f(x)-1),x));
@@ -583,10 +583,10 @@ ssolve(sin(x) = a,x);
 ssolve(csc(x) = a,x);
 [x=-acsc(a)+2*%pi*%z1+%pi,x=acsc(a)+2*%pi*%z0]$
 
-ssolve(tan(x) = a,x);
+block([solve_ignores_conditions : true], ssolve(tan(x) = a,x));
 [x=atan(a)+%pi*%z0]$
 
-ssolve(cot(x) = a,x);
+block([solve_ignores_conditions : true],ssolve(cot(x) = a,x));
 [x=acot(a)+%pi*%z0]$
 
 ssolve(cosh(x) = a,x);
@@ -836,13 +836,13 @@ ssolve(cos(x)=1/2,x);
 ssolve(sin(x) = cos(x), x);
 [x=-((8*%pi*%z0-%pi)/4),x=-((8*%pi*%z1+3*%pi)/4)]$
 
-ssolve(tan(x) = 1, x);
+block([solve_ignores_conditions : true], ssolve(tan(x) = 1, x));
 [x=(4*%pi*%z0+%pi)/4]$
 
 ssolve(tan(x) = 0,x);
 [x=%pi*%z0]$
 
-ssolve(tan(x) = -1, x);
+block([solve_ignores_conditions : true], ssolve(tan(x) = -1, x));
 [x=(4*%pi*%z0-%pi)/4]$
 
 (eq : [x +   y +   z =  6,  2*x +   y + 2*z = 10, x + 3*y +   z = 10], sol : solve(eq,[x,y,z]),0);
@@ -997,7 +997,7 @@ ssolve(log(x^2-1)=log(9^2-1),x);
 ssolve(log(x^2+1)-log(9^2+1),[x]);
 [x = -9, x=9]$
 
-ssolve(log(x)=log(a),x);
+block([solve_ignores_conditions : true], ssolve(log(x)=log(a),x));
 [x = a]$
 
 ssolve(2*%i*%pi*%Z5+log(-1)=%i*x,[x]);
@@ -1144,7 +1144,7 @@ ssolve( (x + 1)*(sin(x)^2 + 1)^2*cos(3*x)^3 = 0,x );
 ssolve(%e^z = 1,z);
 [z = 2*%i*%pi*%z0]$
 
-ssolve(tan(x) = 1,x);
+block([solve_ignores_conditions : true], ssolve(tan(x) = 1,x));
 [x=(4*%pi*%z0+%pi)/4]$
 
 block([solve_ignores_conditions : true], ssolve( sin(x) = tan(x),x));
@@ -1351,19 +1351,19 @@ ssolve([x+3*y=5,sqrt(x+y)-1=y],[x,y]);
 
 /* more miscellaneous */
 
-ssolve(log(x+1) = log(a+1),x);
+block([solve_ignores_conditions : true], ssolve(log(x+1) = log(a+1),x));
 [x=a]$
 
-ssolve(log(x+1) = 2*log(a+1),x);
+block([solve_ignores_conditions : true], ssolve(log(x+1) = 2*log(a+1),x));
 [x=a^2+2*a]$
 
-ssolve(log(x+1) = -log(a+1),x);
+block([solve_ignores_conditions : true], ssolve(log(x+1) = -log(a+1),x));
 [x = -a/(a+1)]$
 
-solve(log(1+x)=-2*log(1+a),x);
+block([solve_ignores_conditions : true], solve(log(1+x)=-2*log(1+a),x));
 [x = -((a^2+2*a)/(a^2+2*a+1))]$
 
-solve(log(x+1) = 5*log(a+1),x);
+block([solve_ignores_conditions : true], solve(log(x+1) = 5*log(a+1),x));
 [x=a^5+5*a^4+10*a^3+10*a^2+5*a]$
 
 ssolve(x^(3/2)=1,x);
@@ -1407,7 +1407,7 @@ ssolve(sin(x+a)=sin(x),a);
 ssolve(cos(x+a)=cos(x),a);
 [a=-acos(cos(x))-x+2*%pi*%z1,a=acos(cos(x))-x+2*%pi*%z0]$
 
-ssolve(tan(x+a)=tan(x),a);
+block([solve_ignores_conditions : true], ssolve(tan(x+a)=tan(x),a));
 [a=atan(tan(x))-x+%pi*%z0]$
 
 ssolve(cosh(x+a)=cosh(x),a);
@@ -1566,7 +1566,7 @@ unwind_protect(block(
 
 
 /* f(x) = f(a) equations */
-solve(log(x)=log(a),x);
+block([solve_ignores_conditions : true], solve(log(x)=log(a),x));
 [x=a]$
 
 ssolve(exp(x)=exp(a),x);
@@ -1575,7 +1575,7 @@ ssolve(exp(x)=exp(a),x);
 ssolve(exp(x*(x-1))=exp(a*(a-1)),x);
 [x=-((sqrt(4*a^2-4*a+8*%i*%pi*%z0+1)-1)/2),x=(sqrt(4*a^2-4*a+8*%i*%pi*%z0+1)+1)/2]$
 
-ssolve(log(x*(x-1))=log(a*(a-1)),x);
+block([solve_ignores_conditions : true], ssolve(log(x*(x-1))=log(a*(a-1)),x));
 [x=1-a,x=a]$
 
 block([algebraic : true], solve(x^(3/2) = (1 + %i) / sqrt(2),x));
@@ -1627,7 +1627,7 @@ solve(csc(x*(x-1))=0,x);
 solve(sech(x)=0,x);
 []$
 
-ssolve(cot(x)=0,x);
+block([solve_ignores_conditions : true], ssolve(cot(x)=0,x));
 [x=(2*%pi*%z0+%pi)/2]$
 
 ssolve(tan(x)=0,x);
@@ -1766,7 +1766,7 @@ solve((sqrt(x)-1)/(x-1),x);
 block([solve_ignores_conditions : false], ssolve((x^2 - 2) * (sqrt(x)-1)/(x-1),x));
 [x = -sqrt(2),x = sqrt(2)]$
 
-block([assume_notequal : true], ssolve(sin(x)/x,x));
+block([assume_notequal : true,solve_ignores_conditions : true], ssolve(sin(x)/x,x));
 [x=%pi*%z0]$
 
 /* From sci.math.symbolic, 29 September 2009; OK, but could be better. In the same
@@ -1895,11 +1895,11 @@ ssolve(abs(x+7)*sin(x)*cos(x),x);
 block([solve_ignores_conditions : true], ssolve(tan(x)=tan(zzz),x));
 [x=atan(tan(zzz))+%pi*%z0]$
 
-ssolve(tan(x)=tan(%pi/4),x);
+block([solve_ignores_conditions : true], ssolve(tan(x)=tan(%pi/4),x));
 [x=(4*%pi*%z0+%pi)/4]$
 
 /* this could be better--so it goes */
-ssolve(tan(x)=tan(%pi/5),x);
+block([solve_ignores_conditions : true], ssolve(tan(x)=tan(%pi/5),x));
 [x=(5*%pi*%z0+%pi)/5]$
 
 /* conjugate(atanh(x)) doesn't simplify to atanh(x), by the way.*/
@@ -1926,7 +1926,7 @@ solve([ x/(x+y) + log( x+y), x/(x+y)],[x,y]);
 [[x=0,y=1]]$
 
 /* #3452 %solve(tan(x)=%e,x) fails */
-ssolve(tan(x)=%e,x);
+block([solve_ignores_conditions : true], ssolve(tan(x)=%e,x));
 [x=atan(%e) + %z0 * %pi]$
 
 
@@ -1971,7 +1971,7 @@ block([solve_ignores_conditions : true], ssolve(sin(x)=tan(x),x));
 [x=-2*%pi*%z0-%pi,x=-2*%pi*%z1]$
 
 /* #2773 Spurious solution using arc-trig */
-block([assume_notequal : true], ssolve(sin(cos(x))/cos(x) = 0, x));
+block([assume_notequal : true,solve_ignores_conditions : true], ssolve(sin(cos(x))/cos(x) = 0, x));
 [x=2*%pi*%z1+acos(2*%pi*%z0)]$
 
 /* #2770 %solve(%i*sin(q)+cos(q),q) gives log(0) warning */
@@ -2207,7 +2207,7 @@ block([solveexplicit : true],
 
 /* How persnickety should solve be? To solve tan(x) = b, should solve ask if b is in the real domain of tangent? */
 
-ssolve(tan(x)-b,x);
+block([solve_ignores_conditions : true], ssolve(tan(x)-b,x));
 [x=atan(b)+%pi*%z0]$
 
 block([solve_ignores_conditions : true], ssolve(a*tan(x)-a*b,x));
@@ -2491,5 +2491,5 @@ block([%rnum : 0], solve([x+y=1, x^2+y^2 = 1],[x,y]));
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
-(kill(ssolve), remvalue(thyme), reset(),0);
+(remvalue(thyme), reset(),0);
 0$

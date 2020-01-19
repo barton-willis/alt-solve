@@ -15,7 +15,7 @@
 (defmvar $use_to_poly t)
 
 ;;; When $solve_ignores_conditions is true, ....?
-(defmvar $solve_ignores_conditions nil)
+(defmvar $solve_ignores_conditions t)
 
 ;;; Wrap $new_variable into a function that switches to the context 'initial' before declaring
 ;;; the type. After the declaration, return to the orginial context. Maybe this fuctionality
@@ -107,7 +107,7 @@
   (mfuncall '$reset $multiplicities)
 
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
-	   ;; Allow sets for eqlist and varl.
+	   ;; Allow sets for eqlist and varl
 	   (when (and (consp eqlist) (consp (car eqlist)) (eql '$set (caar eqlist)))
 		   (setq eqlist ($listify eqlist)))
 
@@ -160,7 +160,6 @@
 
 	 (setq nonatom-subst (reverse nonatom-subst))
 	 (setq varl (mapcar #'third nonatom-subst))  ;was $rhs
-	 ;;(setq nonatom-subst (mapcar #'(lambda(q) (take '(mequal) ($rhs q) ($lhs q))) nonatom-subst))
 	 (setq nonatom-subst (mapcar #'$reverse nonatom-subst))
 	 (push '(mlist) nonatom-subst)
 
@@ -173,9 +172,13 @@
 			  ((null varl)
 			   (when $solvenullwarn
 				   (mtell (intl:gettext "Solve: variable list is empty, continuing anyway.~%")))
+
+        (when  (every #'zerop1 eqlist)
+				    (print "**************  Returning all"))
+
 			   (if (every #'zerop1 eqlist) '$all (take '(mlist))))
 
-			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation, one unknown
+			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation and one unknown
 			   (setq eqlist (keep-float (car eqlist)))
 			   (setq sol ($substitute nonatom-subst (solve-single-equation eqlist (car varl))))
 				 (unkeep-float sol))
@@ -186,12 +189,7 @@
 			  ;; several equations, several unknowns.
 			  (t
 			  	(setq sol (solve-multiple-equations eqlist varl))
-			    ;(print `(eqlist = ,eqlist))
-				 ;(print `(varlist = ,varlist))
-			   ;(setq sol (solvex eqlist varl nil nil))
-			   ;(when (not (every #'$listp (cdr sol))) ;;this is unfortunate?
-				 ;  (setq sol `((mlist) ,sol)))
-			 	($substitute nonatom-subst sol))))
+			 	  ($substitute nonatom-subst sol))))
 	  ($killcontext cntx))))
 
 ;;; Do basic simplifications of an equation. In particular:
@@ -254,9 +252,8 @@
 				   (my-ask-boolean cnd)))))))
 
 ;;; Remove the members of sol that do not satisfy cnd. The members of the CL list sol have
-;;; the form solution.multiplicity.
-;;; The Maxima expression cnd is generally a conjunction of Maxima predicates. For each solution, we
-;;; substitute sx in to cnd and call my-ask-boolean.
+;;; the form solution.multiplicity. The Maxima expression cnd is generally a conjunction
+;;; of Maxima predicates. For each solution, we substitute sx in to cnd and call my-ask-boolean.
 
 (defun filter-solution (sol cnd) "Remove the members of sol that do not satisfy cnd"
 	(let ((checked-sol nil))
@@ -302,18 +299,33 @@
 			  (setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr sol)) t))
 			  (simplifya (cons '(mlist) (mapcar #'car sol)) t)))))
 
+(defun filter-solution-x (sol cnd)
+  (let ((alist nil))
+	  (cond
+			((not ($listp sol)) sol) ;pass through for non listp solution (for example nil or $all)
+			(t
+				 ;; When either $multiplicities hasn't been set or its length doesn't match the solution,
+				 ;; silently change the multiplicities to a list of $not_yet_set.
+			   (when (not (and ($listp $multiplicities) (eql (length sol) (length $multiplicities))))
+				        (mtell "warning: unsilently setting multiplicities to not_yet_set ~%")
+					      (setq $multiplicities (mapcar #'(lambda (q) (ignore q) '$not_yet_set) (cdr sol)))
+						  	(push '(mlist) $multiplicities))
+       		;; First build an association list of solution.multiplicity. Second call filter-solution.
+		  		;; And third re-consitute Maxima lists for the solution and the
+		  		(setq alist (mapcar #'(lambda (a b) (cons a b)) (cdr sol) (cdr $multiplicities)))
+		  		(setq alist (filter-solution alist cnd))
+		  		(setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
+		  		(simplifya (cons '(mlist) (mapcar #'car alist)) t)))))
+
 (defvar $the_unsolved nil) ;this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
   ;;(mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
 	(let ((cnd)) ; did have ($assume_pos nil), but why?
+	   (setq cnd (if $solve_ignores_conditions t (in-domain e)))
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
 		 (setq e (first e))
-
-		 ;; maybe this should be before equeation-simplify, but that causes slowness.
-		 (setq cnd (if $solve_ignores_conditions t (in-domain e)))
-		 ;;(displa `((mequal) eeee ,e))
 		 (cond
 
 			 ((or (zerop1 e) (and (consp e) (consp (car e)) (eql 'mlabox (caar e)) (zerop1 (unkeep-float e))))
@@ -325,18 +337,14 @@
 
 			((solve-mexpt-equation e x m use-trigsolve))
 
-			((solve-by-kernelize e x m))
+			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
 			((solve-mexpt-equation-extra e x m t))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
 
-			;;((solve-by-kernelize e x m))
-
-		    ;;((and use-trigsolve (trigsolve e x)))
-
-			((lambert-w-solve e x m))
+		  ((lambert-w-solve e x m))
 
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
@@ -434,7 +442,6 @@
 	(dolist (x vars)
 		(setq e (sub e (mul x ($ratcoef e x)))))
 	(zerop1 ($ratdisrep e)))
-
 
 ;;; Try to find a kernel blob1^blob2 in ee such that ee is a function of constants (thing free of x)
 ;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
@@ -554,8 +561,8 @@
 			(if cnd ($substitute eq e) nil)))
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
-  (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
-	(print `(e = ,e))
+  ;(mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
+	;(print `(e = ,e))
 	(let ((pterms) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
         (when use-trigsolve
 	      	(setq e ($exponentialize e))
@@ -583,7 +590,7 @@
 						 (setq sol (cdr sol))
 						 (setq sol-all nil)
 						 (dolist (sx sol)
-						    (mtell "solution sx = ~M submin = ~M ~%" sx submin)
+						    ;(mtell "solution sx = ~M submin = ~M ~%" sx submin)
 						    (setq sx ($substitute sx submin))
 								(setq sol-all (append (cdr (solve-single-equation sx x m use-trigsolve)) sol-all)))
 			       (setq sol (simplifya (cons '(mlist) sol-all) t)))

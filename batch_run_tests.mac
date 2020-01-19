@@ -20,4 +20,4 @@ share_testsuite_files : delete("rtest_diff_form", share_testsuite_files)$
 share_testsuite_files : delete(["rtest_simplify_sum",[57]], share_testsuite_files)$
 
 
-run_testsuite();
+run_testsuite(share_tests = true);

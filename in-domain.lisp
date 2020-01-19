@@ -48,10 +48,14 @@
 
 		  (list '%plog #'(lambda (q) (take '(%and)  (not-zerop q)  (in-domain q))))
 
-		  (list 'mexpt #'(lambda (a b) (take '(%and)
-											 (in-domain a)
-											 (in-domain b)
-											 (take '(%or) (not-zerop a) (take '(mgreaterp) b 0)))))))
+		  (list 'mexpt #'(lambda (a b)
+				             (cond ((and (integerp b) (> b 0))
+										         (in-domain a))
+													 (t
+														 (take '(%and)
+										        	 (in-domain a)
+										        	 (in-domain b)
+									        		 (take '(%or) (not-zerop a) (take '(mgreaterp) b 0)))))))))
 
 
 (defun $indomain(e)
@@ -62,6 +66,6 @@
 
 		 (cond
 			 (($mapatom e) t)
-			 (fn (apply fn (cdr e)))
+			 (fn (let (($factor_max_degree 10) ($errormsg nil)) (apply fn (cdr e))))
 			 (t ;;assume operator is defined everywhere--return the conjunction of map in-domain onto argument list.
 			  (simplifya (cons '(%and) (mapcar #'in-domain (cdr e))) t)))))
