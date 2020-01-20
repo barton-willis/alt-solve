@@ -336,7 +336,7 @@
 			  (take '(mlist) (take '(mequal) x ($new_variable (if ($featurep x '$complex) '$complex '$real)))))
 
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
-			   (polynomial-solve e x m))
+			   (filter-solution-x (polynomial-solve e x m) cnd))
 
 			((filter-solution-x (solve-mexpt-equation e x m use-trigsolve) cnd))
 

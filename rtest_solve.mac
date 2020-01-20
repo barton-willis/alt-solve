@@ -13,7 +13,7 @@ errcatch(solve([x>0],x));
 solve([x=1,x=1]);
 [x=1]$
 
-solve(x^a = 5,x);
+block([solve_ignores_conditions : true], (x^a = 5,x));
 [x=5^(1/a)]$
 
 (a : b, b : c, c : d, d : e, x : y, y: z ,0);
@@ -592,13 +592,13 @@ block([solve_ignores_conditions : true],ssolve(cot(x) = a,x));
 ssolve(cosh(x) = a,x);
 [x=2*%i*%pi*%z1-acosh(a),x=acosh(a)+2*%i*%pi*%z0]$
 
-ssolve(sech(x) = a,x);
+block([solve_ignores_conditions : true], ssolve(sech(x) = a,x));
 [x=2*%i*%pi*%z1-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z0]$
 
 ssolve(sinh(x) = a,x);
 [x=-asinh(a)+2*%i*%pi*%z1+%i*%pi,x=asinh(a)+2*%i*%pi*%z0]$
 
-ssolve(csch(x) = a,x);
+block([solve_ignores_conditions : true], ssolve(csch(x) = a,x));
 [x=-acsch(1/a)+2*%i*%pi*%z1+%i*%pi,x=acsch(1/a)+2*%i*%pi*%z0]$
 
 ssolve(tanh(x) = a,x);
@@ -1036,14 +1036,14 @@ ssolve((x-1)/(x+1)=1,x);
 ssolve((x-1)/(1+x)=a,x);
 [x=-((a+1)/(a-1))]$
 
-ssolve(1/x = 1/a,x);
+block([solve_ignores_conditions : true], ssolve(1/x = 1/a,x));
 [x=a]$
 
 /* this is not expected to ever work
 (solve(1/x = 1/a,x), subst(a=0,%%));
 []$ */
 
-ssolve(1/x^2 = 1/a^2,x);
+block([solve_ignores_conditions : true], ssolve(1/x^2 = 1/a^2,x));
 [x=-a,x=a]$
 
 /* hyperbolic */
@@ -1098,7 +1098,7 @@ ssolve(sqrt(x^2+1) = 2 - x,x);
 
 /* subset of the Michael Wester test suite */
 
-ssolve(%e^(2*x) + 2*%e^x + 1 = z,x);
+block([solve_ignores_conditions : true], ssolve(%e^(2*x) + 2*%e^x + 1 = z,x));
 [x=log(-sqrt(z)-1)+2*%i*%pi*%z1,x=log(sqrt(z)-1)+2*%i*%pi*%z0]$
 
 ssolve(exp(2 - x^2) = exp(-x), x);
@@ -1534,7 +1534,7 @@ solve(5^(x^2 - 1) * (x^2-1) / %pi = 42,x);
 solve(2^x = 5*x,x);
 [x = -lambert_w(-log(2)/5)/log(2)]$
 
-ssolve(x^x = z,x);
+block([solve_ignores_conditions : true], ssolve(x^x = z,x));
 [x=%e^lambert_w(log(z)+2*%i*%pi*%z0)]$
 
 solve(x * log(x) = a,x);
@@ -1799,7 +1799,7 @@ ssolve(x^a = 1,x);
 [x = %e^(2*%i*%pi*%z0/a)]$
 
 /*not sure about the need for assume(x >0) */
-block([cntx : newcontext()],
+block([cntx : newcontext(),solve_ignores_conditions : true],
    unwind_protect(
        (assume(a > 0), assume(x > 0), ssolve(x^(2*a) + 2 * x^a + 1,x)),
    killcontext(cntx)));
@@ -1829,7 +1829,7 @@ solve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
 block([solve_ignores_conditions : true], ssolve( tan(a)=b,a));
 [a=atan(b)+%pi*%z0]$
 
-ssolve(sin(x) = sin(x - p[0]),x);
+block([solve_ignores_conditions : true], ssolve(sin(x) = sin(x - p[0]),x));
 [x = (2*%pi*%z0+p[0]-%pi)/2]$
 
 ssolve(sin(x) = cos(x),x);
