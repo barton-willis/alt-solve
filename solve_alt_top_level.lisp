@@ -6,6 +6,24 @@
 
 (in-package :maxima)
 
+;;; sort solutions using orderlessp & maintain correct ordering of multiplicities.
+(defun sort-solutions (sol &optional (ignore-multiplicities nil))
+  (cond ((and ($listp sol) ($listp $multiplicities) (eql (length sol) (length $multiplicities)))
+         (setq sol (mapcar #'(lambda (a b) (cons a b)) (cdr sol) (cdr $multiplicities)))
+         (setq sol (sort sol #'$orderlessp :key #'car))
+         (setq $multiplicities (mapcar #'cdr sol))
+         (setq sol (mapcar #'car sol))
+         (setq $multiplicities (simplifya (cons '(mlist) $multiplicities) t))
+         (simplifya (cons '(mlist) sol) t))
+
+      ((and ($listp sol) ignore-multiplicities)
+         (mfuncall '$reset '$multiplicities)
+         (setq sol (mapcar #'(lambda (q) (sort-solutions q nil)) (cdr sol)))
+         (setq sol (sort sol #'$orderlessp))
+         (simplifya (cons '(mlist) sol) t))
+
+     (t sol)))
+
 ;;; Attempt to verify that sol is a solution to the equations eqs. When sol is a solution, return
 ;;; 'ok; when the solution is definitely spurious, return 'spurious; otherwise, return 'maybe.
 ;;; eqs can be either a list of equations or a single equation.
@@ -73,11 +91,6 @@
                 (push sx ssol))))
       (simplifya (cons '(mlist) ssol) t)))
 
-(defun sort-lists (e)
-   (cond (($listp e)
-          ($sort (cons '(mlist) (mapcar #'sort-lists (cdr e)))))
-        (t e)))
-
 ;;; Solve and sort solutions--especially useful for rtest files
 (defun $ssolve (e x)
-   (let (($%rnum 0)) (sort-lists ($nicedummies ($solve e x)))))
+   (let (($%rnum 0)) (sort-solutions ($nicedummies ($solve e x)) nil)))

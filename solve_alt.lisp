@@ -342,7 +342,7 @@
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
-			((solve-mexpt-equation-extra e x m t))
+			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
