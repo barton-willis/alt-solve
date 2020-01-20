@@ -311,7 +311,7 @@ block([triginverses : false], ssolve(sin(x)=sin(a),x));
 block([triginverses : all], ssolve(2*sin(x)=sin(a),x));
 [x=-asin(sin(a)/2)+2*%pi*%z1+%pi,x=asin(sin(a)/2)+2*%pi*%z0]$
 
-block([solve_ignores_conditions : true], solve(tan(x)=1,x));
+block([solve_ignores_conditions : true], ssolve(tan(x)=1,x));
 [x=(4*%pi*%z0+%pi)/4]$
 
 multiplicities;
@@ -1757,7 +1757,7 @@ solve(log(x+1)+log(x) = log(6)+log(5),x);
 [x = -6,x = 5]$
 
 /* From RJF, Maxima mailing list, Tuesday, September 01, 2009 12:54PM */
-solve((x-%pi)/sin(x)=0, x);
+block([solve_ignores_conditions : false], ssolve((x-%pi)/sin(x)=0, x));
 []$
 
 solve((sqrt(x)-1)/(x-1),x);
