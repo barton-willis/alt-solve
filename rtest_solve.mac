@@ -1786,13 +1786,13 @@ solve(x * log(x) * (x-1),x);
 
 /* Sage Ticket 2617; see also Sage mailing list 18 March 2008 */
 
-block([assume_notequal : true], ssolve(sin(x^2)/x,x));
+block([solve_ignores_conditions : true], ssolve(sin(x^2)/x,x));
 [x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
 
-block([assume_notequal : true], ssolve(sin(x^2)/x^2,x));
+block([solve_ignores_conditions : true], ssolve(sin(x^2)/x^2,x));
 [x=-sqrt(%pi)*sqrt(%z1), x=sqrt(%pi)*sqrt(%z0)]$
 
-block([assume_notequal : true], ssolve(sin(x^2)/x^3,x));
+block([solve_ignores_conditions : true], ssolve(sin(x^2)/x^3,x));
 [x=sqrt(2)*sqrt(%pi)*sqrt(%z0),x=sqrt(2*%pi*%z1+%pi)]$
 
 ssolve(x^a = 1,x);
@@ -1910,7 +1910,7 @@ ssolve(conjugate(atanh(x/8+7)),x);
 [x=-56]$
 
 /* #3490 redundant questions from solve */
-ssolve(x^(13/q)=a,x);
+block([solve_ignores_conditions : true], ssolve(x^(13/q)=a,x));
 [x=a^(q/13)]$
 
 /* #3485 multiplicities incorrect */
@@ -2080,7 +2080,7 @@ ssolve([a=1,exp(b)=2],[a,b]);
 [[a=1,b=2*%i*%pi*%z0+log(2)]]$
 
 /* #3490 redundant questions from solve */
-solve(x^(13/q)=a,x);
+block([solve_ignores_conditions : true], solve(x^(13/q)=a,x));
 [x=a^(q/13)]$
 
 /* #3485 multiplicities incorrect */

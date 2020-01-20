@@ -311,9 +311,12 @@
 					      (setq $multiplicities (mapcar #'(lambda (q) (declare (ignore q)) '$not_yet_set) (cdr sol)))
 						  	(push '(mlist) $multiplicities))
        		;; First build an association list of solution.multiplicity. Second call filter-solution.
-		  		;; And third re-consitute Maxima lists for the solution and the
-		  		(setq alist (mapcar #'(lambda (a b) (cons a b)) (cdr sol) (cdr $multiplicities)))
-		  		(setq alist (filter-solution alist cnd))
+		  		;; And third re-consitute Maxima lists for the solution and the multiplicities. The
+					;; filtering process requires using sign, but the keepfloat mechanism interfers with
+					;; sign.  So we'll unkeep-float each solution. Maybe the entire keep-float/unkeep-float
+					;; scheme needs to be re-considered.
+		  		(setq alist (mapcar #'(lambda (a b) (cons (unkeep-float a) b)) (cdr sol) (cdr $multiplicities)))
+		  		(setq alist (filter-solution alist (unkeep-float cnd)))
 		  		(setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
 		  		(simplifya (cons '(mlist) (mapcar #'car alist)) t)))))
 
@@ -335,7 +338,7 @@
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (polynomial-solve e x m))
 
-			((solve-mexpt-equation e x m use-trigsolve))
+			((filter-solution-x (solve-mexpt-equation e x m use-trigsolve) cnd))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
