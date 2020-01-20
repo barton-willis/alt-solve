@@ -347,7 +347,7 @@
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
 
-		  ((lambert-w-solve e x m))
+		  ((filter-solition-x (lambert-w-solve e x m) cnd))
 
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
