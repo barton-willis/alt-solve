@@ -335,16 +335,16 @@
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (polynomial-solve e x m))
 
-			((filter-solution-x (solve-mexpt-equation e x m use-trigsolve) cnd))
+			((solve-mexpt-equation e x m use-trigsolve))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
-			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
+			((solve-mexpt-equation-extra e x m t))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
 
-		  ((filter-solution-x (lambert-w-solve e x m) cnd))
+		  ((lambert-w-solve e x m))
 
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
