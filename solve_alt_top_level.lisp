@@ -91,6 +91,7 @@
                 (push sx ssol))))
       (simplifya (cons '(mlist) ssol) t)))
 
-;;; Solve and sort solutions--especially useful for rtest files
+;;; Solve, apply nicedummies, simplify in current context, and sort solutions.
+;;; This is especially useful for rtest files
 (defun $ssolve (e x)
-   (let (($%rnum 0)) (sort-solutions ($nicedummies ($solve e x)) nil)))
+   (let (($%rnum 0)) (sort-solutions ($expand ($nicedummies ($solve e x)) 0 0) nil)))

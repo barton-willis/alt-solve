@@ -13,7 +13,7 @@ errcatch(solve([x>0],x));
 solve([x=1,x=1]);
 [x=1]$
 
-block([solve_ignores_conditions : true], (x^a = 5,x));
+block([solve_ignores_conditions : true], ssolve(x^a = 5,x));
 [x=5^(1/a)]$
 
 (a : b, b : c, c : d, d : e, x : y, y: z ,0);
@@ -789,7 +789,7 @@ ssolve(2*sqrt(x) + 3*x^(1/4) - 2 = 0, x);
 [x=1/16]$
 
 expand(ssolve(x = 1/sqrt(1 + x^2), x),0,0);
-[x=-(sqrt(2)*%i)/sqrt(sqrt(5)-1),x=sqrt(2)/sqrt(sqrt(5)+1)]$
+[x=sqrt(2)/sqrt(sqrt(5)+1),x=-((sqrt(2)*%i)/sqrt(sqrt(5)-1))]$
 
 ssolve(sqrt(x)-sqrt(1-x) = 0,x);
 [x=1/2]$
@@ -1413,7 +1413,8 @@ block([solve_ignores_conditions : true], ssolve(tan(x+a)=tan(x),a));
 ssolve(cosh(x+a)=cosh(x),a);
 [a=-acosh(cosh(x))-x+2*%i*%pi*%z1,a=acosh(cosh(x))-x+2*%i*%pi*%z0]$
 
-ssolve(sin(x^2)=0,x);
+/* The solution is simplified in a context with domain = complex. */
+expand(ssolve(sin(x^2)=0,x),0,0);
 [x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
 
 ssolve(x^2+2*x+sqrt(5),x);
@@ -1787,13 +1788,13 @@ solve(x * log(x) * (x-1),x);
 /* Sage Ticket 2617; see also Sage mailing list 18 March 2008 */
 
 block([solve_ignores_conditions : true], ssolve(sin(x^2)/x,x));
-[x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
+[x=(-1)*(%pi*%z0)^(1/2),x=(%pi*%z0)^(1/2)]$
 
 block([solve_ignores_conditions : true], ssolve(sin(x^2)/x^2,x));
-[x=-sqrt(%pi)*sqrt(%z1), x=sqrt(%pi)*sqrt(%z0)]$
+[x=(-1)*(%pi*%z0)^(1/2),x=(%pi*%z0)^(1/2)]$
 
 block([solve_ignores_conditions : true], ssolve(sin(x^2)/x^3,x));
-[x=sqrt(2)*sqrt(%pi)*sqrt(%z0),x=sqrt(2*%pi*%z1+%pi)]$
+[x=(-1)*(%pi*%z0)^(1/2),x=(%pi*%z0)^(1/2)]$
 
 ssolve(x^a = 1,x);
 [x = %e^(2*%i*%pi*%z0/a)]$
@@ -1884,7 +1885,7 @@ ssolve(2013*sin(x)*cos(x)*sin(sqrt(5)*x),x);
 [x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2,x=%pi*%z2,x=(%pi*%z3)/sqrt(5)]$
 
 ssolve(sin(x^2),x);
-[x=-sqrt(%pi)*sqrt(%z0),x=sqrt(%pi)*sqrt(%z0)]$
+[x=(-1)*(%pi*%z0)^(1/2),x=(%pi*%z0)^(1/2)]$
 
 ssolve(abs(x+7)*sin(x),x);
 [x=-7,x=%pi*%z0]$

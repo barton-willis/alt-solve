@@ -83,15 +83,27 @@ Our development priorities are (in order from highest to least)
 \section{Top-level functions}
 
 The top-level functions are \texttt{solve}, \texttt{ssolve}, \texttt{solve\_filter},
-and \texttt{linsolve}. The function \texttt{solve} takes at one or two arguments--the first argument gives the equations to be solved.
+and \texttt{linsolve}. The function \texttt{solve} takes at one or two arguments. The first
+argument gives the equations to be solved. The first argument is either a Maxima expression,
+a list of Maxima expressions, or a set of Maxima expressions. If any of these expressions is
+not explicitly of the form \(a = b\), the expression is assumed to vanish.
 
-The first argument is either a Maxima expression, a list of Maxima expressions, or a set of  Maxima expressions. If any of these expressions is not explicitly an equation (that is have the form \(a = b\), the expression is assumed to vanish.
+When given, the second argument gives the unknowns. The unknowns can either be a list, set, or
+a single unknown. Duplicate unknowns are expunged. If not specified, the unknowns defaults to
+the set of all nonconstant variables in the first argument.
 
-When given, the second argument gives the unknowns. If not specified, the unknowns defaults to the set of all nonconstant variables in the first argument. Duplicate unknowns are expunged.
+For the case of solving for a single unknown \(x\), the function \texttt{solve} returns a list
+of solutions of the form \(x = a\), where the expresion \(a\) does not explicitly depend on \(x\).
+Any declared dependence (using the \texttt{depends} mechanism) is ignored by \texttt{solve}.
+The order of the solutions is unspecified. When solving for two or more unknowns, the solution
+is a list of lists of the form \([x_1 = a_1, x_2 = a_2, \cdots x_n = a_n] \). The ordering of
+this lists is unspecified.
 
-For the case of solving for a single unknown \(x\), the function \texttt{solve} returns a list of solutions of the form \(x = a\), where the expresion \(a\) does not explicitly depend on \(x\). Any declared dependence (using the \texttt{depends} mechanism) is ignored by \texttt{solve}. The order of the solutions is unspecified. When solving for two or more unknowns, the solution is a list of lists of the form \([x_1 = a_1, x_2 = a_2, \cdots x_n = a_n] \). The ordering of this lists is unspecified.
-
-When \texttt{solve} is unable to find a solution and the option variable \texttt{solveexplicit} is true (default false), Maxima prints a message saying that there is no method for solving the equation and it returns the empty list. When \texttt{solveexplicit} is false and there is no method for solving, \texttt{solve} solve chooses an unspecified subexpression of the equation and solves for it; for example
+When \texttt{solve} is unable to find a solution and the option variable \texttt{solveexplicit}
+is true (default false), Maxima prints a message saying that there is no method for solving the
+equation and it returns the empty list. When \texttt{solveexplicit} is false and there is no
+method for solving, \texttt{solve} solve chooses an unspecified subexpression of the equation
+and solves for it; for example
 
 \begin{verbatim}
    (%i1)	block([solveexplicit : true], solve(bessel_j(0,x) = x,x));
@@ -111,11 +123,13 @@ When \texttt{solve} is unable to find a solution and the option variable \texttt
   (%o3)	[x^2=-(sqrt(3)*%i+1)/2,x^2=(sqrt(3)*%i-1)/2]
 \end{verbatim}
 
-When solve finds  soltiuions in the form a list of equalities.
-
 \section{Representation of solutions}
 
-To be compatible with Maxima, solutions to equations with one variable have the form of a Maxima list; thus a solution has the form \([x = e_1, x = e_2, \cdots, x = e_n]\), where the expressions \(e_1, e_2, \dots, e_n\) are free of \(x\). The order of solutions is \emph{unspecified}. The list structure of a solution allows for the following example to yield true:
+To be compatible with Maxima, solutions to equations with one variable have the form of a Maxima
+list; thus a solution has the form \([x = e_1, x = e_2, \cdots, x = e_n]\), where the
+expressions \(e_1, e_2, \dots, e_n\) are free of \(x\). The order of solutions is
+\emph{unspecified}. The list structure of a solution allows for the following example to
+yield true:
 
 \begin{verbatim}
 (%i1)	eq : (x-5)*(x-2)=0$
@@ -123,17 +137,22 @@ To be compatible with Maxima, solutions to equations with one variable have the 
 (%o2)	true
 \end{verbatim}
 
-The solutions should involve objects that Maxima's core functions such as simplification, sign, mapatom, featurep, and declare understand. Although it's tempting to, for example, invent objects such as
-\(x = (1 ... \infty) \uppi\) to represent \(\uppi\) times a nonnegative integer, but without modifing
-Maxima's simplifer for sine, \(\sin \left ((1 ... \infty) \uppi \right) \) would not simplify
- to zero. This is undesirble. Thus we attempt to represent solutions as standard Maxima objects.
+The solutions should involve objects that Maxima's core functions such as simplification,
+sign, mapatom, featurep, and declare understand. Although it's tempting to, for example,
+invent objects such as \(x = (1 ... \infty) \uppi\) to represent \(\uppi\) times a nonnegative
+integer, but without modifing Maxima's simplifer for sine,
+\(\sin \left ((1 ... \infty) \uppi \right) \) would not simplify  to zero. This is undesirble.
+Thus we attempt to represent solutions as standard Maxima objects.
 
-Mapatoms of the form \%zk, \%rk, and \%ck, where k is a nonnegative integer, represent arbitrary integers, real numbers, and complex numbers, respectively. Here is an example of a solution that involves and arbitrary integer:
+Mapatoms of the form \%zk, \%rk, and \%ck, where k is a nonnegative integer, represent arbitrary
+integers, real numbers, and complex numbers, respectively. Here is an example of a solution that
+involves and arbitrary integer:
 \begin{verbatim}
   (%i2)	solve(sin(x)=0,x);
   (%o2)	[x=%pi*%z1]
 \end{verbatim}
-The fact that \%z1 is a declared integer is automatically entered into the fact database into the context `initial.'
+The fact that \%z1 is a declared integer is automatically entered into the fact database into the
+context `initial.'
 
 \section{Multiplicities}
 
@@ -141,7 +160,9 @@ The global variable \texttt{multiplicities} is either a Maxima list of the multi
 a system of equations, no effort is made to determine the multiplicity. For equations of
 two or more varibles, the value of \texttt{multiplicities} is \texttt{not\_set\_yet}.
 
-Any function that sorts or reverses a solution set must adjust the multiplicities. When the multiplicity isn't a positive integer, the multiplicity is \emph{unspecified}. Thus although arguably the following example might be suboptimal, it isn't a bug:
+Any function that sorts or reverses a solution set must adjust the multiplicities. When the
+multiplicity isn't a positive integer, the multiplicity is \emph{unspecified}. Thus although
+arguably the following example might be suboptimal, it isn't a bug:
 \begin{verbatim}
   (%i4)	solve(abs(x-2),x);
   (%o4)	[x=2]
@@ -155,13 +176,25 @@ it is less important.
 
 \section{Use of database facts}
 
-Type declarations on the unknown do not limit the solution set to include only the declared type. For example if \(x\) is declared to be an integer, a solution set for an equation involving \(x\) may include noninteger values. Within the solve process, a type declaration might be used during simplification. So it is possible that a type declaration for an unknown will alter the solution set, but again, the solution set is free to contain members that do not satisfy the declared types (if any) of the unknowns.
+Type declarations on the unknown do not limit the solution set to include only the declared type.
+For example if \(x\) is declared to be an integer, a solution set for an equation involving \(x\)
+may include noninteger values. Within the solve process, a type declaration might be used during
+simplification. So it is possible that a type declaration for an unknown will alter the solution
+set, but again, the solution set is free to contain members that do not satisfy the declared types
+(if any) of the unknowns.
 
-Setting the option variable \texttt{domain} to real (its default) does not limit the solution set to contain only real values. Again, internal to the solve process, the value of \texttt{domain} might affect simplications--so it is possible that the value of \texttt{domain} will affect a solution set.
+Setting the option variable \texttt{domain} to real (its default) does not limit the solution set
+to contain only real values. Again, internal to the solve process, the value of \texttt{domain}
+might affect simplications--so it is possible that the value of \texttt{domain} will affect a
+solution set.
 
-Similarly, inequality assumptions on the unknown (for example assume( \(0 < x, x < 1\)) do not limit the solution set to values that satisfy the assumptions in the fact database. But again, simplifications that are done in the solve process may use the fact database.
+Similarly, inequality assumptions on the unknown (for example assume( \(0 < x, x < 1\)) do not
+limit the solution set to values that satisfy the assumptions in the fact database. But again,
+simplifications that are done in the solve process may use the fact database.
 
-An experimental function \texttt{solve\_filter} attemps to filter out solutions that are inconsistent with the fact database. Especially for deciding if a solution is real, the \texttt{featurep} based mechanism is weak.
+An experimental function \texttt{solve\_filter} attemps to filter out solutions that are
+inconsistent with the fact database. Especially for deciding if a solution is real,
+the \texttt{featurep} based mechanism is weak.
 
 \begin{verbatim}
   (%i2)	declare(x, real)$
@@ -180,13 +213,16 @@ An experimental function \texttt{solve\_filter} attemps to filter out solutions 
 
 \section{Solve is an ordinary function}
 
-The function \solve \/ evaluates its input. That makes \solve \/ an \emph{ordinary} Maxima function. This means, for example, that the function call \(\mathrm{solve}(x/x=1,x)\) is effectively evaluated to
-\(\mathrm{solve}(1=1,x)\) before \solve \/ starts its work. Efforts to thwart this (by setting simp to false or by quoting) are likely to be unsuccessful.
+The function \solve \/ evaluates its input. That makes \solve \/ an \emph{ordinary} Maxima function.
+This means, for example, that the function call \(\mathrm{solve}(x/x=1,x)\) is effectively evaluated to
+\(\mathrm{solve}(1=1,x)\) before \solve \/ starts its work. Efforts to thwart this
+(by setting simp to false or by quoting) are likely to be unsuccessful.
 
 
 \section{Use of asksign}
 
-The solve function sparingly uses \texttt{asksign}. And when it does, these facts are placed into a context that is killed once solve terminates. An example of using asksign:
+The solve function sparingly uses \texttt{asksign}. And when it does, these facts are placed
+into a context that is killed once solve terminates. An example of using asksign:
 
 \begin{verbatim}
   (%i2)	solve(abs(x)=a,x);
@@ -201,12 +237,14 @@ The solve function sparingly uses \texttt{asksign}. And when it does, these fact
   "Is "a" positive, negative or zero?"zero;
   (%o4)	[x=0]
 \end{verbatim}
-Adhering to the requirement that solutions are Maxima lists, not conditionalized expressions, for this example, the alternative to using asksign is to decline to solve the equation. In such cases, \texttt{solve}
-uses \texttt{asksign}.
+Adhering to the requirement that solutions are Maxima lists, not conditionalized expressions,
+for this example, the alternative to using asksign is to decline to solve the equation. In
+such cases, \texttt{solve} uses \texttt{asksign}.
 
 \section{Option variables}
 
-For compatibilty, the goal is to support most of the option variables that directly affect the solve process. These are:
+For compatibilty, the goal is to support most of the option variables that directly affect
+the solve process. These are:
 \begin{description}
 
 \item [algexact] For now, \altsolve\/ does not implement the algexact option variable.
@@ -232,15 +270,22 @@ polynomial equations of degree five or more. When the decomposition yields polyn
 or less, \altsolve\/ returns a solution in terms of radicals. There is, I think, little reason to
 set solvedecomposes to false.
 
-\item [solveexplicit] (default false) When \altsolve\/  is unable to find a solution and the option variable \solveexplicit\/ is false, return an equivalent, but possibly simplified equation;  otherwise print a message that there is no method for solving the equation and return the empty list.
+\item [solveexplicit] (default false) When \altsolve\/  is unable to find a solution and the option
+variable \solveexplicit\/ is false, return an equivalent, but possibly simplified equation;
+otherwise print a message that there is no method for solving the equation and return the empty list.
 
-\item [linsolve\_params] (default true) When linsolve\_params is true, linsolve introduces \%r parameters for underdetermined equations; when false, linsolve expresses some unknowns in terms of others. Which variables are explicitly solved for is unspecified.
+\item [linsolve\_params] (default true) When linsolve\_params is true, linsolve introduces \%r
+parameters for underdetermined equations; when false, linsolve expresses some unknowns in terms
+of others. Which variables are explicitly solved for is unspecified.
 
 For now, \altsolve \/ ignores this option variable.
 
-\item [use\_to\_poly] (default true)  When use\_to\_poly is true, \altsolve\/ is able to solve more algebraic equations.  Likely there is little reason to set this option variable to false.
+\item [use\_to\_poly] (default true)  When use\_to\_poly is true, \altsolve\/ is able to solve
+more algebraic equations.  Likely there is little reason to set this option variable to false.
 
-\item[solve\_ignores\_conditions] (default false) When this option variable is false, \altsolve\/ attempts to remove solutions that are not in the natural domain of the equation; when true, solutions may include those that are outside the domain; for example
+\item[solve\_ignores\_conditions] (default false) When this option variable is false, \altsolve\/
+attempts to remove solutions that are not in the natural domain of the equation; when true,
+solutions may include those that are outside the domain; for example
 \begin{verbatim}
 (%i7)	block([solve_ignores_conditions : true], solve( x * (log(x) - 1)  = 0));
 (%o7)	[x=%e,x=0]
@@ -251,7 +296,10 @@ For now, \altsolve \/ ignores this option variable.
 
 The correct functioning of this mechanism requires the correct functioning of many other Maxima components. But it is subject various limitations.
 
-\item[solve\_inverse\_package] When solve\_inverse\_package is multivalued\_inverse, \altsolve\/ attemps to find all solutions (both real and complex) to equations; when its value is single\_valued\_inverse, the effort is to find one or more soltions, but primarly a real solution. Examples:
+\item[solve\_inverse\_package] When solve\_inverse\_package is multivalued\_inverse, \altsolve\/
+attemps to find all solutions (both real and complex) to equations; when its value is
+single\_valued\_inverse, the effort is to find one or more soltions, but primarly a real solution.
+Examples:
 \begin{verbatim}
   (%i1)	block([solve_inverse_package : multivalued_inverse], solve(1.03^x = 5.2));
   (%o1)	[x=33.83087013568215*(2*%i*%pi*%z3+1.648658625587382)]
@@ -269,7 +317,10 @@ example is
 (%o2)	[x=%pi/6]
 \end{verbatim}
 
-Maxima's integration, especially definite integration code, needs to solve equations. But this code would mostly misbehave using the  multivalued\_inverse package. The \altsolve\/ code automatically sets solve\_inverse\_package to single\_valued\_inverse when inside the integration code.
+Maxima's integration, especially definite integration code, needs to solve equations. But
+this code would mostly misbehave using the  multivalued\_inverse package. The \altsolve\/
+code automatically sets solve\_inverse\_package to single\_valued\_inverse when inside
+the integration code.
 
 \end{description}
 %I'm not sure what solve(0=0, []) should return. Returning the symbol  \all makes a bit of a mess (a solution cannot be relied on to be a list)
@@ -288,10 +339,12 @@ unspecified.
 
 \section{Keep float mechanism}
 
-The top level solve function encloses all floats (Binary64) and big floats in labeled boxes. The floats are converted to exact rational form.
-After solve exits, numbers are converted back to floats (big floats are converted using the \emph{current} value of \fpprec.
+The top level solve function encloses all floats (Binary64) and big floats in labeled boxes.
+The floats are converted to exact rational form. After solve exits, numbers are converted back
+to floats (big floats are converted using the \emph{current} value of \fpprec.
 
-It can, of course, happen that the simplification after conversion back to floats can involve subtractive cancellation. In such cases, purely numerical methods might be better.
+It can, of course, happen that the simplification after conversion back to floats can
+involve subtractive cancellation. In such cases, purely numerical methods might be better.
 
 \section{Solve function hierarchy}
 
@@ -309,7 +362,9 @@ It can, of course, happen that the simplification after conversion back to float
    \item kills the super context.
 \end{alphalist}
 
-The lower level solve functions are solve-single-equation (solve one equation in one unknown), redundant-equation-solve (solve two or more equations for one unknown), and solve-multiple-equations (solve two or more equations in two or more unknowns).
+The lower level solve functions are solve-single-equation (solve one equation in one unknown),
+redundant-equation-solve (solve two or more equations for one unknown), and solve-multiple-equations
+(solve two or more equations in two or more unknowns).
 
 \paragraph{solve-single-equation} If the input is a polynomial, dispatch the polynomial solve code.
 
@@ -325,11 +380,16 @@ and \texttt{complex\_valued\_inverse}. Plus there will be a behind arctrig compa
 
 \section{Polynomial zeros}
 
-The zeros of polynomials of degree four or less are expressed in terms of radicals. Also  cyclotomic polynomials of degree six are solved in terms of radicals, as well as polynomial of degree five or greater that decompose into polynomials of degree four or less. \emph{Well there option variable solvedecomp controls using polynomial decomposition, but I think this option could be removed.}
+The zeros of polynomials of degree four or less are expressed in terms of radicals. Also  cyclotomic
+polynomials of degree six are solved in terms of radicals, as well as polynomial of degree five or
+greater that decompose into polynomials of degree four or less. \emph{Well there option variable solvedecomp controls using polynomial decomposition, but I think this option could be removed.}
 
 \begin{alphalist}[]
 
-\item  Polynomial coefficients that are not simplified to zero by the  general simplifier are assumed to be nonzero. Even if an atom has been declared to be zero, the general simplifier does not simplify  it to zero. Thus even if the atom \(a\) has been declared to be zero, the solution to \(a x = b\) is \(x = -b/a \).
+\item  Polynomial coefficients that are not simplified to zero by the  general simplifier are
+assumed to be nonzero. Even if an atom has been declared to be zero, the general simplifier does
+not simplify  it to zero. Thus even if the atom \(a\) has been declared to be zero,
+the solution to \(a x = b\) is \(x = -b/a \).
 
 
 
