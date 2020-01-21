@@ -1,4 +1,7 @@
-/* Definite integration calls solve (not $solve). Thus we include some definite integration to test solve.*/
+/* Test file for solving equations. Definite integration calls solve (not $solve). Thus we
+include some definite integration problems. These tests have been collected from the
+Maxima mailing list, the Maxima bug list, the Sage list, the to_poly_solve tests, and
+possibly other sources. Unfortunately, some tests are listed multiple times. */
 
 (reset(), load("unwind_protect"), solve_ignores_conditions : false, realonly : false,
 ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_run_time (), 0);
@@ -1454,10 +1457,10 @@ ssolve([x^2+y^2=2^2,(x-1)^2+(y-1)^2=2^2],[x,y]);
 [[x=-((sqrt(7)-1)/2),y=(sqrt(7)+1)/2],[x=(sqrt(7)+1)/2,y=-((sqrt(7)-1)/2)]]$
 
 /* [ 1845370 ] Division by 0 in solve() */
-solve(x^4+(8*n+2*c+4)*x^3+(24*n^2+12*c*n+24*n+c^2+7*c+5)*x^2+(32*n^3+24*c*n^2
+ssolve(x^4+(8*n+2*c+4)*x^3+(24*n^2+12*c*n+24*n+c^2+7*c+5)*x^2+(32*n^3+24*c*n^2
  +48*n^2+4*c^2*n+28*c*n+20*n+3*c^2+7*c+2)*x+20*n^4+24*c*n^3+38*n^3+9*c^2*n^2+39*c*n^2
  +22*n^2+c^3*n+12*c^2*n+17*c*n+4*n+c^3+3*c^2+2*c,x);
-[x=(sqrt((sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)+c^2-2*c+2)/2)-sqrt(-(sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)-c^2+2*c-2)/2)-4*n-c-2)/(2),x=-(sqrt((sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)+c^2-2*c+2)/2)+sqrt(-(sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)-c^2+2*c-2)/2)+4*n+c+2)/(2),x=(sqrt((sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)+c^2-2*c+2)/2)+sqrt(-(sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)-c^2+2*c-2)/2)-4*n-c-2)/(2),x=-(sqrt((sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)+c^2-2*c+2)/2)-sqrt(-(sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)-c^2+2*c-2)/2)+4*n+c+2)/(2)]$
+[x=-(sqrt((sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)+c^2-2*c+2)/2)+sqrt(-(sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)-c^2+2*c-2)/2))/(2)-(8*n+2*c+4)/4,x=-(sqrt((sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)+c^2-2*c+2)/2)-sqrt(-(sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)-c^2+2*c-2)/2))/(2)-(8*n+2*c+4)/4,x=(sqrt((sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)+c^2-2*c+2)/2)-sqrt(-(sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)-c^2+2*c-2)/2))/(2)-(8*n+2*c+4)/4,x=(sqrt((sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)+c^2-2*c+2)/2)+sqrt(-(sqrt(64*n^4+(128*c+96)*n^3+(80*c^2+176*c+32)*n^2+(16*c^3+96*c^2+48*c)*n+c^4+12*c^3+20*c^2)-c^2+2*c-2)/2))/(2)-(8*n+2*c+4)/4]$
 
 
 /*  FIX ME ------------------------
