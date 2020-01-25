@@ -1828,13 +1828,13 @@ are other equations in this thread that the solve cannot do:
 I have inserted these equations--I think the answers are OK, but I need to check them.
 */
 
-solve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
+ssolve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
 [[y=d*sin(atan((a*r)/((r-d)*s))+%pi*%z21),x=100*cos(atan((a*r)/((r-d)*s))+%pi*%z21),bt=atan((a*r)/((r-d)*s))+%pi*%z21]]$
 
-solve([bt=atan((a*r)/(s*(r-d))),x=100*cos(bt),y=d*sin(bt)],[x,y,bt]);
+ssolve([bt=atan((a*r)/(s*(r-d))),x=100*cos(bt),y=d*sin(bt)],[x,y,bt]);
 [[y=(a*d*r)/((r-d)*s*sqrt(((r^2-2*d*r+d^2)*s^2+a^2*r^2)/((r^2-2*d*r+d^2)*s^2))),x=100/sqrt(((r^2-2*d*r+d^2)*s^2+a^2*r^2)/((r^2-2*d*r+d^2)*s^2)),bt=atan((a*r)/((r-d)*s))]]$
 
-solve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
+ssolve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
 [[y=d*sin(atan((a*r)/((r-d)*s))+%pi*%z1),x=100*cos(atan((a*r)/((r-d)*s))+%pi*%z1),bt=atan((a*r)/((r-d)*s))+%pi*%z1]]$
 
 block([solve_ignores_conditions : true], ssolve( tan(a)=b,a));
@@ -2018,12 +2018,16 @@ solve([z/(z-1) = (z-x)/y, (z-x)/y = y/(z-y), y/(z-y) = (z-y)/(y-1)], [x,y,z]); *
 solve(sqrt(2*x+3)+2*(2*x+3) = 55,x);
 [x=11]$
 
-/* #2458 to_poly_solve gives a wrong solution for cos(x)=sin(3x) */
+/* #2458 to_poly_solve gives a wrong solution for cos(x)=sin(3x). I have
+checked these solutions by hand. */
 
-/* solution is a big mess--for now, let's not do it
 ssolve(cos(x)-sin(3*x),x);
-[x = (4*%pi*%z0+%pi)/4]$  /* not sure about this */
-*/
+[x=-((8*%pi*%z0+3*%pi)/4),
+x=-((8*%pi*%z1-%pi)/4),
+x=-((16*%pi*%z2-5*%pi)/8),
+x=-((16*%pi*%z3+3*%pi)/8),
+x=-((16*%pi*%z4+7*%pi)/8),
+x=-((16*%pi*%z5-%pi)/8)]$
 
  /* #2397 Solve returns [] when solutions exists */
 block([keepfloat : true], solve(%e^(0.0057195*x)+%e^(-0.0057195*x)=1,x));
@@ -2440,6 +2444,7 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
 
 
 
+
    algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
 [[x=sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2]]$
 
@@ -2489,6 +2494,7 @@ solve(6*x^2 = 28,x^2);
 
 ssolve(6*x^2 = 28/x^2,x^2);
 [x^2=-sqrt(42)/3,x^2=sqrt(42)/3]$
+
 
 solve([6*x^2 = 28/x^2],[x^2,x^2]);
 [x^2=-sqrt(42)/3,x^2=sqrt(42)/3]$
