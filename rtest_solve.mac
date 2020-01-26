@@ -1393,7 +1393,7 @@ ssolve(a*x=b, x);
 [x=b/a]$
 
 block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
-[[a=%i*%r1,x=%r1],[a=-%i*%r2,x=%r2]]$
+[[x=%r1,a=%i*%r1],[x=%r2,a=-%i*%r2]]$
 
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
 [[x=%r1,a=((sqrt(2)*%i+sqrt(2))*%r1)/2],
@@ -1659,8 +1659,8 @@ solve(acos(sqrt(x))=1/5,x);
 solve(acos(x)=1/5,x);
 [x=cos(1/5)]$
 
-solve(taylor(cos(x),x,0,4),x);
-[x=sqrt(sqrt(6)+3)-sqrt(3-sqrt(6)),x=-sqrt(sqrt(6)+3)-sqrt(3-sqrt(6)),x=sqrt(sqrt(6)+3)+sqrt(3-sqrt(6)),x=sqrt(3-sqrt(6))-sqrt(sqrt(6)+3)]$
+ssolve(taylor(cos(x),x,0,4),x);
+[x=-sqrt(2)*sqrt(3-sqrt(3)),x=sqrt(2)*sqrt(3-sqrt(3)),x=-sqrt(2)*sqrt(sqrt(3)+3),x=sqrt(2)*sqrt(sqrt(3)+3)]$
 
 ssolve(taylor(sin(x),x,0,4),x);
 [x=0,x=-sqrt(6),x=sqrt(6)]$
@@ -1829,13 +1829,13 @@ I have inserted these equations--I think the answers are OK, but I need to check
 */
 
 ssolve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
-[[y=d*sin(atan((a*r)/((r-d)*s))+%pi*%z21),x=100*cos(atan((a*r)/((r-d)*s))+%pi*%z21),bt=atan((a*r)/((r-d)*s))+%pi*%z21]]$
+[[bt=atan((a*r)/((r-d)*s))+%pi*%z0,x=100*cos(atan((a*r)/((r-d)*s))+%pi*%z0),y=d*sin(atan((a*r)/((r-d)*s))+%pi*%z0)]]$
 
 ssolve([bt=atan((a*r)/(s*(r-d))),x=100*cos(bt),y=d*sin(bt)],[x,y,bt]);
-[[y=(a*d*r)/((r-d)*s*sqrt(((r^2-2*d*r+d^2)*s^2+a^2*r^2)/((r^2-2*d*r+d^2)*s^2))),x=100/sqrt(((r^2-2*d*r+d^2)*s^2+a^2*r^2)/((r^2-2*d*r+d^2)*s^2)),bt=atan((a*r)/((r-d)*s))]]$
+[[bt=atan((a*r)/((r-d)*s)),x=(100*sqrt(r^2-2*d*r+d^2)*abs(s))/sqrt((r^2-2*d*r+d^2)*s^2+a^2*r^2),y=(a*d*r*sqrt(r^2-2*d*r+d^2)*abs(s))/((r-d)*s*sqrt((r^2-2*d*r+d^2)*s^2+a^2*r^2))]]$
 
 ssolve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]);
-[[y=d*sin(atan((a*r)/((r-d)*s))+%pi*%z1),x=100*cos(atan((a*r)/((r-d)*s))+%pi*%z1),bt=atan((a*r)/((r-d)*s))+%pi*%z1]]$
+[[bt=atan((a*r)/((r-d)*s))+%pi*%z0,x=100*cos(atan((a*r)/((r-d)*s))+%pi*%z0),y=d*sin(atan((a*r)/((r-d)*s))+%pi*%z0)]]$
 
 block([solve_ignores_conditions : true], ssolve( tan(a)=b,a));
 [a=atan(b)+%pi*%z0]$
@@ -2207,9 +2207,9 @@ block([solveexplicit : true],
   /3], [A,B,C]);
   []$
 
-  /* #2779 %solve(sin(x)=tan(x),x) fails */
-  block([solve_ignores_conditions : true], ssolve(sin(x)=tan(x),x));
-  [x=%pi*%z1]$
+  /* #2779 %solve(sin(x)=tan(x),x) fails.  Better answer is x = %pi * %z0 */
+  ssolve(sin(x)=tan(x),x);
+  [x=-2*%pi*%z0-%pi,x=-2*%pi*%z1]$
 
   /* #2773 Spurious solution using arc-trig */
   block([solve_inverse_package : single_valued_inverse], solve(sin(cos(x))/cos(x) = 0, x));
@@ -2437,10 +2437,10 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
  [x =   (25*2^(9/2))/3^(1/4),  y = 800/sqrt(3)]];
 
  algsys([v^2-2*v+u^2+10*u+1,v^2-10*v+u^2+2*u+1],[v,u]);
- [[v=-(sqrt(34)-6)/2,u=(sqrt(34)-6)/2],[v=(sqrt(34)+6)/2,u=-(sqrt(34)+6)/2]]$
+ [[v=-((sqrt(34)-6)/2),u=(sqrt(34)-6)/2],[v=(sqrt(34)+6)/2,u=-((sqrt(34)+6)/2)]]$
 
   algsys([2*v^2-12*v+1,v^2-2*v+u^2+10*u+1],[v,u]);
-[[v=-(sqrt(34)-6)/2,u=-(sqrt(34)+14)/2],[v=(sqrt(34)+6)/2,u=(sqrt(34)-14)/2],[v=(sqrt(34)+6)/2,u=-(sqrt(34)+6)/2],[v=-(sqrt(34)-6)/2,u=(sqrt(34)-6)/2]]$
+[[v=-((sqrt(34)-6)/2),u=-((sqrt(34)+14)/2)],[v=(sqrt(34)+6)/2,u=(sqrt(34)-14)/2],[v=(sqrt(34)+6)/2,u=-((sqrt(34)+6)/2)],[v=-((sqrt(34)-6)/2),u=(sqrt(34)-6)/2]]$
 
 
 
