@@ -656,10 +656,10 @@
 ;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt to set the
 ;;; multiplicities to anything reasonable--it resets  multiplicities to the default.
 (defun redundant-equation-solve (eqs x)
-	;;(mtell "using redundant solve ~%")
+	(mtell "using redundant solve ~%")
 	(let ((eqset) (sol) (checked-sol nil))
 		 (setq eqs (mapcar #'meqhk (cdr eqs))) ;eqs is now a CL list
-		 (setq eqset (simplifya (cons '($set) eqs) t))
+		 (setq eqset (simplifya (cons '($set) eqs) t)) ;eqset is a Maxima set of expressions
 
 		 (dolist (ek eqs) ; for each equation ek, ratsubst 0 for ek and adjoin ek back into the equations
 			 (when (not ($freeof x ek)) ; disallow subsitution when ek is freeof x
@@ -667,6 +667,7 @@
 				 (setq eqset ($disjoin 0 eqset))
 				 (setq eqset ($adjoin ek eqset))))
 
+     (mtell "The eq set is ~M ~%" eqset)
 		 (setq eqset (sort (cdr eqset) #'equation-complexity-guess)) ; effort to find simplest equation
 		 (setq sol (let (($solveexplicit t)) (solve-single-equation (first eqset) x)))
 		 ;;include only solutions that can be verified--likely this will sometimes miss legitimate solutions.
@@ -685,14 +686,16 @@
 	(let (($listconstvars nil)) ($setify ($listofvars e))))
 
 (defun triangularize-eqs (e x)
-	;;(setq e ($setify e))
-	;;(setq x ($setify x))
-	(setq e ($equiv_classes e #'(lambda (a b) ($setequalp
-											   ($intersection (set-of-vars a) x)
-											   ($intersection (set-of-vars b) x)))))
-	(setq e ($listify e))
-	($sort e #'(lambda (a b) (< ($cardinality ($intersection (set-of-vars a) x))
-										($cardinality ($intersection (set-of-vars b) x))))))
+   (let ((xx x))
+	    (setq e (apply-identities e *pythagorean-identities*))
+	    (setq e (if ($listp e) ($setify e) e))
+	    (setq x (if ($listp x) ($setify x) x))
+      (setq e ($equiv_classes e #'(lambda (a b) ($setequalp
+											   ($intersection (set-of-vars a) xx)
+											   ($intersection (set-of-vars b) xx)))))
+    	(setq e ($listify e))
+	    ($sort e #'(lambda (a b) (< ($cardinality ($intersection (set-of-vars a) x))
+									          	($cardinality ($intersection (set-of-vars b) x)))))))
 
 (defun list-of-list-p (e)
 	(and
@@ -710,7 +713,7 @@
 ;;; subsquent sets.
 (defun solve-triangular-system (eqs vars)
 		;(mtell "Top of solve-triangular-system ~%")
-	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars) (freesol nil))
+	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars) (free-sol nil))
 
 		   (cond ((null eqs)
 				        ;; No equations to solve, so all variables are free.
