@@ -27,7 +27,7 @@
 
 (defmfun $linsolve (e x) "Solve list of linear equations e for the list of unknowns x."
      ;(mtell "Top of my linsolve ~%")
-     (mfuncall '$reset $%rnum_list) ; reset %rnum_list to default.
+     (mfuncall '$reset '$%rnum_list) ; reset %rnum_list to default.
      (let ((mat) (sol nil) (g) (xx nil) (nonatom-subs nil) ($scalarmatrixp nil))
           ;; when either e or x isn't a Maxima list, make it a Maxima list
 		      (when (not ($listp e))
