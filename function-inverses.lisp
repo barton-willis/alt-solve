@@ -228,6 +228,7 @@
 
 		  (list '%asin #'(lambda (q) (list (take '(%sin) q))))
 		  (list '%acos #'(lambda (q) (list (take '(%cos) q))))
+			;; Maybe this should check if the -pi/2 < Re(q) <= pi/2
 		  (list '%atan #'(lambda (q) (list (take '(%tan) q))))
 		  (list '%acot #'(lambda (q)
 								(cond ((zerop1 q) (list))
