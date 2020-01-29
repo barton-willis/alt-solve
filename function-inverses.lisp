@@ -137,6 +137,9 @@
 								(cond ((zerop1 q) (list))
 									(t (list (take '(%cot) q))))))
 
+    ;; Maybe this should check if the -pi/2 < Re(q) <= pi/2
+		(list '%atan #'(lambda (q) (list (take '(%tan) q))))
+
 
 		 (list '%sinh #'(lambda (q) (list
 									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%asinh) q))
