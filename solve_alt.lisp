@@ -104,7 +104,7 @@
 (defun $solve (eqlist &optional (varl nil))
   ;(mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
 	;(print `(linsovle_params = ,$linsolve_params))
-  (mfuncall '$reset $multiplicities)
+  (mfuncall '$reset '$multiplicities)
   (mfuncall '$reset '$%rnum_list) ;not sure about this?
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
 	   ;; Allow sets for eqlist and varl
@@ -838,7 +838,7 @@
 (defvar $list_of_equations nil)
 (defun solve (e x ms)
   ;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
-	(push (list e x) $list_of_equations) ; debugging-like thing
+	;;;(push (list e x) $list_of_equations) ; debugging-like thing
 ;;	(displa (mfuncall '$reset (list '(mlist)')
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
