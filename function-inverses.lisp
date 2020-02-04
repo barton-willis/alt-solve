@@ -193,7 +193,6 @@
 
 		 	 ; exp(X)=q --> if q=0 then empty else
 		  (list 'exponential-inverse #'(lambda (q a)
-											   ;;;(print `(q = ,q a = ,a))
 											  (cond ((zerop1 q) nil)
 												  	(t (list (div (take '(%log) q) (take '(%log) a)))))))
 

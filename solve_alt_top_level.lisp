@@ -90,8 +90,3 @@
                   (mtell "Solve: unable to verify solution ~M is consistent with fact database ~%" sx))
                 (push sx ssol))))
       (simplifya (cons '(mlist) ssol) t)))
-
-;;; Solve, apply nicedummies, simplify in current context, and sort solutions.
-;;; This is especially useful for rtest files
-(defun $ssolve (e x)
-   (let (($%rnum 0)) (sort-solutions ($expand ($nicedummies ($solve e x)) 0 0) nil)))

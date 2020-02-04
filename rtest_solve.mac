@@ -125,7 +125,7 @@ solve(x);
 [x=0]$
 
 ssolve(0,x);
-[x = %r0]$
+all$
 
 ssolve(0.0,x);
 [x = %r0]$
@@ -143,7 +143,7 @@ solve(0.1b0,x);
 []$
 
 ssolve(0,[x]);
-[x=%r0]$
+all$
 
 ssolve(0.0,[x]);
 [x= %r0]$
@@ -261,6 +261,9 @@ ssolve(x/(x-107),x);
 
 ssolve((x-9)/(x-107),x);
 [x=9]$
+
+solve_inverse_package;
+0$
 
 /* From mailing list Feb 2019 */
 ssolve(1.03^x = 2,x);

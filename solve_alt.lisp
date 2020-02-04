@@ -102,6 +102,11 @@
               (t e)))
         (t (simplifya (cons (list (caar e)) (mapcar #'unkeep-float (cdr e))) t))))
 
+;;; Solve, apply nicedummies, simplify in current context, and sort solutions.
+;;; This is especially useful for rtest files
+(defun $ssolve (e x)
+		(let (($%rnum 0)) (sort-solutions ($expand ($nicedummies ($solve e x)) 0 0) nil)))
+
 ;;; Flags that I've ignored: $solveexplicit (not entirely), $dispflag, $programmode, and $breakup.
 
 ;;; The top level function solve function:
@@ -115,8 +120,9 @@
 ;;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
-  ;(mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
+  (mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
 	;(print `(linsovle_params = ,$linsolve_params))
+	(print  $solve_inverse_package)
   (mfuncall '$reset '$multiplicities)
   (mfuncall '$reset '$%rnum_list) ;not sure about this?
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
@@ -463,7 +469,7 @@
 ;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
 
 (defun solve-mexpt-equation (ee x m use-trigsolve)
-	;(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
+	(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
