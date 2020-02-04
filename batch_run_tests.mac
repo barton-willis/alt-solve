@@ -18,4 +18,4 @@ share_testsuite_files : delete(["rtest_sym",[15]], share_testsuite_files)$
 
 share_testsuite_files : delete("rtest_diff_form", share_testsuite_files)$
 
-run_testsuite(share_tests = false);
+run_testsuite(share_tests = true);
