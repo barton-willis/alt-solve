@@ -38,7 +38,7 @@ The \altsolve\/ package aims to be a replacement for Maxima's solve function. Th
 
 \item to provide clear user documentation that is centered  on user's questions,
 
-\item to focus on symbolic solution to equations that are pertinent to science and engineering problems,
+\item to focus on symbolic solutions to equations that are pertinent to science and engineering problems,
 
 \item to find all real and complex solutions to equations, but take care to not return spurious solutions.
 
@@ -47,7 +47,7 @@ Additionally, \altsolve\/  aims to be compatible with Maxima's current solve fun
 
 \begin{alphalist}[]
 
-\item Solutions are expressed as Maxima lists with solutions that invovle objects that Maxima's core  understands.
+\item Solutions are expressed as Maxima lists with solutions that involve objects that Maxima's core  understands.
 
 \item We make an effort to support most the option variables that directly affect solve.
 
@@ -66,11 +66,11 @@ We do \emph{not} aim
 
 \end{alphalist}
 
-Our development priorities are (in order from highest to least)
+\noindent Our development priorities are (in order from highest to least)
 
 \begin{alphalist}[]
 
-\item to write  Common Lisp source codethat is easy to extend and to fix,
+\item to write  Common Lisp source code that is easy to extend and to fix,
 
 \item to have a modest code size,
 
@@ -83,7 +83,7 @@ Our development priorities are (in order from highest to least)
 \section{Top-level functions}
 
 The top-level functions are \texttt{solve}, \texttt{ssolve}, \texttt{solve\_filter},
-and \texttt{linsolve}. The function \texttt{solve} takes at one or two arguments. The first
+and \texttt{linsolve}. The function \texttt{solve} takes  one or two arguments. The first
 argument gives the equations to be solved. The first argument is either a Maxima expression,
 a list of Maxima expressions, or a set of Maxima expressions. If any of these expressions is
 not explicitly of the form \(a = b\), the expression is assumed to vanish.

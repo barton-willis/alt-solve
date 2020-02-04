@@ -4,6 +4,7 @@ load(solve_alt)$
 
 file_search_tests : append(file_search_maxima, file_search_tests)$
 
+/*
 push("rtest_solve2", testsuite_files)$
 
 push("rtest_solve", testsuite_files)$
@@ -15,5 +16,6 @@ share_testsuite_files : delete(["rtest_abs_integrate",[66,164]], share_testsuite
 share_testsuite_files : delete(["rtest_sym",[15]], share_testsuite_files)$
 
 share_testsuite_files : delete("rtest_diff_form", share_testsuite_files)$
+*/
 
-run_testsuite(share_tests = true);
+run_testsuite(share_tests = false);

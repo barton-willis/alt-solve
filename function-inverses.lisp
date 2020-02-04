@@ -19,7 +19,7 @@
 					(mul 2 '$%pi (my-new-variable '$integer))) a)))))))
 
 (defun power-inverse-standard (q a)
-  ;;(mtell "top of power-inverse-standard q = ~M  a = ~M ~%" q a)
+  (mtell "top of power-inverse-standard q = ~M  a = ~M ~%" q a)
 	(let ((kmax) (kmin) (sol nil) (xxx) (ph) (cnd) (ok) ($m1pbranch t) ($domain '$complex))
 
 		 (cond
@@ -280,5 +280,5 @@
 (defmvar $multivalued_inverse *function-inverses*)
 (defmvar $single_valued_inverse *function-inverses-alt*)
 
-(defmvar $solve_inverse_package *function-inverses-alt*)
+(defmvar $solve_inverse_package *function-inverses*)
 (setf (get '$solve_inverse_package 'assign) #'solve-inverse-assign)

@@ -6,6 +6,16 @@
 
 (in-package :maxima)
 
+;;; We attempt to give the functions solve, $solve, and $linsolve new names and then
+;;; redefine them. This business about setting *evaluator-mode* is mostly a
+;;; mystery to me.
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  #+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
+	($load "solve.lisp")
+	(setf (symbol-function '$solve_original) (symbol-function '$solve))
+	(setf (symbol-function 'solve_original) (symbol-function 'solve))
+	(setf (symbol-function '$linsolve_original) (symbol-function '$linsolve)))
+
 ;;; Unrelated to solving equations...
 (dolist (e (list '$max '%acosh '%cos '%cosh '%lambert_w '%log '%sin '%sinh 'mabs 'rat))
 	(setf (get e 'msimpind) (list e 'simp)))
@@ -28,22 +38,25 @@
 						(msetq $context '$initial)
 						($new_variable knd))
 				(msetq $context cntx))))
-;;; For testing, we need to be sure to expunge all current solve code. To do this with SBCL, I think
-;;; we need to set SBCL to INTERPRET mode and load solve and algsys.
+
+;;; I think it's OK to set *evaluator-mode* to :COMPILE (the default) and the load
+;;; additonal needed files. But it seems that the remainder of this file needs to be
+;;; loaded with *evaluator-mode* set to :INTERPRET.
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  #+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
-	($load "solve")
-	($load "algsys")
-	($load "to_poly_solve")
+  #+(or sbcl) (setq sb-ext:*evaluator-mode* :COMPILE)
+	($load "to_poly.lisp")
+	($load "to_poly_solve_extra.lisp")
 	($load "function-inverses.lisp")
-	(setq $solve_inverse_package $multivalued_inverse)
 	($load "trig_identities.lisp")
 	($load "polynomial-solve.lisp")
 	($load "in-domain.lisp")
 	($load "linsolve.lisp")
 	($load "solve_alt_top_level.lisp")
-	($load "grobner")
-	($load "myalgsys"))
+	($load "grobner.lisp")
+	($load "myalgsys.lisp"))
+
+#+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
 (defun polynomialp (p vars coeffp exponp)
