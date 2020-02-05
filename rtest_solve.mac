@@ -262,9 +262,6 @@ ssolve(x/(x-107),x);
 ssolve((x-9)/(x-107),x);
 [x=9]$
 
-solve_inverse_package;
-0$
-
 /* From mailing list Feb 2019 */
 ssolve(1.03^x = 2,x);
 [x=33.83087013568215*(2*%i*%pi*%z0+log(2))]$

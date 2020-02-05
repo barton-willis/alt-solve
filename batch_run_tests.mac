@@ -6,8 +6,7 @@ file_search_tests : append(file_search_maxima, file_search_tests)$
 
 push("rtest_solve2", testsuite_files)$
 
-/*
-push("rtest_solve", testsuite_files)$ */
+push("rtest_solve", testsuite_files)$ 
 
 push("rtest_linsolve", testsuite_files)$
 

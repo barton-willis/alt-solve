@@ -327,7 +327,7 @@
 				 ;; When either $multiplicities hasn't been set or its length doesn't match the solution,
 				 ;; silently change the multiplicities to a list of $not_yet_set.
 			   (when (not (and ($listp $multiplicities) (eql (length sol) (length $multiplicities))))
-				        (mtell "warning: unsilently setting multiplicities to 1! ~%")
+				        (mtell "warning: setting multiplicities to 1! ~%")
 					      (setq $multiplicities (mapcar #'(lambda (q) (declare (ignore q)) 1) (cdr sol)))
 						  	(push '(mlist) $multiplicities))
        		;; First build an association list of solution.multiplicity. Second call filter-solution.
