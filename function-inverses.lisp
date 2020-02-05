@@ -13,13 +13,13 @@
 	(let ((mag-q (take '(mexpt) (mul q (take '($conjugate) q)) (div 1 2)))
 	      (ph (take '($parg) q)))
 
-      (mtell "mag-q = ~M  phase = ~M ~%" mag-q ph)
+      ;;(mtell "mag-q = ~M  phase = ~M ~%" mag-q ph)
 			(list (mul (take '(mexpt) mag-q (div 1 a))
 				(take '(mexpt) '$%e (mul '$%i (div (add ph
 					(mul 2 '$%pi (my-new-variable '$integer))) a)))))))
 
 (defun power-inverse-standard (q a)
-  (mtell "top of power-inverse-standard q = ~M  a = ~M ~%" q a)
+  ;;(mtell "top of power-inverse-standard q = ~M  a = ~M ~%" q a)
 	(let ((kmax) (kmin) (sol nil) (xxx) (ph) (cnd) (ok) ($m1pbranch t) ($domain '$complex))
 
 		 (cond

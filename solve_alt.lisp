@@ -10,6 +10,7 @@
 ;;; redefine them. This business about setting *evaluator-mode* is mostly a
 ;;; mystery to me.
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  ($load "myload.lisp") ;track what is loaded & how many times.
   #+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
 	($load "solve.lisp")
 	(setf (symbol-function '$solve_original) (symbol-function '$solve))
@@ -28,7 +29,7 @@
 (defmvar $solve_ignores_conditions t)
 
 ;;; Wrap $new_variable into a function that switches to the context 'initial' before declaring
-;;; the type. After the declaration, return to the orginial context. Maybe this fuctionality
+;;; the type. After the declaration, return to the original context. Maybe this functionality
 ;;; should be blended into $new_variable. Finally, I'm not sure the unwind_protect is really
 ;;; need--but it's OK.
 (defun my-new-variable (knd) "wrap $new_variable that autodeclares the type in the context initial."
@@ -40,7 +41,7 @@
 				(msetq $context cntx))))
 
 ;;; I think it's OK to set *evaluator-mode* to :COMPILE (the default) and the load
-;;; additonal needed files. But it seems that the remainder of this file needs to be
+;;; additional needed files. But it seems that the remainder of this file needs to be
 ;;; loaded with *evaluator-mode* set to :INTERPRET.
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -120,9 +121,9 @@
 ;;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
-  (mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
+  ;(mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
 	;(print `(linsovle_params = ,$linsolve_params))
-	(print  $solve_inverse_package)
+	;(print  $solve_inverse_package)
   (mfuncall '$reset '$multiplicities)
   (mfuncall '$reset '$%rnum_list) ;not sure about this?
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
@@ -330,8 +331,8 @@
 					      (setq $multiplicities (mapcar #'(lambda (q) (declare (ignore q)) 1) (cdr sol)))
 						  	(push '(mlist) $multiplicities))
        		;; First build an association list of solution.multiplicity. Second call filter-solution.
-		  		;; And third re-consitute Maxima lists for the solution and the multiplicities. The
-					;; filtering process requires using sign, but the keepfloat mechanism interfers with
+		  		;; And third re-constitute Maxima lists for the solution and the multiplicities. The
+					;; filtering process requires using sign, but the keepfloat mechanism interferes with
 					;; sign.  So we'll unkeep-float each solution. Maybe the entire keep-float/unkeep-float
 					;; scheme needs to be re-considered.
 		  		(setq alist (mapcar #'(lambda (a b) (cons (unkeep-float a) b)) (cdr sol) (cdr $multiplicities)))
@@ -469,7 +470,7 @@
 ;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
 
 (defun solve-mexpt-equation (ee x m use-trigsolve)
-	(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
+	;(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
@@ -513,7 +514,7 @@
 
 			 	((and (eql 2 (length nvars)) ($freeof x (first e)) (homogeneous-linear-poly-p (first e) nvars))
 				 (let ((k1) (a) (k2) (b) (xx) (yy))
-					  (mtell "doing new mexpt solver ~%")
+					  ;(mtell "doing new mexpt solver ~%")
 					  (setq e (first e))
 					  (setq k1 ($ratcoef e (first nvars)))
 					  (setq a (second (first kernels)))
@@ -624,7 +625,7 @@
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
 		 (setq q (let ((errcatch t) ($errormsg nil)) (ignore-errors ($to_poly e (list '(mlist) x)))))
 
-		 (mtell "doing to poly solve ~%")
+		; (mtell "doing to poly solve ~%")
 
 		 (when (and q (< ($length ($third q)) 2))
 			 (setq checked-sol (list '(mlist)))
@@ -675,7 +676,7 @@
 ;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt to set the
 ;;; multiplicities to anything reasonable--it resets  multiplicities to the default.
 (defun redundant-equation-solve (eqs x)
-	(mtell "using redundant solve ~%")
+	;(mtell "using redundant solve ~%")
 	(let ((eqset) (sol) (checked-sol nil))
 		 (setq eqs (mapcar #'meqhk (cdr eqs))) ;eqs is now a CL list
 		 (setq eqset (simplifya (cons '($set) eqs) t)) ;eqset is a Maxima set of expressions
@@ -686,7 +687,7 @@
 				 (setq eqset ($disjoin 0 eqset))
 				 (setq eqset ($adjoin ek eqset))))
 
-     (mtell "The eq set is ~M ~%" eqset)
+    ; (mtell "The eq set is ~M ~%" eqset)
 		 (setq eqset (sort (cdr eqset) #'equation-complexity-guess)) ; effort to find simplest equation
 		 (setq sol (let (($solveexplicit t)) (solve-single-equation (first eqset) x)))
 		 ;;include only solutions that can be verified--likely this will sometimes miss legitimate solutions.
@@ -725,11 +726,11 @@
 (defun mequalp (e) "True iff e is an mequal expression"
   (and (consp e) (consp (car e)) (eql (caar e) 'mequal)))
 
-;;; Solve a triangular system of equations eqs for the variables vars. Specifially, eqs is a CL
+;;; Solve a triangular system of equations eqs for the variables vars. Specifically, eqs is a CL
 ;;; list of Maxima sets and vars is a CL list of mapatoms. We return a CL list of CL lists of the form
 ;;; ((x=5,y=42), (x=107,y=12)), for example. The CL list of Maxima sets eqs has a special structure.
 ;;; The set of variables in the n-th set is a proper subset of the set of variables in all
-;;; subsquent sets.
+;;; subsequent sets.
 (defun solve-triangular-system (eqs vars)
 		;(mtell "Top of solve-triangular-system ~%")
 	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars) (free-sol nil))
@@ -785,7 +786,7 @@
 
 ;;; We replace solvex with a call to $solve -- I need to look up the meanings of ind and flag.
 (defun solvex (eql varl ind flag)
-	(mtell "Top of solvex ind = ~M flag = ~M ~%" ind flag)
+	;(mtell "Top of solvex ind = ~M flag = ~M ~%" ind flag)
 	(setq eql (simplifya (cons '(mlist) eql) t))
 	(setq varl (simplifya (cons '(mlist) varl) t))
    ($solve eql varl))
@@ -838,7 +839,7 @@
 ;;; lead to solving biquadratics. Standard Maxima doesn't factor the biquadratic--that gives solutions
 ;;; that are needlessly complicated. But for such definite integrals, factoring the biquadratic
 ;;; and solving yields solutions that are arguably more complex than not factoring. So a weird trick--
-;;; factoring the biquadraic is controled with the option variable *solve-factors-biquadratic*. When
+;;; factoring the biquadraic is controlled with the option variable *solve-factors-biquadratic*. When
 ;;; the global *defint-assumptions* is bound, set *solve-factors-biquadratic* to nil. This stupid
 ;;; Maxima trick simply allows the testsuite to have fewer needless failures.
 
