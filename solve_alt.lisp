@@ -6,20 +6,19 @@
 
 (in-package :maxima)
 
-;;; We attempt to give the functions solve, $solve, and $linsolve new names and then
-;;; redefine them. This business about setting *evaluator-mode* is mostly a
-;;; mystery to me.
+;;; The option variable solveverbose is useful for debugging, but it's not intended
+;;; for general use. 
+(defmvar $solveverbose nil)
+
+;;; The need for setting *evaluator-mode* is a mystery to me. And I'm not entirely sure
+;;; about the need for loading solve.lisp.
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  ($load "myload.lisp") ;track what is loaded & how many times.
   #+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
-	($load "solve.lisp")
-	(setf (symbol-function '$solve_original) (symbol-function '$solve))
-	(setf (symbol-function 'solve_original) (symbol-function 'solve))
-	(setf (symbol-function '$linsolve_original) (symbol-function '$linsolve)))
+	($load "solve.lisp"))
 
 ;;; Unrelated to solving equations...
-(dolist (e (list '$max '%acosh '%cos '%cosh '%lambert_w '%log '%sin '%sinh 'mabs 'rat))
-	(setf (get e 'msimpind) (list e 'simp)))
+;(dolist (e (list '$max '%acosh '%cos '%cosh '%lambert_w '%log '%sin '%sinh 'mabs 'rat))
+;	(setf (get e 'msimpind) (list e 'simp)))
 
 ;;; When $use_to_poly is true, dispatch the to_poly_solver after attempting other methods;
 ;;; when $use_to_poly is false, never dispatch the to_poly_solver.
@@ -40,12 +39,11 @@
 						($new_variable knd))
 				(msetq $context cntx))))
 
-;;; I think it's OK to set *evaluator-mode* to :COMPILE (the default) and the load
-;;; additional needed files. But it seems that the remainder of this file needs to be
-;;; loaded with *evaluator-mode* set to :INTERPRET.
+;;; Load all need files--maybe SBCL still needs to be in interpert mode.
+
+#+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  #+(or sbcl) (setq sb-ext:*evaluator-mode* :COMPILE)
 	($load "to_poly.lisp")
 	($load "to_poly_solve_extra.lisp")
 	($load "function-inverses.lisp")
@@ -56,8 +54,6 @@
 	($load "solve_alt_top_level.lisp")
 	($load "grobner.lisp")
 	($load "myalgsys.lisp"))
-
-#+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
 (defun polynomialp (p vars coeffp exponp)
@@ -104,7 +100,8 @@
         (t (simplifya (cons (list (caar e)) (mapcar #'unkeep-float (cdr e))) t))))
 
 ;;; Solve, apply nicedummies, simplify in current context, and sort solutions.
-;;; This is especially useful for rtest files
+;;; This is especially useful for rtest files. The function sort-solutions (defined
+;;; in solve_alt_top.lisp) sorts solutions and the multiplicities.
 (defun $ssolve (e x)
 		(let (($%rnum 0)) (sort-solutions ($expand ($nicedummies ($solve e x)) 0 0) nil)))
 
@@ -343,7 +340,14 @@
 (defvar $the_unsolved nil) ;this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
-  ;;(mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
+
+
+;	(when $solveverbose
+;	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
+;		(print `(e = ,e))
+;		(print `(e = ,e))
+;		($read ))
+
 	(let ((cnd)) ; did have ($assume_pos nil), but why?
 	   (setq cnd (if $solve_ignores_conditions t (in-domain e)))
 		 (setq e (equation-simplify e m))
@@ -440,11 +444,17 @@
 			 (t nil))))
 
 (defun kernelize (e kernel-p &optional (subs nil))
-	(let ((g (gensym)) (x nil) (op))
+
+  (when $solveverbose
+		(mtell "Top of kernelize; e = ~M ~%" e)
+		(print `(kernel-p = ,(funcall kernel-p e) subs = ,subs))
+		(print `(mapatom = ,($mapatom e))))
+
+	(let ((g (gensym)) (x nil) (op) (is-a-kernel (funcall kernel-p e)))
 		 (cond
 			 (($mapatom e) (list e subs))
 
-			  ((funcall kernel-p e) ; it's a kernel
+			  (is-a-kernel  ;was! (funcall kernel-p e) ; it's a kernel
 			   (setq x (assoc e subs :test #'alike1)) ;is it a known kernel?
 			   (cond (x
 					  (list (cdr x) subs)) ; it's a known kernel--use the value from the association list subs
@@ -470,7 +480,7 @@
 ;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
 
 (defun solve-mexpt-equation (ee x m use-trigsolve)
-	;(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
+	(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
@@ -505,7 +515,6 @@
 					(cond
 						((eql sol '$all) '$all)
 						(t
-						 ;;(displa (mfuncall '$facts))
 						 (setq sol (mapcan #'(lambda (q) (funcall inverse-function ($rhs q) zzz)) (cdr sol)))
 						 ;; not sure what to do when solve returns $all? It's a mess--don't want an error.
 						 (setq sol (mapcan #'(lambda (q) (let ((sq (solve-single-equation (sub ker q) x m use-trigsolve)))
@@ -914,9 +923,10 @@
 (defun solvequartic (x) (declare (ignore x)) (merror "solvequartic"))
 
 ;;;;;;;;;;;;;broken code!
-;;; Attempt to solve equations that are rational functions of trig functions with identical arguments. When the equation
-;;; e doesn't have the required form, return nil. Steps: (#1) convert all trig functions to sine or cosine (#2) gather
-;;; the arguments of sine and cosine (#3) check that the arguments of sine and cosine are identical, and when they are
+;;; Attempt to solve equations that are rational functions of trig functions with identical arguments.
+;;; When the equation e doesn't have the required form, return nil. Steps: (#1) convert all trig
+;;; functions to sine or cosine (#2) gather the arguments of sine and cosine (#3) check that the
+;;; arguments of sine and cosine are identical, and when they are
 ;;; replace cos(X) --> gc and sin(X) --> gs (#4) append gc^2 + gs^2-1 to the equation and solve.
 
 (defun trigsolve (e x) "Attempt to solve equations that are rational functions of trig functions with the same argument."

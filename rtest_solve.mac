@@ -2443,13 +2443,11 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
 [[v=-((sqrt(34)-6)/2),u=-((sqrt(34)+14)/2)],[v=(sqrt(34)+6)/2,u=(sqrt(34)-14)/2],[v=(sqrt(34)+6)/2,u=-((sqrt(34)+6)/2)],[v=-((sqrt(34)-6)/2),u=(sqrt(34)-6)/2]]$
 
 
-
-
-   algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
+algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
 [[x=sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2]]$
 
-    eqs:[y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0];
-    [y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0];
+eqs:[y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0];
+[y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0];
 
     (assume(h>0),0);
     0;
@@ -2508,5 +2506,5 @@ block([%rnum : 0], solve([x+y=1, x^2+y^2 = 1],[x,y]));
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
-(remvalue(thyme), reset(),0);
+(remvalue(thyme), kill(all), reset(),0);
 0$
