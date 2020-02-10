@@ -5,8 +5,8 @@
 ;;;; https://creativecommons.org/licenses/by-sa/4.0/
 
 (in-package :maxima)
-(eval-when (:compile-toplevel :load-toplevel :execute)
-   ($load "grobner"))
+;(eval-when (:compile-toplevel :load-toplevel :execute)
+;   ($load "grobner"))
 
 (defun $myalgsys (ee x)
    (mtell "Top of my algsys; eq = ~M  x = ~M  ~%" ee x)
