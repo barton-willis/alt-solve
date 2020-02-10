@@ -219,7 +219,11 @@
 
 		  (list '%sin #'(lambda (q) (list (take '(%asin) q))))
 		  (list '%cos #'(lambda (q) (list (take '(%acos) q))))
-		  (list '%tan #'(lambda (q) (list (take '(%atan) q))))
+
+			(list '%tan #'(lambda (q)
+									(cond
+										((zerop1 (add 1 (mul q q))) (list)) ; +/- %i not in range of tan
+										(t (list (take '(%atan) q))))))
 
 	    (list '%csc #'(lambda (q) (if (zerop1 q) (list) (list (take '(%acsc) q)))))
 		  (list '%sec #'(lambda (q) (if (zerop1 q) (list) (list (take '(%asec) q)))))

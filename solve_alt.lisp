@@ -7,7 +7,7 @@
 (in-package :maxima)
 
 ;;; The option variable solveverbose is useful for debugging, but it's not intended
-;;; for general use. 
+;;; for general use.
 (defmvar $solveverbose nil)
 
 ;;; The need for setting *evaluator-mode* is a mystery to me. And I'm not entirely sure
@@ -337,16 +337,14 @@
 		  		(setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
 		  		(simplifya (cons '(mlist) (mapcar #'car alist)) t)))))
 
-(defvar $the_unsolved nil) ;this is purely for debugging
+(defvar $the_unsolved nil);this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
-
-
-;	(when $solveverbose
-;	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
-;		(print `(e = ,e))
-;		(print `(e = ,e))
-;		($read ))
+  (when $solveverbose
+	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
+		(print `(e = ,e))
+		(print `(x = ,x))
+		($read ))
 
 	(let ((cnd)) ; did have ($assume_pos nil), but why?
 	   (setq cnd (if $solve_ignores_conditions t (in-domain e)))
@@ -400,10 +398,12 @@
 ;;; power function separately.
 
 (defun solve-by-kernelize (e x m)
-	(let ((kernel-p #'(lambda (q) (and (consp q)
-									   (consp (car q))
-									   (gethash (caar q) $solve_inverse_package)
-									   (not ($freeof x q)))))
+	(let ((kernel-p #'(lambda (q)
+		                 (and
+											 (consp q)
+									     (consp (car q))
+									     (gethash (caar q) $solve_inverse_package)
+									     (not ($freeof x q)))))
 		  ($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
 		  (mult-acc nil) (xxx) (mult-save))
 
@@ -444,7 +444,6 @@
 			 (t nil))))
 
 (defun kernelize (e kernel-p &optional (subs nil))
-
   (when $solveverbose
 		(mtell "Top of kernelize; e = ~M ~%" e)
 		(print `(kernel-p = ,(funcall kernel-p e) subs = ,subs))
@@ -480,7 +479,7 @@
 ;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
 
 (defun solve-mexpt-equation (ee x m use-trigsolve)
-	(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
+	;(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
 	(setq ee ($expand ee))
 	;(displa `((mequal) ee ,ee))
 	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
@@ -922,6 +921,7 @@
 (defun solvecubic (x) (declare (ignore x)) (merror "solvecubic"))
 (defun solvequartic (x) (declare (ignore x)) (merror "solvequartic"))
 
+#|
 ;;;;;;;;;;;;;broken code!
 ;;; Attempt to solve equations that are rational functions of trig functions with identical arguments.
 ;;; When the equation e doesn't have the required form, return nil. Steps: (#1) convert all trig
@@ -968,3 +968,4 @@
 					(setq buzz (simplifya (cons '(mlist) buzz) t)))))
 
 		 buzz))
+|#
