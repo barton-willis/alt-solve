@@ -6,6 +6,7 @@
 
 (in-package :maxima)
 
+(declare-top (unspecial coef var exp p y x)) ;not sure about this!!!
 ;;; The option variable solveverbose is useful for debugging, but it's not intended
 ;;; for general use.
 (defmvar $solveverbose nil)
@@ -240,7 +241,7 @@
 		(t
 		 (setq e ($num (sratsimp e)))
 		 (setq e (apply-identities e *pythagorean-identities*))
-		 (setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
+		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
 
 
@@ -340,8 +341,8 @@
 (defvar $the_unsolved nil);this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
-  (when $solveverbose
-	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~% " e x m use-trigsolve)
+(when $solveverbose
+	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~%" e x m use-trigsolve)
 		(print `(e = ,e))
 		(print `(x = ,x))
 		($read ))
@@ -360,7 +361,7 @@
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (filter-solution-x (polynomial-solve e x m) cnd))
 
-			((filter-solution-x (solve-mexpt-equation e x m use-trigsolve) cnd))
+			((filter-solution-x (solve-mexpt-equation e x m nil) cnd))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
@@ -398,16 +399,11 @@
 ;;; power function separately.
 
 (defun solve-by-kernelize (e x m)
-	(let ((kernel-p #'(lambda (q)
-		                 (and
-											 (consp q)
-									     (consp (car q))
-									     (gethash (caar q) $solve_inverse_package)
-									     (not ($freeof x q)))))
-		  ($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
+  (when $solveverbose
+		(mtell "Top of solve-by-kernelize e = ~M x = ~M ~%" e x))
+	(let (($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
 		  (mult-acc nil) (xxx) (mult-save))
-
-		 (setq e (kernelize e kernel-p))
+		 (setq e (kernelize e x))
 		 (cond ((and (null (cdr (second e))) ($freeof x (first e)))
 				(setq ker (second e))
 				(setq e (first e))
@@ -443,31 +439,37 @@
 				(simplifya (cons '(mlist) acc) t))
 			 (t nil))))
 
-(defun kernelize (e kernel-p &optional (subs nil))
+(defun kernelize (e x &optional (subs nil))
   (when $solveverbose
-		(mtell "Top of kernelize; e = ~M ~%" e)
-		(print `(kernel-p = ,(funcall kernel-p e) subs = ,subs))
-		(print `(mapatom = ,($mapatom e))))
+		(mtell "Top of kernelize; e = ~M  x = ~M ~%" e x)
+		(print `(e = ,e))
+		(print `(x = ,x)))
 
-	(let ((g (gensym)) (x nil) (op) (is-a-kernel (funcall kernel-p e)))
+	(let ((g (gensym)) (kn nil) (xop) (xk) (eargs) (is-a-kernel))
+	   (setq is-a-kernel (and
+			                   (consp e)
+												 (consp (car e))
+												 (gethash (caar e) $solve_inverse_package)
+												 (among x e)))
 		 (cond
 			 (($mapatom e) (list e subs))
 
-			  (is-a-kernel  ;was! (funcall kernel-p e) ; it's a kernel
-			   (setq x (assoc e subs :test #'alike1)) ;is it a known kernel?
-			   (cond (x
-					  (list (cdr x) subs)) ; it's a known kernel--use the value from the association list subs
-				   	 (t
-				   	  (list g (acons e g subs))))) ; it's unknown--append a new key/value to subs
+			  (is-a-kernel
+			   (setq kn (assoc e subs :test #'alike1)) ;is it a known kernel?
+			   (cond (kn
+					       (list (cdr kn) subs)) ; it's a known kernel--use the value from the association list subs
+				   	   (t
+				   	    (list g (acons e g subs))))) ; it's unknown--append a new key/value to subs
 
 			 (t ; map kernelize onto the argument list and build up the association list subs
-			  (setq op (list (caar e)))
+			  (setq xop (list (caar e)))
 			  (setq e (cdr e))
+				(setq eargs nil)
 			  (dolist (xk e)
-				  (setq xk (kernelize xk kernel-p subs))
-				  (push (first xk) x)
+				  (setq xk (kernelize xk x subs))
+				  (push (first xk) eargs)
 				  (setq subs (second xk)))
-			  (list (simplifya (cons op (reverse x)) t) subs)))))
+			  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
 
 (defun homogeneous-linear-poly-p (e vars)
 	(setq e ($rat e))
@@ -475,79 +477,57 @@
 		(setq e (sub e (mul x ($ratcoef e x)))))
 	(zerop1 ($ratdisrep e)))
 
-;;; Try to find a kernel blob1^blob2 in ee such that ee is a function of constants (thing free of x)
-;;; and blob1^blob2. Solve for blob1^blob2 and attempt to invert blob1^blob2.
+;;; Try to find a kernel of the form blob1^blob2 such that e is a function of constants
+;; (expression that is free of x) and of blob1^blob2. Solve for blob1^blob2 and attempt
+;; to invert blob1^blob2. The only invertable cases are when exactly one of blob1 or blob2
+;; is free of x.
 
-(defun solve-mexpt-equation (ee x m use-trigsolve)
-	;(mtell "top of solve-mexpt-equation ee = ~M x = ~M m = ~M ~M use-trigsolve = ~%" ee x m use-trigsolve)
-	(setq ee ($expand ee))
-	;(displa `((mequal) ee ,ee))
-	(let ((nvars) (kernels) (ker) (sol nil) (e ee)  (zzz)
-				  (inverse-function nil) ($use_to_poly nil))
+(defun solve-mexpt-equation (e x m use-trigsolve)
+	(let ((kernels) (ker) (ee) (g (gensym)) (zz) (xx) (finv nil) (sol))
+    (when $solveverbose
+			(mtell "Top of solve-mexpt-equation ~%")
+			(print `(e = ,e x = ,x))
+			($read ))
+		;;gather all terms in e of the form X^Y into a list of the form [[X1,Y1], ... [Xn,Yn]]
+	  (setq kernels	(cdr ($gatherargs e 'mexpt))) ;remove '(mlist)
+    (setq kernels (remove-if #'(lambda (q) ($freeof x q)) kernels))
+		(while kernels ;kernels is a CL list of Maxima lists
+			  (setq ker (cdr (pop kernels))) ;ker is a CL list of the form (base, exponent)
+				(setq zz (take '(mexpt) (first ker) (second ker))) ;reconsitute kernel
+		    (cond ((among x zz) ;only consider kernels that depend on the unknown x
+				        (setq ee ($ratsubst g zz e))
+				     	  (cond (($freeof x ee) ;we have a match!
+						           (setq kernels nil) ;set kernels to nil to terminate the while loop
+				            	 (setq finv (cond ; find the appropriate inverse function
+												     (($freeof x (first ker)) ;looking at a^X = b
+														  (setq zz (first ker))
+															(setq xx (second ker))
+						                  (gethash 'exponential-inverse $solve_inverse_package))
 
-		 (setq e (kernelize ee #'(lambda (q) (and (mexptp q) (not ($freeof x q))))))
-		 (mapcar #'(lambda (q) (push (car q) kernels) (push (cdr q) nvars)) (second e))
+														 (($freeof x (second ker)) ;looking at X^a = b
+															 (setq zz (second ker))
+															 (setq xx (first ker))
+														   (gethash 'power-inverse $solve_inverse_package))
 
-		 (cond ((and (second e) (not (cdr (second e))) ($freeof x (first e)))
-				;;(setq nvars (car (mapcar #'cdr (second e))))
-				(setq nvars (car nvars))
-				(setq ker (first kernels))
-				(setq inverse-function
-					  (cond
-							(($freeof x (second ker)) ; looking at a^X = b
-							  (setq zzz (second ker))
-							  (setq ker (third ker))
-							  (gethash 'exponential-inverse $solve_inverse_package))
+														 (t nil)))
 
-					  	 (($freeof x (third ker)) ; looking at X^a = b
-					  		 (setq zzz (third ker))
-							   (setq ker (second ker))
-						  	 (gethash 'power-inverse $solve_inverse_package))
+											 (setq sol (solve-single-equation ee g)) ;solve for g
+											 (cond
+						 						  ((eql sol '$all) '$all)
+						 					  	(finv
+						 					   	 (setq sol (mapcan #'(lambda (q) (funcall finv ($rhs q) zz)) (cdr sol)))
 
-						    ((alike1 (second ker) (third ker))
-						   	 (setq zzz 0)
-						  	 (setq ker (second ker))
-						  	 (gethash 'lambert-like-inverse $solve_inverse_package))))
+                           (setq ssol nil)
+													 (dolist (sx sol)
+													     (setq sx (solve-single-equation (sub xx sx) x m use-trigsolve))
+															 (cond (($listp sx)
+															 	       (setq ssol (append (cdr sx) ssol)))
+																		 (t
+																			 (setq ssol (cons sx ssol)))))
+													(setq sol (simplifya (cons '(mlist) ssol) t)))))))))
+								sol))
 
-				(when inverse-function
-					(setq sol (solve-single-equation (first e) nvars)) ;was ($solve (first e) nvars))
-					(cond
-						((eql sol '$all) '$all)
-						(t
-						 (setq sol (mapcan #'(lambda (q) (funcall inverse-function ($rhs q) zzz)) (cdr sol)))
-						 ;; not sure what to do when solve returns $all? It's a mess--don't want an error.
-						 (setq sol (mapcan #'(lambda (q) (let ((sq (solve-single-equation (sub ker q) x m use-trigsolve)))
-																(if ($listp sq) (cdr sq) (list sq)))) sol))
-						 (setq sol (simplifya (cons '(mlist) sol) t))))))
 
-			 	((and (eql 2 (length nvars)) ($freeof x (first e)) (homogeneous-linear-poly-p (first e) nvars))
-				 (let ((k1) (a) (k2) (b) (xx) (yy))
-					  ;(mtell "doing new mexpt solver ~%")
-					  (setq e (first e))
-					  (setq k1 ($ratcoef e (first nvars)))
-					  (setq a (second (first kernels)))
-					  (setq xx (third (first kernels)))
-					  (setq k2 ($ratcoef e (second nvars)))
-					  (setq b (second (second kernels)))
-					  (setq yy (third (second kernels)))
-
-					  ;; We're looking at k1 * a^XX + k2 * b^YY = 0, where XX & YY depend on x.  Transform this to
-					  ;; exp(log(k1) + log(a)*XX) + exp(log(k2) + log(b)*YY) = 0. And transform this to
-					  ;; exp(log(k1) + log(a)*XX - log(k2) - log(b)*YY) = -1.
-
-					  ;;(displa `((mlist) k1 ,k1 k2 ,k2 X ,xx  y ,yy a ,a b ,b))
-
-					  (cond ((and ($freeof x a) ($freeof x b))
-
-							 (setq inverse-function (gethash 'exponential-inverse $solve_inverse_package))
-							 (setq sol ($solve (add
-												(take '(%log) k1)
-												(mul (take '(%log) a) xx)
-												(mul -1 (take '(%log) k2))
-												(mul -1 (take '(%log) b) yy)
-												(mul -1 (car (funcall inverse-function -1 '$%e)))) x)))))))
-
-		 sol))
 ;;; experimental code for solving equations of the form Polynomial(a^x) = 0.
 
 ;;; Return a CL list of all the terms in the expression e that have the form a^x, where a is freeof x,
@@ -592,8 +572,7 @@
 			(if cnd ($substitute eq e) nil)))
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
-  ;(mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
-	;(print `(e = ,e))
+  (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
 	(let ((pterms) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
         (when use-trigsolve
 	      	(setq e ($exponentialize e))
@@ -602,8 +581,15 @@
 					(setq do-rectform t))
 
      (setq pterms (gather-expt-terms e x))
+
 	   (setq pterms (remove-duplicates pterms :test #'alike1 :from-end t))
      (setq subs (get-algebraic-relations pterms x g))
+
+		 (when $solveverbose
+			  (print `(subs = ,subs))
+				($read))
+
+
 		 ;; look for a subsitution that is linear in g--call it submin.
 		 (when (cdr subs)
       	(setq submin (first (remove-if #'(lambda (s) (> ($hipow s g) 1)) (cdr subs)))))
