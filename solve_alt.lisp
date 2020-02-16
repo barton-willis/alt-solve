@@ -572,7 +572,9 @@
 			(if cnd ($substitute eq e) nil)))
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
-  (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x)
+  (when $solveverbose
+     (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x))
+		 
 	(let ((pterms) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
         (when use-trigsolve
 	      	(setq e ($exponentialize e))
