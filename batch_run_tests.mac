@@ -12,13 +12,4 @@ push("rtest_solve", testsuite_files)$
 
 push("rtest_linsolve", testsuite_files)$
 
-/* the tests rtest_abs_integrate, rtest_sym, and rtest_diff_form all cause problems.*/
-
-share_testsuite_files : delete(["rtest_abs_integrate",[66,164]], share_testsuite_files)$
-
-share_testsuite_files : delete(["rtest_sym",[15]], share_testsuite_files)$
-
-share_testsuite_files : delete("rtest_diff_form", share_testsuite_files)$
-
-
 run_testsuite(share_tests = true);
