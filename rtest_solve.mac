@@ -125,7 +125,7 @@ solve(x);
 [x=0]$
 
 ssolve(0,x);
-all$
+[x = %r0]$
 
 ssolve(0.0,x);
 [x = %r0]$
@@ -143,7 +143,7 @@ solve(0.1b0,x);
 []$
 
 ssolve(0,[x]);
-all$
+[x = %r0]$
 
 ssolve(0.0,[x]);
 [x= %r0]$
@@ -593,7 +593,7 @@ block([solve_ignores_conditions : true],ssolve(cot(x) = a,x));
 [x=acot(a)+%pi*%z0]$
 
 ssolve(cosh(x) = a,x);
-[x=2*%i*%pi*%z1-acosh(a),x=acosh(a)+2*%i*%pi*%z0]$
+[x = 2*%i*%pi*%z0 - acosh(a), x = acosh(a) + 2*%i*%pi*%z1]$
 
 block([solve_ignores_conditions : true], ssolve(sech(x) = a,x));
 [x=2*%i*%pi*%z1-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z0]$
@@ -680,7 +680,7 @@ ssolve(abs(x - 1) = 2, x);
 [x=-1,x=3]$
 
 ssolve(abs(2*x + 5) = abs(x - 2), x);
-[x=-7, x=-1]$
+[x = - 1, x = - 7]$
 
 ssolve(1 - abs(x) = max(-x - 2, x - 2), x);
 [x=-3/2, x = 3/2]$
@@ -729,7 +729,7 @@ block(
 [x=a]$
 
 ssolve(max(2 - x^2, x) = max(-x, x^3/9), x);
-[x=-1, x=3]$
+[x = 3, x = - 1]$
 
 /*This problem is tricky--Maxima must recognize that a cubic has a real root.*/
 ssolve(max(2 - x^2, x) = x^3/9, x);
@@ -860,7 +860,7 @@ ssolve(x=x,x);
 [x = %r0]$
 
 ssolve(abs(x) = max(-x,x),x);
-[x=%r0]$
+[x = %r1]$
 
 ssolve(x^2 - 1 = (x-1)*(x+1),x);
 [x=%r0]$
@@ -1131,7 +1131,7 @@ ssolve(abs(x - 1) = 2, x);
 [x=-1, x=3]$
 
 ssolve(abs(2*x + 5) = abs(x - 2), x);
-[x=-7, x=-1]$
+[x = - 1, x = - 7]$
 
 ssolve(1 - abs(x) = max(-x - 2, x - 2), x);
 [x=-3/2, x=3/2]$
@@ -1746,7 +1746,7 @@ solve([sqrt(x) = 10 - sqrt(x-1)],[x]);
 [x = 10201/400]$
 
 ssolve([sqrt(x) = min(x,35)],[x]);
-[x = 0, x = 1, x = 1225]$
+[x = 1225, x = 0, x = 1]$
 
 solve([sqrt(x-y) = 2, sqrt(x+y) = 5],[x,y]);
 [x = 29/2,y = 21/2]$
@@ -2238,7 +2238,7 @@ ssolve(abs(x) = 1,[x]);
 [x=-1, x=1]$
 
 ssolve(abs(x) + abs(1-x) = 6,x);
-[x=-5/2,x=7/2]$
+[x=7/2, x=-5/2]$
 
 ssolve(abs(x  - abs(1-x)) = 1/2,x);
 [x=1/4,x=3/4]$

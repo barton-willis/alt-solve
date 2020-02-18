@@ -32,7 +32,7 @@
 ;;; the type. After the declaration, return to the original context. Maybe this functionality
 ;;; should be blended into $new_variable. Finally, I'm not sure the unwind_protect is really
 ;;; need--but it's OK.
-(defun my-new-variable (knd) "wrap $new_variable that autodeclares the type in the context initial."
+(defun my-new-variable (knd) "wrapper for  $new_variable that autodeclares the type in the context initial."
 	 (let ((cntx $context))
 				(unwind-protect
 					(progn
@@ -119,13 +119,10 @@
 ;;;   (h) kills the super context
 
 (defun $solve (eqlist &optional (varl nil))
-  ;(mtell "top of $solve  eqlist = ~M varl = ~M ~%" eqlist varl)
-	;(print `(linsovle_params = ,$linsolve_params))
-	;(print  $solve_inverse_package)
   (mfuncall '$reset '$multiplicities)
   (mfuncall '$reset '$%rnum_list) ;not sure about this?
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
-	   ;; Allow sets for eqlist and varl
+	   ;; Allow eqlist and varl to be sets.
 	   (when (and (consp eqlist) (consp (car eqlist)) (eql '$set (caar eqlist)))
 		   (setq eqlist ($listify eqlist)))
 
@@ -184,15 +181,14 @@
 	 (unwind-protect
 	  (progn
 			(setq cntx ($supcontext)) ;make asksign and friends data vanish after exiting $solve.
-	    ;(displa (mfuncall '$facts))
 		  (cond
 
 			  ((null varl)
 			   (when $solvenullwarn
 				   (mtell (intl:gettext "Solve: variable list is empty, continuing anyway.~%")))
 
-        (when  (every #'zerop1 eqlist)
-				    (print "**************  Returning all"))
+         (when  (every #'zerop1 eqlist)
+				     (print "**************  Returning all"))
 
 			   (if (every #'zerop1 eqlist) '$all (take '(mlist))))
 
@@ -202,7 +198,7 @@
 				 (unkeep-float sol))
 
 			  ((null (cdr varl)) ;one unknown, more than one equation
-			   (redundant-equation-solve (cons '(mlist) eqlist) (car varl)))
+			    (redundant-equation-solve (cons '(mlist) eqlist) (car varl)))
 
 			  ;; several equations, several unknowns.
 			  (t
@@ -411,6 +407,9 @@
 				(setq ker (caar ker))
 				(setq fun (caar ker))
 				(setq sol ($solve e z))
+				(when (not ($listp $multiplicities))
+				   (mtell "using fake multiplicities ~%")
+					 (setq $multiplicities (mapcar #'(lambda (s) 1) sol)))
 				(setq mult-save (mapcar #'(lambda (q) (mult m q)) (cdr $multiplicities)))
 				(setq sol (mapcar #'third (cdr sol)))  ;third = $rhs
 				(setq fun-inverse (gethash fun $solve_inverse_package))
@@ -426,6 +425,10 @@
 
 				(dolist (sx sol)
 					(setq q ($solve sx x))
+					(when (not ($listp $multiplicities))
+						 (mtell "using fake multiplicities ~%")
+						 (setq $multiplicities (mapcar #'(lambda (s) 1) sol)))
+
 					(push (cdr q) acc)
 					(setq xxx (pop mult-save))
 					(push (mapcar #'(lambda (q) (mult xxx q)) (cdr $multiplicities)) mult-acc))
@@ -574,7 +577,7 @@
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
   (when $solveverbose
      (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x))
-		 
+
 	(let ((pterms) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
         (when use-trigsolve
 	      	(setq e ($exponentialize e))
@@ -618,11 +621,12 @@
 		sol))
 
 (defun new-to-poly-solve (e x cnd)
+
+  (when $solveverbose
+		(mtell "doing to poly solve e = ~M x = ~M  ~%" e x))
+
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
 		 (setq q (let ((errcatch t) ($errormsg nil)) (ignore-errors ($to_poly e (list '(mlist) x)))))
-
-		; (mtell "doing to poly solve ~%")
-
 		 (when (and q (< ($length ($third q)) 2))
 			 (setq checked-sol (list '(mlist)))
 			 (setq eq ($first q))
@@ -690,13 +694,20 @@
 		 (push '(mlist) eqs) ; restore eqs to a Maxima list
 		 (when ($listp sol) ; sol could be $all, maybe?
 			 (setq sol (cdr sol))
-			 (dolist (sx sol)
+		   (while sol
+			   (setq sx (pop sol))
 				 (cond ((every #'(lambda (q) (zerop1 (try-to-crunch-to-zero q))) (cdr ($substitute sx eqs)))
-						(push sx checked-sol))
-					   (t
-						(intl:gettext (mtell "Solve: unable to verify putative solution ~M ~%" sx))))))
-		 (mfuncall '$reset '$multiplicities)
-		 (simplifya (cons '(mlist) checked-sol) t)))
+						     (push sx checked-sol))
+					     (t
+								 (setq sol nil) ;bailout of while loop
+								 (setq checked-sol nil))))
+
+		     (cond ((consp checked-sol)
+	     	         (mfuncall '$reset '$multiplicities)
+    	    	     (simplifya (cons '(mlist) checked-sol) t))
+				       (t
+								  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") eqs x)
+								  (simplifya (cons '(mlist) checked-sol) t))))))
 
 (defun set-of-vars (e)
 	(let (($listconstvars nil)) ($setify ($listofvars e))))
@@ -853,7 +864,9 @@
 
 (defvar $list_of_equations nil)
 (defun solve (e x ms)
-  ;(mtell "top of ?solve ~M ~M ~M ~%" e x ms)
+  (when $solveverbose
+      (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
+
 	;;;(push (list e x) $list_of_equations) ; debugging-like thing
 ;;	(displa (mfuncall '$reset (list '(mlist)')
 	(let ((sol) (mss)
