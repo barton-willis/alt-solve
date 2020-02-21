@@ -464,7 +464,7 @@ multiplicities;
 [4,4]$
 
 ssolve(exp(2*x) + exp(4*x)=0,x);
-[x=-((2*%i*%pi*%z0+log(-1))/2)]$
+[x=(2*%i*%pi*%z0+log(-1))/2]$
 
 /* bugs from, or inspired by, the  testsuite */
 nusum(n*n!,n,0,n);
@@ -558,7 +558,7 @@ ssolve(%e^x/(%e^x+5)=%e^107/(%e^107+5),x);
 [x=2*%i*%pi*%z0+107]$
 
 ssolve(exp(x) + exp(2*x) = 2,x);
-[x=2*%i*%pi*%z0,x=2*%i*%pi*%z1+log(2)+%i*%pi]$
+[x=2*%i*%pi*%z0,x=2*%i*%pi*%z1+log(-2)]$
 
 ssolve(exp(x) + 1/exp(x) = 2,x);
 [x=-2*%i*%pi*%z0]$
@@ -593,7 +593,7 @@ block([solve_ignores_conditions : true],ssolve(cot(x) = a,x));
 [x=acot(a)+%pi*%z0]$
 
 ssolve(cosh(x) = a,x);
-[x = 2*%i*%pi*%z0 - acosh(a), x = acosh(a) + 2*%i*%pi*%z1]$
+[x=2*%i*%pi*%z1-acosh(a),x=acosh(a)+2*%i*%pi*%z0]$
 
 block([solve_ignores_conditions : true], ssolve(sech(x) = a,x));
 [x=2*%i*%pi*%z1-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z0]$
@@ -860,7 +860,7 @@ ssolve(x=x,x);
 [x = %r0]$
 
 ssolve(abs(x) = max(-x,x),x);
-[x = %r1]$
+[x = %r0]$
 
 ssolve(x^2 - 1 = (x-1)*(x+1),x);
 [x=%r0]$
@@ -957,7 +957,7 @@ solve(x*(x-1)=0,x);
 
 ssolve((sin(x)-8*cos(x)*sin(x))*(sin(x)^2+cos(x))-(2*cos(x)*sin(x)-sin(x))
     *(-2*sin(x)^2+2*cos(x)^2-cos(x)),x);
-[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi,x=2*%pi*%z2-acos(1/3)+%pi,x=2*%pi*%z3+acos(1/3)-%pi,x=%pi*%z4]$
+[x=-2*%pi*%z0-%pi,x=-2*%pi*%z1,x=-2*%pi*%z2+atan(2^(3/2))-%pi,x=-2*%pi*%z3-atan(2^(3/2))-%pi]$
 
 ssolve(sin(a*x)=1/2,x);
 [x=(12*%pi*%z0+%pi)/(6*a),x=(12*%pi*%z1+5*%pi)/(6*a)]$
@@ -1102,7 +1102,7 @@ ssolve(sqrt(x^2+1) = 2 - x,x);
 /* subset of the Michael Wester test suite */
 
 block([solve_ignores_conditions : true], ssolve(%e^(2*x) + 2*%e^x + 1 = z,x));
-[x=log(-sqrt(z)-1)+2*%i*%pi*%z1,x=log(sqrt(z)-1)+2*%i*%pi*%z0]$
+[x=log(-sqrt(z)-1)+2*%i*%pi*%z0,x=log(sqrt(z)-1)+2*%i*%pi*%z1]$
 
 ssolve(exp(2 - x^2) = exp(-x), x);
 [x=-((sqrt(8*%i*%pi*%z0+9)-1)/2),x=(sqrt(8*%i*%pi*%z0+9)+1)/2]$
@@ -1209,7 +1209,7 @@ block([eqn1 :   x +   y +   z =  6,
        eqn3 :   x + 3*y +   z = 10,
        %rnum : 0],
 ssolve([eqn1, eqn2, eqn3], [x, y, z]));
-[[x=%r1,y=2,z=4-%r1]]$
+[[x=%r0,y=2,z=4-%r0]]$
 
 /* from Maxima and Sage mailing lists */
 
@@ -1393,13 +1393,13 @@ ssolve(a*x=b, x);
 [x=b/a]$
 
 block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
-[[x=%r1,a=%i*%r1],[x=%r2,a=-%i*%r2]]$
+[[x=%r0,a=%i*%r0],[x=%r2,a=-%i*%r2]]$
 
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
-[[x=%r1,a=((sqrt(2)*%i+sqrt(2))*%r1)/2],
+[[x=%r0,a=((sqrt(2)*%i+sqrt(2))*%r0)/2],
 [x=%r2,a=((sqrt(2)*%i-sqrt(2))*%r2)/2],
-[x=%r3,a=-(((sqrt(2)*%i+sqrt(2))*%r3)/2)],
-[x=%r0,a=-(((sqrt(2)*%i-sqrt(2))*%r0)/2)]]$
+[x=%r1,a=-((sqrt(2)*%i+sqrt(2))*%r1)/2],
+[x=%r2,a=-((sqrt(2)*%i-sqrt(2))*%r2)/2]]$
 
 
 ssolve((x-1)/(x+1) = 1, [x]);
@@ -1495,9 +1495,8 @@ solve([x=1,x=2],x);
 []$
 
 /* [ 1452341 ] solve(x^(5/2)+1,x) produces incorrect roots */
-solve(1+x^(5/2),x);
-[x=-%e^((3*%i*%pi)/5),x=%e^((2*%i*%pi)/5)]$
-
+ssolve(1+x^(5/2),x);
+[x=%e^((2*%i*%pi)/5),x=-%e^((3*%i*%pi)/5)]$
 
 /* [ 1105366 ] SOLVE gives a wrong answer */
 ssolve(sqrt(%e^(2*t)*sin(t)^2+%e^(2*t)*cos(t)^2+3*%e^(2*t))=2,t);
@@ -1599,13 +1598,13 @@ block([algebraic : true], solve(x^(3/2) = (-1 - %i) / sqrt(2),x));
 [x=%i/2-sqrt(3)/2,x=-%i]$
 
 block([algebraic : true], solve(x^(3/2) = - 1,x));
-[x=-((sqrt(3)*%i+1)/2),x=(sqrt(3)*%i-1)/2]$
+[x=(sqrt(3)*%i-1)/2,x=-(sqrt(3)*%i+1)/2]$
 
 block([algebraic : true], solve(x^(3/2) = 1,x));
 [x=1]$
 
 block([algebraic : true], solve(x^(3/2) = (1/2 + sqrt(3) * %i/2),x));
-[x=((sqrt(3)*%i+1)/2)^(2/3)]$
+[x=(((sqrt(3)*%i+1)/2))^(2/3)]$
 
 /* Maxima testsuite */
 solve('diff(y,x),'diff(y,x));
@@ -1647,7 +1646,7 @@ ssolve(tan(x)=0,x);
 solve(asin(x)=1/2,x);
 [x=sin(1/2)]$
 
-solve(asin(x^2)=1/5,x);
+ssolve(asin(x^2)=1/5,x);
 [x=-sqrt(sin(1/5)),x=sqrt(sin(1/5))]$
 
 solve(asin(sqrt(x))=1/5,x);
@@ -1963,8 +1962,9 @@ solve(Q*sqrt(Q^2 + 2)=1,Q);
 /* #3234 solve with list of vars */
 
 block([L:x*y*z+%lambda*(2*x*y+2*x*z+2*y*z-1)],
-   solve([diff(L,x)=0,diff(L,y)=0,diff(L,z)=0,diff(L,%lambda)=0], [x,y,z,%lambda]));
-[[x=-1/sqrt(6),y=-1/sqrt(6),z=-1/sqrt(6),%lambda=1/(4*sqrt(6))],[x=1/sqrt(6),y=1/sqrt(6),z=1/sqrt(6),%lambda=-1/(4*sqrt(6))]]$
+      myalgsys([diff(L,x)=0,diff(L,y)=0,diff(L,z)=0,diff(L,%lambda)=0], [x,y,z,%lambda]));
+[[%lambda=-1/(4*sqrt(6)),x=1/sqrt(6),y=1/sqrt(6),z=1/sqrt(6)],
+[%lambda=1/(4*sqrt(6)),x=-1/sqrt(6),y=-1/sqrt(6),z=-1/sqrt(6)]]$
 
 /* #2954 solve( (sin(y+x)-1)/sin(y+x)=1 ,y) returns []  (closed) */
 solve((sin(y+x)-1)/sin(y+x)=1,y);
@@ -2058,7 +2058,7 @@ block(
 
 /* #2038 Elementary Algsys/Solve bug */
 ssolve([y^2+x^2-1,y^2+(1-sqrt(3))*y+x^2+2],[y,x]);
-[[x=-(sqrt(-2*(3^(5/2))-32)/2),y=(3^(3/2)+3)/2],[x=sqrt(-2*(3^(5/2))-32)/2,y=(3^(3/2)+3)/2]]$
+[[y=(3^(3/2)+3)/2,x=-sqrt(-2*3^(5/2)-32)/2],[y=(3^(3/2)+3)/2,x=sqrt(-2*3^(5/2)-32)/2]]$
 
 /* #1988 solve returns nonlinear solution to linear equations */
 block([%rnum : 0], solve([-(y*A)/sqrt(2*A^2+1)-(x*A)/sqrt(2*A^2+1)+A/sqrt(2*A^2+1)+z/sqrt(2*A^2+1),x],[x,y,z]));
@@ -2388,7 +2388,8 @@ ode2('diff(x,t,2)+5*('diff(x,t,1))^3,x,t);
 [x=%k2-(sqrt(10)*sqrt(t+%k1))/5,x=(sqrt(10)*sqrt(t+%k1))/5+%k2]$
 
 algsys([x^4+1],[x]);
-[[x=(sqrt(2)*%i+sqrt(2))/2],[x=(sqrt(2)*%i-sqrt(2))/2],[x=-(sqrt(2)*%i+sqrt(2))/2],[x=-(sqrt(2)*%i-sqrt(2))/2]]$
+[[x=((sqrt(2)*%i+sqrt(2))/2)],[x=((sqrt(2)*%i-sqrt(2))/2)],
+[x=-((sqrt(2)*%i+sqrt(2))/2)],[x=-((sqrt(2)*%i-sqrt(2))/2)]]$
 
 ssolve(x^6-1,x);
 [x=-1,x=1,x=-(sqrt(3)*%i)/2-1/2,x=1/2-(sqrt(3)*%i)/2,x=(sqrt(3)*%i)/2-1/2,x=(sqrt(3)*%i)/2+1/2]$
