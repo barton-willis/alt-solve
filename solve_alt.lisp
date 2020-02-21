@@ -871,10 +871,11 @@
 ;;	(displa (mfuncall '$reset (list '(mlist)')
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*)
+				;($solveradcan t)
 				($solve_ignores_conditions t)
 				($use_to_poly t)
-				($realonly nil)
-				($negdistrib t) ;not sure about this?
+				($realonly nil) ;not sure about this
+				($negdistrib t) ;not sure about this--likely needed!
 				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
 				(m))
 		 	(setq x (if x x *var))
