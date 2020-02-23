@@ -593,7 +593,7 @@ block([solve_ignores_conditions : true],ssolve(cot(x) = a,x));
 [x=acot(a)+%pi*%z0]$
 
 ssolve(cosh(x) = a,x);
-[x=2*%i*%pi*%z1-acosh(a),x=acosh(a)+2*%i*%pi*%z0]$
+[x=2*%i*%pi*%z0-acosh(a),x=acosh(a)+2*%i*%pi*%z1]$
 
 block([solve_ignores_conditions : true], ssolve(sech(x) = a,x));
 [x=2*%i*%pi*%z1-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z0]$
