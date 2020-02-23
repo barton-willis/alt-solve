@@ -880,6 +880,15 @@
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
+			   ;; clunkly workaround for bug with integrate(sqrt(1+cos(x)),x,-%pi,%pi).
+				 ;; For this case, we need to solve (cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1)
+				 ;; arguably this has no solutions, but the definite integrate code needs to
+				 ;; find the solution x = %pi. Some trigsimp, radcan, and factoring cancels the
+				 ;; troublesome factor and allows solve to return %pi as a solution.
+			   (when (or limitp (boundp '*defint-assumptions*))
+				    (setq e (apply-identities-xxx e)) ; $trigsimp?
+						(setq e ($factor ($radcan e))))
+
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
 				 ;(mtell "solution  = ~M ~%" sol)
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.

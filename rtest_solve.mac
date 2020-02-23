@@ -860,7 +860,7 @@ ssolve(x=x,x);
 [x = %r0]$
 
 ssolve(abs(x) = max(-x,x),x);
-[x = %r0]$
+[x = %r1]$
 
 ssolve(x^2 - 1 = (x-1)*(x+1),x);
 [x=%r0]$
