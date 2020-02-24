@@ -40,7 +40,7 @@
 						($new_variable knd))
 				(msetq $context cntx))))
 
-;;; Load all need files--maybe SBCL still needs to be in interpert mode.
+;;; Load all need files--maybe SBCL still needs to be in interpret mode.
 
 #+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
 
@@ -482,7 +482,7 @@
 
 ;;; Try to find a kernel of the form blob1^blob2 such that e is a function of constants
 ;; (expression that is free of x) and of blob1^blob2. Solve for blob1^blob2 and attempt
-;; to invert blob1^blob2. The only invertable cases are when exactly one of blob1 or blob2
+;; to invert blob1^blob2. The only invertible cases are when exactly one of blob1 or blob2
 ;; is free of x.
 
 (defun solve-mexpt-equation (e x m use-trigsolve)
@@ -595,10 +595,10 @@
 				($read))
 
 
-		 ;; look for a subsitution that is linear in g--call it submin.
+		 ;; look for a substitution that is linear in g--call it submin.
 		 (when (cdr subs)
       	(setq submin (first (remove-if #'(lambda (s) (> ($hipow s g) 1)) (cdr subs)))))
-		 ;; When there is a subsitution that is linear in g, we:
+		 ;; When there is a substitution that is linear in g, we:
 		 ;; (1)	substitute subs into the equation
 		 ;; (2) when the result is free of x (only unknown is g) we
 		 ;; (3) solve for g
@@ -881,8 +881,8 @@
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
 			   ;; clunkly workaround for bug with integrate(sqrt(1+cos(x)),x,-%pi,%pi).
-				 ;; For this case, we need to solve (cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1)
-				 ;; arguably this has no solutions, but the definite integrate code needs to
+				 ;; For this case, we need to solve (cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1).
+				 ;; Arguably it has no solutions, but the definite integrate code needs to
 				 ;; find the solution x = %pi. Some trigsimp, radcan, and factoring cancels the
 				 ;; troublesome factor and allows solve to return %pi as a solution.
 			   (when (or limitp (boundp '*defint-assumptions*))
