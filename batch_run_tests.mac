@@ -8,8 +8,6 @@ file_search_tests : append(file_search_maxima, file_search_tests)$
 
 push("rtest_solve2", testsuite_files)$
 
-push("rtest_solve", testsuite_files)$
-
 push(["rtest_solve", [88, 146, 156, 184, 214, 260,
 287, 301, 323, 324, 337, 339,
 340, 341, 348, 373, 385, 387,
