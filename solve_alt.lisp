@@ -868,8 +868,12 @@
       (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
 
 	;;;(push (list e x) $list_of_equations) ; debugging-like thing
-;;	(displa (mfuncall '$reset (list '(mlist)')
+;;;  (displa (mfuncall '$reset))
 	(let ((sol) (mss)
+	      ($savefactors t) ;new
+				(genvar nil) ; new
+				($ratfac t) ; new
+				($derivsubst nil) ; new
 				($solve_inverse_package *function-inverses-alt*)
 				;($solveradcan t)
 				($solve_ignores_conditions t)
@@ -886,11 +890,10 @@
 				 ;; find the solution x = %pi. Some trigsimp, radcan, and factoring cancels the
 				 ;; troublesome factor and allows solve to return %pi as a solution.
 			   (when (or limitp (boundp '*defint-assumptions*))
-				    (setq e (apply-identities-xxx e)) ; $trigsimp?
-						(setq e ($factor ($radcan e))))
+				    (setq e (apply-identities-xxx e)) ;; use $trigsimp instead?
+	          (setq e (let (($logsimp t)) ($radcan e)))) ;; was ($factor ($radcan e))))
 
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
-				 ;(mtell "solution  = ~M ~%" sol)
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
 
 				 (setq m (cond (($listp $multiplicities)
@@ -900,16 +903,18 @@
 							  (mapcar #'(lambda (q) (declare (ignore q)) 1) sol)))))
 
 		    (setq m (reverse m))
-		 	(setq *roots nil)
-		 	(setq *failures nil)
-		 	(dolist (q sol)
-				(setq mss (mul ms (pop m)))
-				(cond ((and (mequalp q) (eql 0 (second q))) ; second = $lhs
-					   (push q *failures)
-					   (push mss *failures))
-					  (t
+
+		  	(setq *roots nil)
+		  	(setq *failures nil)
+		  	(dolist (q sol)
+			   	(setq mss (mul ms (pop m)))
+			  	(cond ((and (mequalp q) (eql 0 (second q))) ; second = $lhs
+			    		   (push q *failures)
+				    	   (push mss *failures))
+				  	  (t
 			   	    	(push mss *roots)
-				    	(push q *roots))))
+				      	(push q *roots))))
+
 		   (rootsort *roots)
 		   (rootsort *failures)
 		 nil))

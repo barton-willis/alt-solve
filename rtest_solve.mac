@@ -2447,37 +2447,27 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
 algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
 [[x=sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2]]$
 
-eqs:[y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0];
-[y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0];
+(eqs : [y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0],0);
+0$
 
-    (assume(h>0),0);
-    0;
-    s:algsys(eqs,[x,y,z]);
-    [[x = sqrt(h)/sqrt(g),
-      y = sqrt(h)/sqrt(g),
-      z = (h-g)/(sqrt(g)*sqrt(h))],
-     [x = -(sqrt(h)/sqrt(g)),
-      y = -(sqrt(h)/sqrt(g)),
-      z = -((h-g)/(sqrt(g)*sqrt(h)))]];
-    ratsimp(subst(s[1],eqs));
-    [0=0, 0=0, 0=0];
-    ratsimp(subst(s[2],eqs));
-    [0=0, 0=0, 0=0];
+block([cntx : supcontext()],
+   unwind_protect((activate(cntx),
+   assume(h > 0), assume(g > 0), sol : algsys(eqs,[x,y,z]), 0), killcontext(cntx)));
+0$
 
-    (forget(h>0),0);
-    0;
+map(lambda([q], ratsimp(subst(q,eqs))),sol);
+[[0=0, 0=0, 0=0], [0=0, 0=0, 0=0]]$
 
-    (assume(h<0),0);
-    0;
-    s:algsys(eqs,[x,y,z]);
-    [[x=(sqrt(-g)*sqrt(-h))/g,y=(sqrt(-g)*sqrt(-h))/g,z=(sqrt(-g)*sqrt(-h)*(h-g))/(g*h)],[x=-(sqrt(-g)*sqrt(-h))/g,y=-(sqrt(-g)*sqrt(-h))/g,z=-(sqrt(-g)*sqrt(-h)*(h-g))/(g*h)]]$
+block([cntx : supcontext()],
+   unwind_protect((activate(cntx),
+   assume(h < 0), assume(g > 0), sol : algsys(eqs,[x,y,z]), 0), killcontext(cntx)));
+0$
 
-    ratsimp(subst(s[1],eqs));
-    [0=0, 0=0, 0=0];
-    ratsimp(subst(s[2],eqs));
-    [0=0, 0=0, 0=0];
-    (forget(h<0),remvalue(eqs), remvalue(s), 0);
-    0;
+map(lambda([q], ratsimp(subst(q,eqs))),sol);
+[[0=0, 0=0, 0=0], [0=0, 0=0, 0=0]]$
+
+(remvalue(eqs), remvalue(sol), 0);
+0$
 
 block([cntx : supcontext()], unwind_protect((assume(equal(a, 0)), solve(abs(x) = a,x)), killcontext(cntx)));
 [x=0]$
