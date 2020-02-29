@@ -870,15 +870,15 @@
 	;;;(push (list e x) $list_of_equations) ; debugging-like thing
 ;;;  (displa (mfuncall '$reset))
 	(let ((sol) (mss)
-	      ($savefactors t) ;new
-				(genvar nil) ; new
-				($ratfac t) ; new
-				($derivsubst nil) ; new
+	      ;($savefactors t) ;new--not sure why
+				;(genvar nil) ; new--question about this
+				;($ratfac t) ; new--not sure why
+				;($derivsubst nil) ; new
 				($solve_inverse_package *function-inverses-alt*)
 				;($solveradcan t)
 				($solve_ignores_conditions t)
 				($use_to_poly t)
-				($realonly nil) ;not sure about this
+				;($realonly nil) ;not sure about this
 				($negdistrib t) ;not sure about this--likely needed!
 				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
 				(m))
