@@ -12,8 +12,8 @@
 (defmvar $solveverbose nil)
 
 ;;; When $use_grobner is true, and solve dispatches algsys, apply $poly_reduced_grobner
-;;; before calling algsys.
-(defmvar $use_grobner nil)
+;;; before calling algsys.  I'd like to get rid of this option and always apply grobner.
+(defmvar $use_grobner t)
 
 ;;; The need for setting *evaluator-mode* is a mystery to me. And I'm not entirely sure
 ;;; about the need for loading solve.lisp.
@@ -802,10 +802,9 @@
 	(setq varl (simplifya (cons '(mlist) varl) t))
    ($solve eql varl))
 
-
 (defun dispatch-grobner (e x)
      (let ((cnd))
-        (setq e (mapcar #'meqhk (cdr ee))) ; remove '(mlist) and convert a=b to a-b.
+        (setq e (mapcar #'meqhk (cdr e))) ; remove '(mlist) and convert a=b to a-b.
         (setq e (mapcar #'try-to-crunch-to-zero e)) ;ratsimp
         (setq e (remove-if #'zerop1 e)) ; remove vanishing
         ;; We should, of course, expunge putative solutions that make a denominator vanish.
@@ -815,10 +814,7 @@
         (setq e (cons '(mlist) e))  ; return e to a Maxima list
         (setq e ($poly_reduced_grobner e x)) ;triangularize equations
         (setq e ($expand e 0 0)) ;I think poly_reduced_grobner returns unsimplified expressions
-        (setq e ($listify ($setify e))) ;convert both e and x to sets & expunge redundant eqs
-        (setq x ($listify ($setify x)))
         (setq e (mfuncall '$trigsimp e))))
-
 
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
