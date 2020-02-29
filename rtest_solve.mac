@@ -4,7 +4,8 @@ Maxima mailing list, the Maxima bug list, the Sage list, the to_poly_solve tests
 possibly other sources. Unfortunately, some tests are listed multiple times. */
 
 (reset(), load("unwind_protect"), solve_ignores_conditions : false, realonly : false,
-ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_run_time (), 0);
+ratprint : false, solve_inverse_package : multivalued_inverse,use_grobner : true,
+thyme : elapsed_run_time (), 0);
 0$
 
 nicedummies(solve(0.0,x));
@@ -1210,7 +1211,7 @@ block([eqn1 :   x +   y +   z =  6,
        eqn3 :   x + 3*y +   z = 10,
        %rnum : 0],
 ssolve([eqn1, eqn2, eqn3], [x, y, z]));
-[[x=%r0,y=2,z=4-%r0]]$
+[[x=%r1,y=2,z=4-%r1]]$
 
 /* from Maxima and Sage mailing lists */
 
@@ -1267,7 +1268,7 @@ solve([x=a, y=b], [x]);
 []$
 
 solve([x=2, y=3], [y,x]);
-[[y=3,x=2]]$
+[[x=2,y=3]]$
 
 solve([a*x=x], [x]);
 [x=0]$
@@ -1394,14 +1395,13 @@ ssolve(a*x=b, x);
 [x=b/a]$
 
 block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
-[[x=%r0,a=%i*%r0],[x=%r2,a=-%i*%r2]]$
+[[a=%r1,x=%i*%r1],[a=%r2,x=-%i*%r2]]$
 
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
-[[x=%r0,a=((sqrt(2)*%i+sqrt(2))*%r0)/2],
-[x=%r2,a=((sqrt(2)*%i-sqrt(2))*%r2)/2],
-[x=%r1,a=-((sqrt(2)*%i+sqrt(2))*%r1)/2],
-[x=%r2,a=-((sqrt(2)*%i-sqrt(2))*%r2)/2]]$
-
+[[a=%r1,x=((sqrt(2)*%i+sqrt(2))*%r1)/2],
+[a=%r2,x=((sqrt(2)*%i-sqrt(2))*%r2)/2],
+[a=%r3,x=-(((sqrt(2)*%i+sqrt(2))*%r3)/2)],
+[a=%r0,x=-(((sqrt(2)*%i-sqrt(2))*%r0)/2)]]$
 
 ssolve((x-1)/(x+1) = 1, [x]);
 []$
@@ -1434,7 +1434,7 @@ ssolve([x + x*y = a, x*y = 8],[x,x*y]);
 [[x=a-8,x*y=8]]$
 
 ssolve([x + x*y = a, x*y = 8 + z, x-z+78],[x,x*y,z]);
-[[x=(a-86)/2,x*y=(a+86)/2,z=(a+70)/2]]$
+[[x=(a-86)/2,z=(a+70)/2,x*y=(a+86)/2]]$
 
 ssolve([abs(x*y-1) = a, a^2 - x*y],[x*y,a]);
 [[x*y=-((sqrt(5)-3)/2),a=(sqrt(5)-1)/2],[x*y=(sqrt(5)+3)/2,a=(sqrt(5)+1)/2]]$
@@ -1599,13 +1599,13 @@ block([algebraic : true], solve(x^(3/2) = (-1 - %i) / sqrt(2),x));
 [x=%i/2-sqrt(3)/2,x=-%i]$
 
 block([algebraic : true], solve(x^(3/2) = - 1,x));
-[x=(sqrt(3)*%i-1)/2,x=-(sqrt(3)*%i+1)/2]$
+[x=(sqrt(3)*%i-1)/2,x=-((sqrt(3)*%i+1)/2)]$
 
 block([algebraic : true], solve(x^(3/2) = 1,x));
 [x=1]$
 
 block([algebraic : true], solve(x^(3/2) = (1/2 + sqrt(3) * %i/2),x));
-[x=(((sqrt(3)*%i+1)/2))^(2/3)]$
+[x=((sqrt(3)*%i+1)/2)^(2/3)]$
 
 /* Maxima testsuite */
 solve('diff(y,x),'diff(y,x));
@@ -2059,7 +2059,8 @@ block(
 
 /* #2038 Elementary Algsys/Solve bug */
 ssolve([y^2+x^2-1,y^2+(1-sqrt(3))*y+x^2+2],[y,x]);
-[[y=(3^(3/2)+3)/2,x=-sqrt(-2*3^(5/2)-32)/2],[y=(3^(3/2)+3)/2,x=sqrt(-2*3^(5/2)-32)/2]]$
+[[x=((sqrt(3)+2)*sqrt(2*sqrt(3)-8))/2,y=(3^(3/2)+3)/2],
+[x=-(((sqrt(3)+2)*sqrt(2*sqrt(3)-8))/2),y=(3^(3/2)+3)/2]]$
 
 /* #1988 solve returns nonlinear solution to linear equations */
 block([%rnum : 0], solve([-(y*A)/sqrt(2*A^2+1)-(x*A)/sqrt(2*A^2+1)+A/sqrt(2*A^2+1)+z/sqrt(2*A^2+1),x],[x,y,z]));
@@ -2158,7 +2159,8 @@ solve( L= ((N^(1/m2)-c1) / (c2-c3*N^(1/m2)))^(1/m1), N));
 block([like : 28*log((1-s)*r)+18*log(s*(1-s)*r)+18*log(s*s*(1-s)*r)
   +436*log((1-s)*(1-r)+s*(1-s)*(1-r)+s*s*(1-s)*(1-r)+s*s*s)],
   solve([diff(like,s), diff(like,r)],[s,r]));
-[[r=(16*sqrt(4021)+1819)/11250,s=(sqrt(4021)-5)/74],[r=-(16*sqrt(4021)-1819)/11250,s=-(sqrt(4021)+5)/74]]$
+  [[r=-((16*sqrt(4021)-1819)/11250),s=-((sqrt(4021)+5)/74)],
+  [r=(16*sqrt(4021)+1819)/11250,s=(sqrt(4021)-5)/74]]$
 
 /* #2960 %solve(sin(x)=abs(sin(x)),x) bad */
 /*    solve(sin(x)=abs(sin(x)),x); */
@@ -2417,18 +2419,19 @@ ratsimp(integrate(1/(sin(x-3)^2+1),x,3,11));
 (atan((sqrt(2)*sin(8))/cos(8))+3*%pi)/sqrt(2)$
 
 integrate(1/(x^4+3*x^2+1)^2,x,0,inf);
-(sqrt(3-sqrt(5))*(3*sqrt(2)*sqrt(5)+15*sqrt(2))*%pi+sqrt(sqrt(5)+3)*(15*sqrt(2)-3*sqrt(2)*sqrt(5))*%pi)/400$
+(3*%pi)/(2*5^(3/2))$
 
 integrate(log(1+7/x^2),x,1,inf);
 2*sqrt(7)*atan(sqrt(7))-log(8)$
 
 algsys(eqs:[y^2+x^2-(400-400/(2/q+1))^2=0,(-y-400/(2/q+1)+400)^2+x^2+(-640000)/(2/q+1)^2=0],[x,y]);
-[[x=-400*q*sqrt(-(q-2)/(q+2)),y=-(400*q^2-800)/(q+2)],[x=400*q*sqrt(-(q-2)/(q+2)),y=-(400*q^2-800)/(q+2)]]$
+[[x=-((400*q*sqrt(4-q^2))/(q+2)),y=-((400*q^2-800)/(q+2))],
+[x=(400*q*sqrt(4-q^2))/(q+2),y=-((400*q^2-800)/(q+2))]]$
 
 algsys(eqs:[y^2+x^2-(400-400/(2/q+1))^2=0,
        (-y-400/(2/q+1)+400)^2+x^2-640000/(2/q+1)^2=0],[x,y]);
-[[x = -(400*q*sqrt(-((q-2)/(q+2)))), y = -((400*q^2-800)/(q+2))],
- [x =   400*q*sqrt(-((q-2)/(q+2))),  y = -((400*q^2-800)/(q+2))]];
+[[x=-((400*q*sqrt(4-q^2))/(q+2)),y=-((400*q^2-800)/(q+2))],
+[x=(400*q*sqrt(4-q^2))/(q+2),y=-((400*q^2-800)/(q+2))]]$
 
 algsys(subst(q=sqrt(3),eqs),[x,y]);
 [[x = 1200-800*sqrt(3),y = 400*sqrt(3)-800],
@@ -2446,7 +2449,14 @@ algsys(subst(q=1-sqrt(3),eqs),[x,y]);
 
 
 algsys([x^2+y^2+z^2-1,z-x^2-y^2,y-x^2-z^2],[x,y,z]);
-[[x=sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(2)*%i,y=-(sqrt(5)+1)/2,z=(sqrt(5)-1)/2],[x=sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=-sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],[x=sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2],[x=-sqrt(-sqrt(5)-2),y=-(sqrt(5)+1)/2,z=-(sqrt(5)+1)/2]]$
+[[x=sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-((sqrt(5)+1)/2)],
+[x=sqrt(2)*%i,y=-((sqrt(5)+1)/2),z=(sqrt(5)-1)/2],
+[x=-sqrt(2)*%i,y=(sqrt(5)-1)/2,z=-((sqrt(5)+1)/2)],
+[x=-sqrt(2)*%i,y=-((sqrt(5)+1)/2),z=(sqrt(5)-1)/2],
+[x=sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],
+[x=-sqrt(sqrt(5)-2),y=(sqrt(5)-1)/2,z=(sqrt(5)-1)/2],
+[x=sqrt(-sqrt(5)-2),y=-((sqrt(5)+1)/2),z=-((sqrt(5)+1)/2)],
+[x=-sqrt(-sqrt(5)-2),y=-((sqrt(5)+1)/2),z=-((sqrt(5)+1)/2)]]$
 
 (eqs : [y-x=0, g*x*y-h=0, z+(x+1)/y-x-1=0],0);
 0$

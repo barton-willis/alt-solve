@@ -11,6 +11,10 @@
 ;;; for general use.
 (defmvar $solveverbose nil)
 
+;;; When $use_grobner is true, and solve dispatches algsys, apply $poly_reduced_grobner
+;;; before calling algsys.
+(defmvar $use_grobner nil)
+
 ;;; The need for setting *evaluator-mode* is a mystery to me. And I'm not entirely sure
 ;;; about the need for loading solve.lisp.
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -798,6 +802,24 @@
 	(setq varl (simplifya (cons '(mlist) varl) t))
    ($solve eql varl))
 
+
+(defun dispatch-grobner (e x)
+     (let ((cnd))
+        (setq e (mapcar #'meqhk (cdr ee))) ; remove '(mlist) and convert a=b to a-b.
+        (setq e (mapcar #'try-to-crunch-to-zero e)) ;ratsimp
+        (setq e (remove-if #'zerop1 e)) ; remove vanishing
+        ;; We should, of course, expunge putative solutions that make a denominator vanish.
+        ;; But for now, we only collect the denominators.
+        (setq cnds (mapcar #'(lambda (q) ($ratdenom q)) e)); collect denominators.
+        (setq e (mapcar #'$ratnumer e)) ;collect numerators
+        (setq e (cons '(mlist) e))  ; return e to a Maxima list
+        (setq e ($poly_reduced_grobner e x)) ;triangularize equations
+        (setq e ($expand e 0 0)) ;I think poly_reduced_grobner returns unsimplified expressions
+        (setq e ($listify ($setify e))) ;convert both e and x to sets & expunge redundant eqs
+        (setq x ($listify ($setify x)))
+        (setq e (mfuncall '$trigsimp e))))
+
+
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
 (defun solve-multiple-equations (e x) "Solve the CL list of equations e for the CL list of unknowns x"
@@ -818,7 +840,13 @@
   	(cond  ((every #'(lambda (q) ($polynomialp q x
 			    	#'(lambda (s) ($lfreeof x s))
 	   			  #'(lambda (s) (and (integerp s) (>= s 0))))) (cdr e))
-						;(mtell "solve-multiple-equations is dispatching algsys ~%")
+						;(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
+						(setq e ($setify e)) ;convert both e and x to sets & expunge redundant eqs
+			      (setq x ($setify x))
+						(setq e ($listify e)) ;convert both e and x to sets & expunge redundant eqs
+			      (setq x ($listify x))
+						(when $use_grobner
+							(setq e (dispatch-grobner e x)))
 						(setq sol ($algsys e x))
 						(unkeep-float sol))
 		 		(t

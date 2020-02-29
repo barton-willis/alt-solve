@@ -1,5 +1,6 @@
 (reset(), load("unwind_protect"), solve_ignores_conditions : false, realonly : false,
-ratprint : false, solve_inverse_package : multivalued_inverse, thyme : elapsed_run_time (), 0);
+ratprint : false, solve_inverse_package : multivalued_inverse, use_grobner : true,
+thyme : elapsed_run_time (), 0);
 0$
 
 /* Test for bug #4 desolve('diff(f(x),x,2)+f(x)=2*x,f(x)); */
