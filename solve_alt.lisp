@@ -7,6 +7,7 @@
 (in-package :maxima)
 
 (declare-top (unspecial coef var exp p y x)) ;not sure about this!!!
+
 ;;; The option variable solveverbose is useful for debugging, but it's not intended
 ;;; for general use.
 (defmvar $solveverbose nil)
@@ -914,8 +915,11 @@
 				 ;; find the solution x = %pi. Some trigsimp, radcan, and factoring cancels the
 				 ;; troublesome factor and allows solve to return %pi as a solution.
 			   (when (or limitp (boundp '*defint-assumptions*))
+				    (mtell "going to radcan ~%")
 				    (setq e (apply-identities-xxx e)) ;; use $trigsimp instead?
-	          (setq e (let (($logsimp t)) ($radcan e)))) ;; was ($factor ($radcan e))))
+				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump))
+												  ($logcontract e)))) ;; was (setq e (let (($logsimp t)) ($radcan e))))
+
 
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
