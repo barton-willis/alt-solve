@@ -814,7 +814,7 @@
         (setq e (cons '(mlist) e))  ; return e to a Maxima list
         (setq e ($poly_reduced_grobner e x)) ;triangularize equations
         (setq e ($expand e 0 0)) ;I think poly_reduced_grobner returns unsimplified expressions
-        (setq e (mfuncall '$trigsimp e))))
+        (setq e (apply-identities-xxx e))))
 
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
@@ -914,7 +914,7 @@
 				 ;; find the solution x = %pi. Some trigsimp, radcan, and factoring cancels the
 				 ;; troublesome factor and allows solve to return %pi as a solution.
 			   (when (or limitp (boundp '*defint-assumptions*))
-					  (setq e (mfuncall '$trigsimp e))
+					  (setq e (apply-identities-xxx e)) 
 				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump))
 												  ($logcontract e)))) ;; was (setq e (let (($logsimp t)) ($radcan e))))
 
