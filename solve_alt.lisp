@@ -915,8 +915,7 @@
 				 ;; find the solution x = %pi. Some trigsimp, radcan, and factoring cancels the
 				 ;; troublesome factor and allows solve to return %pi as a solution.
 			   (when (or limitp (boundp '*defint-assumptions*))
-				    (mtell "going to radcan ~%")
-				    (setq e (apply-identities-xxx e)) ;; use $trigsimp instead?
+					  (setq e (mfuncall '$trigsimp e))
 				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump))
 												  ($logcontract e)))) ;; was (setq e (let (($logsimp t)) ($radcan e))))
 
