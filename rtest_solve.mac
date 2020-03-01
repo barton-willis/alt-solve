@@ -30,10 +30,10 @@ solve([a*x - b],[x]);
 0$
 
 solve([0],[]);
-all$
+[0=0]$
 
 solve([0,0],[]);
-all$
+[0=0]$
 
 block([solveexplicit : false, solvedecomposes : true], multiplicities : [], solve(z*(1+z^3+z^5),z),multiplicities);
 [1,1]$
@@ -102,22 +102,22 @@ solve(107);
 []$
 
 block([solvenullwarn : false], solve(0));
-all$
+[0=0]$
 
 block([solvenullwarn : true], solve(0));
-all$
+[0=0]$
 
 block([solvenullwarn : false], solve(0.0));
-all$
+[0=0]$
 
 block([solvenullwarn : true], solve(0.0));
-all$
+[0=0]$
 
 block([solvenullwarn : false], solve(0.0b0));
-all$
+[0=0]$
 
 block([solvenullwarn : true], solve(0.0b0));
-all$
+[0=0]$
 
 solve(%i,x);
 []$

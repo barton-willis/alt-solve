@@ -189,13 +189,11 @@
 		  (cond
 
 			  ((null varl)
-			   (when $solvenullwarn
-				   (mtell (intl:gettext "Solve: variable list is empty, continuing anyway.~%")))
-
-         (when  (every #'zerop1 eqlist)
-				     (print "**************  Returning all"))
-
-			   (if (every #'zerop1 eqlist) '$all (take '(mlist))))
+		  	   (when $solvenullwarn
+			   	    (mtell (intl:gettext "Solve: variable list is empty, continuing anyway.~%")))
+           (cond ((every #'zerop1 eqlist)
+				           (simplifya (take '(mlist) (take '(mequal) 0 0)) t)) ;was '$all
+						  	 (t (take '(mlist)))))
 
 			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation and one unknown
 			   (setq eqlist (keep-float (car eqlist)))
