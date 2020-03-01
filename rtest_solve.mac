@@ -1137,13 +1137,17 @@ ssolve(abs(2*x + 5) = abs(x - 2), x);
 ssolve(1 - abs(x) = max(-x - 2, x - 2), x);
 [x=-3/2, x=3/2]$
 
-ssolve( (x + 1)*(sin(x)^2 + 1)^2*cos(3*x)^3 = 0,x );
-[x=-1,x=2*%pi*%z0-%i*asinh(1),
-  x=2*%pi*%z1+%i*asinh(1)+%pi,
-  x=2*%pi*%z2+%i*asinh(1),
-  x=2*%pi*%z3-%i*asinh(1)+%pi,
-  x=(4*%pi*%z4+%pi)/6,
-  x=(4*%pi*%z5-%pi)/6]$
+(eq : (x + 1)*(sin(x)^2 + 1)^2*cos(3*x)^3,0);
+0$
+
+(sol : ssolve(eq=0,x),0);
+0$
+
+map(lambda([s], trigreduce(subst(s, eq))), sol);
+[0,0,0,0,0,0,0,0,0,0]$
+
+(remvalue(eq), remvalue(sol),0);
+0$
 
 ssolve(%e^z = 1,z);
 [z = 2*%i*%pi*%z0]$
@@ -1640,7 +1644,7 @@ solve(asin(sqrt(x))=1/5,x);
 [x = sin(1/5)^2]$
 
 solve(acos(sqrt(x))=1/5,x);
-[x = cos(1/5)^2]$
+[x=1-sin(1/5)^2]$
 
 solve(acos(x)=1/5,x);
 [x=cos(1/5)]$

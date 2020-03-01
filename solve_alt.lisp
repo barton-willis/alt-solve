@@ -231,15 +231,16 @@
 
 (defun equation-simplify (e &optional (m 1))
 	(setq e ($ratdisrep (meqhk e))) ;do a=b -->a-b & convert to general form
-	(when $solveradcan ;unsure when is the best time to do this...let's get it done.
-		(setq e ($radcan e)))
 	(cond
 		((and (mexptp e) (mnump (third e)) (mgrp (third e) 0)) ; do z^n --> z when n is a positive mnump
 		 (equation-simplify (second e) (mul m (third e))))
-
 		(t
+	   ;;unsure when is the best time to do radcan, but it's better to do it after
+		 ;; the z^n --> z simplification.
+		 (when $solveradcan
+				(setq e ($radcan e)))
 		 (setq e ($num (sratsimp e)))
-		 (setq e (apply-identities e *pythagorean-identities*))
+		 (setq e (apply-identities-xxx e *pythagorean-identities*)) ; was (apply-identities e *pythagorean-identities*))
 		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
 
