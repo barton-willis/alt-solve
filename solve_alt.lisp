@@ -21,8 +21,8 @@
 	($load "solve.lisp"))
 
 ;;; Unrelated to solving equations...
-;(dolist (e (list '$max '%acosh '%cos '%cosh '%lambert_w '%log '%sin '%sinh 'mabs 'rat))
-;	(setf (get e 'msimpind) (list e 'simp)))
+(dolist (e (list '$max '%acosh '%cos '%cosh '%lambert_w '%log '%sin '%sinh 'mabs 'rat))
+	(setf (get e 'msimpind) (list e 'simp)))
 
 ;;; When $use_to_poly is true, dispatch the to_poly_solver after attempting other methods;
 ;;; when $use_to_poly is false, never dispatch the to_poly_solver.
@@ -57,6 +57,7 @@
 	($load "linsolve.lisp")
 	($load "solve_alt_top_level.lisp")
 	($load "grobner.lisp")
+	($load "one-to-one-solve.lisp")
 	($load "myalgsys.lisp"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
@@ -1008,4 +1009,5 @@
 					(setq buzz (simplifya (cons '(mlist) buzz) t)))))
 
 		 buzz))
+
 |#
