@@ -26,11 +26,26 @@
 |#
 (in-package :maxima)
 
-(defvar *one-to-one-reduce* (make-hash-table))
+(defvar *one-to-one-reduce* (make-hash-table :test #'equal))
 
-(setf (gethash (list '%sin '%sin) *one-to-one-reduce*)
-	  #'(lambda (a b) 42))
+;; attempt to solve equation c0*sin(kn0) + c1*sin(kn1) + b = 0 for x
+(defun sin-sin-solve (x c0 kn0 c1 kn1 b)
+   (let ((sol0) (sol1) (sol2))
+      (cond ((and (zerop1 b) (alike1 c0 c1)) ;c0*sin(kn0) + c0*sin(kn1) = 0
+				      (setq sol0 ($solve c0 x))
+	            (setq sol1 ($solve (add kn0 kn1 (mul -2  '$%pi ($new_variable '$integer))) x))
+			   		  (setq sol2 ($solve (add kn0 (mul -1 kn1) (mul -2  '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
+			  	    ($append sol0 sol1 sol2)) ;;need to blend solutions + multiplicities!
 
+				  	((and (zerop1 b) (alike1 c0 (mul -1 c1)))	 ;c0*sin(kn0) - c0*sin(kn1) = 0
+							(setq sol0 ($solve c0 x))
+							(setq sol1 ($solve (add kn0 kn1 (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
+						  (setq sol2 ($solve (add kn0 (mul -1 kn1) (mul -2 '$%pi ($new_variable '$integer))) x))
+						  ($append sol0 sol1 sol2)) ;;need to blend solutions + multiplicities!
+				(t
+					nil))))
+
+(setf (gethash (list '%sin '%sin) *one-to-one-reduce*) #'sin-sin-solve)
 
 (defun kernelize-fn (e fn &optional (subs nil))
 		(let ((g (gensym)) (kn nil) (xop) (xk) (eargs nil))
@@ -51,19 +66,29 @@
 									  (setq subs (second xk)))
 								  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
 
-
 (defun $one_to_one_solve (e x)
-  (let ((ee) (b) (subs nil) (gvars nil))
+  (let ((ee) (subs nil) (gvars nil) (fn nil) (c0 nil) (c1 nil) (b nil))
      (flet ((is-a-kernel (e)
 	           (and
 						  	(consp e)
 						  	(consp (car e))
-						  	(member (caar e) (list '%sin '%cos '%tan '%log '%sqrt 'mexpt) :test #'eql))))
+						  	(member (caar e) (list '%sin '%cos '%tan '%log 'mexpt) :test #'eql))))
 		     	  (setq ee (kernelize-fn e #'is-a-kernel))
 		    		(setq subs (second ee))
-						(setq gvars (mapcar #'cdr subs))
-						(setq subs (mapcar #'car subs))
-						(displa (cons '(mlist) gvars))
-						(displa (cons '(mlist) subs))
+						(setq gvars (mapcar #'cdr subs)) ;CL
+						(setq subs (mapcar #'car subs)) ;CL list of kernels
+	          (setq ee (first ee))
+						(cond ((and
+							        (eql 2 (length gvars))
+							        ($polynomialp ee (cons '(mlist) gvars)
+							                         #'(lambda (q) ($freeof x q))
+																	  	 #'(lambda (q) (or (eql 0 q) (eql 1 q)))))
 
-			      (first ee))))
+									(setq fn (gethash (mapcar #'caar subs) *one-to-one-reduce*))
+									(when fn
+				    					(setq c0 ($ratcoef ee (first gvars)))
+					    				(setq c1 ($ratcoef ee (second gvars)))
+							    		(setq b ($substitute 0 (first gvars) ($substitute 0 (second gvars) ee)))
+							    		(setq kn0 (second (first subs)))
+							    		(setq kn1 (second (second subs)))
+							   	  	(funcall fn x c0 kn0 c1 kn1 b)))))))
