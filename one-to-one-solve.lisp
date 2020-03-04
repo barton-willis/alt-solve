@@ -47,6 +47,55 @@
 
 (setf (gethash (list '%sin '%sin) *one-to-one-reduce*) #'sin-sin-solve)
 
+;; attempt to solve equation c0*sin(kn0) + c1*sin(kn1) + b = 0 for x
+(defun cos-cos-solve (x c0 kn0 c1 kn1 b)
+   (let ((sol0) (sol1) (sol2))
+      (cond ((and (zerop1 b) (alike1 c0 c1)) ;c0*cos(kn0) + c0*cos(kn1) = 0
+				      (setq sol0 ($solve c0 x))
+	            (setq sol1 ($solve (add kn0 kn1 (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
+			   		  (setq sol2 ($solve (add kn0 (mul -1 kn1) (mul -2  '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
+			  	    ($append sol0 sol1 sol2)) ;;need to blend solutions + multiplicities!
+
+				  	((and (zerop1 b) (alike1 c0 (mul -1 c1)))	 ;c0*cos(kn0) - c0*cos(kn1) = 0
+							(setq sol0 ($solve c0 x))
+							(setq sol1 ($solve (add kn0 kn1 (mul -2 '$%pi ($new_variable '$integer))) x))
+						  (setq sol2 ($solve (add kn0 (mul -1 kn1) (mul -2 '$%pi ($new_variable '$integer))) x))
+						  ($append sol0 sol1 sol2)) ;;need to blend solutions + multiplicities!
+				(t
+					nil))))
+
+(setf (gethash (list '%cos '%cos) *one-to-one-reduce*) #'cos-cos-solve)
+
+;; attempt to solve equation c0*sin(kn0) + c1*sin(kn1) + b = 0 for x
+(defun sin-cos-solve (x c0 kn0 c1 kn1 b)
+   (let ((r) (ph))
+      (cond ((and ($freeof x c0) ($freeof x c1) (alike1 kn0 kn1)) ;c0*cos(kn0) + c0*cos(kn1) = 0
+              (setq r (take '(mexpt) (add (mul c0 c0) (mul c1 c1)) (div 1 2)))
+              (setq ph (take '($atan2) c0 c1))
+				      ($solve (add kn0 ph (mul -1 (take '(%asin) (div b r))) (mul '$%pi ($new_variable '$integer))) x))
+				(t
+					nil))))
+
+(setf (gethash (list '%sin '%cos) *one-to-one-reduce*) #'sin-cos-solve)
+
+(defun cos-sin-solve (x c0 kn0 c1 kn1 b)
+    (sin-cos-solve x c1 kn1 c0 kn0 b))
+(setf (gethash (list '%cos '%sin) *one-to-one-reduce*) #'cos-sin-solve)
+
+;; attempt to solve c0*tan(kn0) + c1*tan(kn1) + b = 0 for x
+(defun tan-tan-solve (x c0 kn0 c1 kn1 b)
+    (cond ((and (alike1 c0 c1) (zerop1 b)) ;; c0*tan(kn0) + c1*tan(kn1) = 0
+            ($append
+               ($solve (add kn0 kn1 (mul '$%pi ($new_variable '$integer))) x)
+               ($solve c0 x)))
+          ((and (alike1 c0 (mul -1 c1)) (zerop1 b)) ;; c0*tan(kn0) - c1*tan(kn1) = 0
+              ($append
+                ($solve (add kn0 (mul -1 kn1) (mul '$%pi ($new_variable '$integer))) x)
+                ($solve c0 x)))
+              (t
+                nil)))
+(setf (gethash (list '%tan '%tan) *one-to-one-reduce*) #'tan-tan-solve)
+
 (defun kernelize-fn (e fn &optional (subs nil))
 		(let ((g (gensym)) (kn nil) (xop) (xk) (eargs nil))
 					(cond (($mapatom e) (list e subs))
