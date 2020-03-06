@@ -58,6 +58,7 @@
 	($load "solve_alt_top_level.lisp")
 	($load "grobner.lisp")
 	($load "one-to-one-solve.lisp")
+	;;($load "fourier_elim.lisp")
 	($load "myalgsys.lisp"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
@@ -361,6 +362,8 @@
 			   (filter-solution-x (polynomial-solve e x m) cnd))
 
 			((filter-solution-x (solve-mexpt-equation e x m nil) cnd))
+
+      ((filter-solution-x (one-to-one-solve e x m nil) cnd))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
@@ -670,7 +673,7 @@
 			 ;;(setq checked-sol (simplifya (cons '(mlist) checked-sol) t))
 
 			 (when checked-sol
-				 (mtell "used the to poly solver")))
+				 (mtell "used the to poly solver ~%")))
 
 		 checked-sol))
 

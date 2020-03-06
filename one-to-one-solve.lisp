@@ -90,11 +90,34 @@
                ($solve c0 x)))
           ((and (alike1 c0 (mul -1 c1)) (zerop1 b)) ;; c0*tan(kn0) - c1*tan(kn1) = 0
               ($append
-                ($solve (add kn0 (mul -1 kn1) (mul '$%pi ($new_variable '$integer))) x)
-                ($solve c0 x)))
+								 ($solve (add kn0 (mul -1 kn1) (mul '$%pi ($new_variable '$integer))) x)
+                 ($solve c0 x)))
               (t
                 nil)))
 (setf (gethash (list '%tan '%tan) *one-to-one-reduce*) #'tan-tan-solve)
+
+;; attempt to solve c0*e1^(kn0) + c1*e2^(kn1) + b = 0 for x
+(defun exp-exp-solve (x c0 kn0 c1 kn1 b)
+  (displa kn0)
+	(displa kn1)
+   (let ((e))
+      (cond ((and
+		      (zerop1 b)
+		      (alike1 (second kn0) (second kn1))
+					($freeof x (second kn0)) ($freeof x (second kn1)))
+
+           (print "ssgsfg")
+					(setq e (let (($logexpand '$super))
+						  (add
+								(take '(%log) (mul c0 kn0))
+					      (mul -1 (take '(%log) (mul -1 c1 kn1)))
+								(mul 2 '$%pi '$%i  ($new_variable '$intger)))))
+				  (displa e)
+			  	($solve e x))
+					(t
+						nil))))
+
+(setf (gethash (list 'mexpt 'mexpt) *one-to-one-reduce*) #'exp-exp-solve)
 
 (defun kernelize-fn (e fn &optional (subs nil))
 		(let ((g (gensym)) (kn nil) (xop) (xk) (eargs nil))
@@ -115,7 +138,52 @@
 									  (setq subs (second xk)))
 								  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
 
-(defun $one_to_one_solve (e x)
+
+;; affine_p(p,vars) returns true iff p is an affine polynomial in vars, that is,
+;; that it is a polynomial in vars (a list) whose total degree in vars is no greater than 1.
+;; Stavros Macrakis wrote $affine_p and the tests (see rtest_fourier_elim.mac) for this function.
+
+(defun $myaffine_p (p vl)
+  (setq vl (require-list vl "affine_p"))
+  (let* (($ratfac nil)
+	 ($ratprint nil)
+	 (rat ($rat p)))
+    (and (eq (caar rat) 'mrat) ; don't handle bags etc.
+	 (not (memq 'trunc (car rat))) ; don't handle taylor series (even in other vars)
+	 (let* (;; in affine poly, only numer can include vars
+		(num ($ratnumer rat))
+		;; (what vars are actually used; cf. $ratfreeof/$showratvars)
+		(numvars (caddar (minimize-varlist num)))
+		;; ... and denominator cannot depend on vars at all
+		(den ($ratdenom rat))
+		(denvars (caddar (minimize-varlist den)))
+		(truncnum))
+	   (and
+	    ;; everything in denvars must be freeof vl
+	    (every #'(lambda (term)
+		       (every #'(lambda (var) (freeof var term)) vl))
+		   denvars)
+	    ;; everything in numvars must be either in vl or freeof vl
+	    (every #'(lambda (term)
+		       (or (memalike term vl)
+			   (every #'(lambda (var) (freeof var term)) vl)))
+		   numvars)
+	    ;; there must be no terms of degree > 1
+	    (progn
+	      ;; calculate p without terms of degree > 1
+	      (let (($ratwtlvl 1)
+		    ;; ignore prevailing *ratweights (don't append to new ones)
+		    (*ratweights (mapcar #'(lambda (x) (cons x 1)) vl)))
+		;; adding ($rat 0) performs the truncation; just ($rat num) does not
+		(setq truncnum (add ($rat 0) num)))
+	      ;; subtract out: any terms of degree > 1?
+	      (equal 0 (ratdisrep (sub num truncnum)))))))))
+
+
+(defun one-to-one-solve (e x m zzz)
+ (declare (ignore m zzz))
+ (when (or t $solveverbose)
+	 (mtell "top of one-one-solve e = ~M  x = ~M ~%" e x))
   (let ((ee) (subs nil) (gvars nil) (fn nil) (c0 nil) (c1 nil) (b nil))
      (flet ((is-a-kernel (e)
 	           (and
@@ -128,16 +196,18 @@
 						(setq subs (mapcar #'car subs)) ;CL list of kernels
 	          (setq ee (first ee))
 						(cond ((and
+							        t
 							        (eql 2 (length gvars))
-							        ($polynomialp ee (cons '(mlist) gvars)
-							                         #'(lambda (q) ($freeof x q))
-																	  	 #'(lambda (q) (or (eql 0 q) (eql 1 q)))))
+											($myaffine_p ee (cons '(mlist) gvars)))
 
+							    (print `(ops = ,(mapcar #'caar subs)))
 									(setq fn (gethash (mapcar #'caar subs) *one-to-one-reduce*))
 									(when fn
 				    					(setq c0 ($ratcoef ee (first gvars)))
 					    				(setq c1 ($ratcoef ee (second gvars)))
 							    		(setq b ($substitute 0 (first gvars) ($substitute 0 (second gvars) ee)))
-							    		(setq kn0 (second (first subs)))
-							    		(setq kn1 (second (second subs)))
+									   	(setq kn0 (if (mexptp (first subs)) (first subs)  (second (first subs))))
+										  (setq kn1 (if (mexptp (second subs)) (second subs)  (second (second subs))))
+							    	;	(setq kn0 (second (first subs)))
+							    	;	(setq kn1 (second (second subs)))
 							   	  	(funcall fn x c0 kn0 c1 kn1 b)))))))

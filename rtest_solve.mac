@@ -1998,6 +1998,7 @@ block([assume_notequal : true,solve_ignores_conditions : true], ssolve(sin(cos(x
 solve((x^2-1)/(x-1)=2);
 []$
 
+
 /* #2546 solve with repeated equations gives a wrong answer */
 ssolve([sin(x)=cos(x), sin(x)=cos(x)],x);
 [x=%pi/4,x=-(3*%pi)/4]$
@@ -2513,6 +2514,7 @@ map(lambda([sx], ratsimp(subst(sx, eqs))), sol);
 
 (eqs : [b2 + a1 = r2, a1 * b2 = r3, a2 * b2 + a3 * b1 = r4, a3* b2 + a5 + r4= d5, a5 * b1 = 0],0);
 0$
+
 
 (eqs : map(lambda([s], rhs(s)-lhs(s)),eqs),0);
 0$
