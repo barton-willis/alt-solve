@@ -69,12 +69,15 @@
 ;; attempt to solve equation c0*sin(kn0) + c1*sin(kn1) + b = 0 for x
 (defun sin-cos-solve (x c0 kn0 c1 kn1 b)
    (let ((r) (ph))
-      (cond ((and ($freeof x c0) ($freeof x c1) (alike1 kn0 kn1)) ;c0*cos(kn0) + c0*cos(kn1) = 0
-              (setq r (take '(mexpt) (add (mul c0 c0) (mul c1 c1)) (div 1 2)))
-              (setq ph (take '($atan2) c0 c1))
-				      ($solve (add kn0 ph (mul -1 (take '(%asin) (div b r))) (mul '$%pi ($new_variable '$integer))) x))
-				(t
-					nil))))
+	    (setq r (take '(mexpt) (add (mul c0 c0) (mul c1 c1)) (div 1 2)))
+      (cond ((zerop1 r)
+			        (take '(mlist)))
+
+			    	((and ($freeof x c0) ($freeof x c1) (alike1 kn0 kn1))
+               (setq ph (take '($atan2) c0 c1))
+				       ($solve (add kn0 ph (mul -1 (take '(%asin) (div b r))) (mul '$%pi ($new_variable '$integer))) x))
+			    	(t
+			    		nil))))
 
 (setf (gethash (list '%sin '%cos) *one-to-one-reduce*) #'sin-cos-solve)
 
@@ -98,20 +101,16 @@
 
 ;; attempt to solve c0*e1^(kn0) + c1*e2^(kn1) + b = 0 for x
 (defun exp-exp-solve (x c0 kn0 c1 kn1 b)
-  (displa kn0)
-	(displa kn1)
    (let ((e))
       (cond ((and
 		      (zerop1 b)
 		      (alike1 (second kn0) (second kn1))
 					($freeof x (second kn0)) ($freeof x (second kn1)))
-
-           (print "ssgsfg")
 					(setq e (let (($logexpand '$super))
 						  (add
 								(take '(%log) (mul c0 kn0))
 					      (mul -1 (take '(%log) (mul -1 c1 kn1)))
-								(mul 2 '$%pi '$%i  ($new_variable '$intger)))))
+								(mul 2 '$%pi '$%i  ($new_variable '$integer)))))
 				  (displa e)
 			  	($solve e x))
 					(t
