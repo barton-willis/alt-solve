@@ -1391,7 +1391,7 @@ ssolve(a*x=b, x);
 
 block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
 [[a=%r1,x=%i*%r1],[a=%r2,x=-%i*%r2]]$
-
+   
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
 [[a=%r1,x=((sqrt(2)*%i+sqrt(2))*%r1)/2],
 [a=%r2,x=((sqrt(2)*%i-sqrt(2))*%r2)/2],

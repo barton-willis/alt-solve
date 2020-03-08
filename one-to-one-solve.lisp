@@ -4,44 +4,50 @@
 ;;;; This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 ;;;; https://creativecommons.org/licenses/by-sa/4.0/
 
-#|
-(one_to_one_reduce[a,b] := false,
-  one_to_one_reduce['sin,'sin] : lambda([a,b],
-      (a - b - 2 * %pi * new_variable('integer)) * (a + b - 2 * %pi * new_variable('integer) + %pi)),
-
-  one_to_one_reduce['cos,'cos] : lambda([a,b],
-      (a - b - 2 * %pi * new_variable('integer)) * (a + b - 2 * %pi * new_variable('integer))),
-
-  one_to_one_reduce['sin,'cos] : lambda([a,b],
-    (a/2 - b/2 - %pi/4 - %pi * new_variable('integer))*(a/2 + b/2 - %pi/4 - %pi * new_variable('integer))),
-
-  one_to_one_reduce['cos,'sin] :  lambda([a,b],
-    (b/2 - a/2 - %pi * new_variable('integer) - %pi/4)*(b/2 + a/2 - %pi * new_variable('integer) - %pi/4)),
-
-  one_to_one_reduce['tan,'tan] : lambda([a,b], (a-b - %pi*new_variable('integer))/(cos(a)*cos(b))),
-
-  one_to_one_reduce['%exp,'%exp] : lambda([a,b],
-      a - b - 2 * %pi * %i * new_variable('integer)));
-
-|#
 (in-package :maxima)
+
+(defun merge-solutions (&rest xxx)
+   (let ((sx) (mx) (cx) (sol nil) (cnd t))
+      (while xxx
+    		 (setq sx (pop xxx)) ;solution
+	    	 (setq mx (pop xxx)) ;multiplicities -- Maxima list
+         (setq cx (pop xxx)) ;conditions --cx is a Maxima predicate
+		     (setq cnd (take '(mand) cnd cx)) ;collect all conditions
+			   ;; build an association list of the form sol.multiplicity
+	       (setq sol (append sol (mapcar #'(lambda (a b) (cons a b)) (cdr sx) (cdr mx)))))
+
+    ;; remove redundant solutions
+	  (setq sol (remove-duplicates sol :test #'alike1 :key #'car :from-end t))
+    (setq sol (filter-solution sol cnd)) ;remove supurious solutions
+		(setq mx (mapcar #'cdr sol)) ;reformulate multiplicity
+		(setq sol (mapcar #'car sol)) ;reformulate solutions
+		(setq $multiplicities (simplifya (cons '(mlist) mx) t))
+		(simplifya (cons '(mlist) sol) t)))
 
 (defvar *one-to-one-reduce* (make-hash-table :test #'equal))
 
 ;; attempt to solve equation c0*sin(kn0) + c1*sin(kn1) + b = 0 for x
 (defun sin-sin-solve (x c0 kn0 c1 kn1 b)
-   (let ((sol0) (sol1) (sol2))
+   (let ((sol0) (sol1) (sol2) (mx0) (mx1) (mx2))
       (cond ((and (zerop1 b) (alike1 c0 c1)) ;c0*sin(kn0) + c0*sin(kn1) = 0
 				      (setq sol0 ($solve c0 x))
-	            (setq sol1 ($solve (add kn0 kn1 (mul -2  '$%pi ($new_variable '$integer))) x))
-			   		  (setq sol2 ($solve (add kn0 (mul -1 kn1) (mul -2  '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
-			  	    ($append sol0 sol1 sol2)) ;;need to blend solutions + multiplicities!
+							(setq mx0 $multiplicities)
+	            (setq sol1 ($solve (add kn0 kn1 (mul -2 '$%pi ($new_variable '$integer))) x))
+							(setq mx1 $multiplicities)
+			   		  (setq sol2 ($solve (add kn0 (mul -1 kn1)
+								   (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
+              (setq mx2 $multiplicities)
+							(mtell "merging ~M  ~M ~M ~%" sol0 sol1 sol2)
+							(merge-solutions sol0 mx0 t sol1 mx1 t sol2 mx2 t))
 
 				  	((and (zerop1 b) (alike1 c0 (mul -1 c1)))	 ;c0*sin(kn0) - c0*sin(kn1) = 0
 							(setq sol0 ($solve c0 x))
+							(setq mx0 $multiplicities)
 							(setq sol1 ($solve (add kn0 kn1 (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
+              (setq mx1 $multiplicities)
 						  (setq sol2 ($solve (add kn0 (mul -1 kn1) (mul -2 '$%pi ($new_variable '$integer))) x))
-						  ($append sol0 sol1 sol2)) ;;need to blend solutions + multiplicities!
+              (setq mx1 $multiplicities)
+						  (merge-solutions sol0 mx0 t sol1 mx1 t sol2 mx2 t))
 				(t
 					nil))))
 
@@ -49,18 +55,26 @@
 
 ;; attempt to solve equation c0*sin(kn0) + c1*sin(kn1) + b = 0 for x
 (defun cos-cos-solve (x c0 kn0 c1 kn1 b)
-   (let ((sol0) (sol1) (sol2))
+   (let ((sol0) (sol1) (sol2) (mx0) (mx1) (mx2))
       (cond ((and (zerop1 b) (alike1 c0 c1)) ;c0*cos(kn0) + c0*cos(kn1) = 0
 				      (setq sol0 ($solve c0 x))
-	            (setq sol1 ($solve (add kn0 kn1 (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
-			   		  (setq sol2 ($solve (add kn0 (mul -1 kn1) (mul -2  '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
-			  	    ($append sol0 sol1 sol2)) ;;need to blend solutions + multiplicities!
+							(setq mx0 $multiplicities)
+	            (setq sol1 ($solve (add kn0 kn1 (mul -2 '$%pi
+								    (sub ($new_variable '$integer) (div 1 2)))) x))
+							(setq mx1 $multiplicities)
+			   		  (setq sol2 ($solve (add kn0 (mul -1 kn1)
+								   (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x))
+							(setq mx2 $multiplicities)
+							(merge-solutions sol0 mx0 t sol1 mx1 t sol2 mx2 t))
 
 				  	((and (zerop1 b) (alike1 c0 (mul -1 c1)))	 ;c0*cos(kn0) - c0*cos(kn1) = 0
 							(setq sol0 ($solve c0 x))
+							(setq mx0 $multiplicities)
 							(setq sol1 ($solve (add kn0 kn1 (mul -2 '$%pi ($new_variable '$integer))) x))
+							(setq mx1 $multiplicities)
 						  (setq sol2 ($solve (add kn0 (mul -1 kn1) (mul -2 '$%pi ($new_variable '$integer))) x))
-						  ($append sol0 sol1 sol2)) ;;need to blend solutions + multiplicities!
+							(setq mx2 $multiplicities)
+							(merge-solutions sol0 mx0 t sol1 mx1 t sol2 mx2 t))
 				(t
 					nil))))
 
@@ -72,7 +86,6 @@
 	    (setq r (take '(mexpt) (add (mul c0 c0) (mul c1 c1)) (div 1 2)))
       (cond ((zerop1 r)
 			        (take '(mlist)))
-
 			    	((and ($freeof x c0) ($freeof x c1) (alike1 kn0 kn1))
                (setq ph (take '($atan2) c0 c1))
 				       ($solve (add kn0 ph (mul -1 (take '(%asin) (div b r))) (mul '$%pi ($new_variable '$integer))) x))
@@ -87,31 +100,38 @@
 
 ;; attempt to solve c0*tan(kn0) + c1*tan(kn1) + b = 0 for x
 (defun tan-tan-solve (x c0 kn0 c1 kn1 b)
-    (cond ((and (alike1 c0 c1) (zerop1 b)) ;; c0*tan(kn0) + c1*tan(kn1) = 0
-            ($append
-               ($solve (add kn0 kn1 (mul '$%pi ($new_variable '$integer))) x)
-               ($solve c0 x)))
+    (let ((sol0) (mx0) (sol1) (mx1))
+        (cond ((and (alike1 c0 c1) (zerop1 b)) ;; c0*tan(kn0) + c1*tan(kn1) = 0
+                 (setq sol0 ($solve (add kn0 kn1 (mul '$%pi ($new_variable '$integer))) x))
+				    		 (setq mx0 $multiplicities)
+                 (setq sol1 ($solve c0 x))
+				    		 (setq mx1 $multiplicities)
+				    		 (merge-solutions sol0 mx0 t sol1 mx1 t))
+
           ((and (alike1 c0 (mul -1 c1)) (zerop1 b)) ;; c0*tan(kn0) - c1*tan(kn1) = 0
-              ($append
-								 ($solve (add kn0 (mul -1 kn1) (mul '$%pi ($new_variable '$integer))) x)
-                 ($solve c0 x)))
+			    				(setq sol0 ($solve (add kn0 (mul -1 kn1) (mul '$%pi ($new_variable '$integer))) x))
+						    	(setq mx0 $multiplicities)
+                  (setq sol1 ($solve c0 x))
+						     	(setq mx1 $multiplicities)
+						      (merge-solutions sol0 mx0 t sol1 mx1 t))
+
               (t
-                nil)))
+                nil))))
+
 (setf (gethash (list '%tan '%tan) *one-to-one-reduce*) #'tan-tan-solve)
 
 ;; attempt to solve c0*e1^(kn0) + c1*e2^(kn1) + b = 0 for x
 (defun exp-exp-solve (x c0 kn0 c1 kn1 b)
    (let ((e))
       (cond ((and
-		      (zerop1 b)
-		      (alike1 (second kn0) (second kn1))
-					($freeof x (second kn0)) ($freeof x (second kn1)))
-					(setq e (let (($logexpand '$super))
-						  (add
-								(take '(%log) (mul c0 kn0))
-					      (mul -1 (take '(%log) (mul -1 c1 kn1)))
-								(mul 2 '$%pi '$%i  ($new_variable '$integer)))))
-				  (displa e)
+		           (zerop1 b)
+		           (alike1 (second kn0) (second kn1))
+		      		 ($freeof x (second kn0)) ($freeof x (second kn1)))
+			     		(setq e (let (($logexpand '$super))
+					    	  (add
+							    	(take '(%log) (mul c0 kn0))
+					          (mul -1 (take '(%log) (mul -1 c1 kn1)))
+							    	(mul 2 '$%pi '$%i  ($new_variable '$integer)))))
 			  	($solve e x))
 					(t
 						nil))))
@@ -199,7 +219,6 @@
 							        (eql 2 (length gvars))
 											($myaffine_p ee (cons '(mlist) gvars)))
 
-							    (print `(ops = ,(mapcar #'caar subs)))
 									(setq fn (gethash (mapcar #'caar subs) *one-to-one-reduce*))
 									(when fn
 				    					(setq c0 ($ratcoef ee (first gvars)))
@@ -207,6 +226,4 @@
 							    		(setq b ($substitute 0 (first gvars) ($substitute 0 (second gvars) ee)))
 									   	(setq kn0 (if (mexptp (first subs)) (first subs)  (second (first subs))))
 										  (setq kn1 (if (mexptp (second subs)) (second subs)  (second (second subs))))
-							    	;	(setq kn0 (second (first subs)))
-							    	;	(setq kn1 (second (second subs)))
 							   	  	(funcall fn x c0 kn0 c1 kn1 b)))))))

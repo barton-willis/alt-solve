@@ -10,10 +10,6 @@
 ;;; for general use.
 (defmvar $solveverbose nil)
 
-;;; When $use_grobner is true, and solve dispatches algsys, apply $poly_reduced_grobner
-;;; before calling algsys.  I'd like to get rid of this option and always apply grobner.
-(defmvar $use_grobner t)
-
 ;;; The need for setting *evaluator-mode* is a mystery to me. And I'm not entirely sure
 ;;; about the need for loading solve.lisp.
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -280,12 +276,14 @@
 				 (push sx checked-sol)))
 		 (reverse checked-sol)))
 
-;;; Solve the equation e=0 for x, where e is a mtimes expression. Actually, effectively the equation is e^m = 0, so
-;;; m is the multiplicity so far in the solving process. The list cnd has conditions on the solution.
+;;; Solve the equation e=0 for x, where e is a mtimes expression. Actually, effectively the
+;;; equation is e^m = 0, so m is the multiplicity so far in the solving process. The list cnd
+;;; has conditions on the solution.
 
-;;; When e = e1*e2* ... * en, solve e1=0, e2=0, ... en = 0.  Remove the duplicates from the union of the solutions, and
-;;; remove those solutions that do not satisfy cnd. One problem is when one of the solutions is all, but there is a condition
-;;; on the solution--something like solve ((sin(x)^2 + cos(x)^2-1)*(1/x),x). I'm not sure how to fix this.
+;;; When e = e1*e2* ... * en, solve e1=0, e2=0, ... en = 0.  Remove the duplicates from the
+;;; union of the solutions, and remove those solutions that do not satisfy cnd. One problem is
+;;; when one of the solutions is all, but there is a condition on the solution--something like
+;;; solve ((sin(x)^2 + cos(x)^2-1)*(1/x),x). I'm not sure how to fix this.
 
 (defun product-solver (e x m use-trigsolve cnd) "Solve e=e1*e2*...*en for x"
 	;;(mtell "using product solve ~%")
@@ -843,8 +841,7 @@
 			      (setq x ($setify x))
 						(setq e ($listify e)) ;convert both e and x to sets & expunge redundant eqs
 			      (setq x ($listify x))
-						(when $use_grobner
-							(setq e (dispatch-grobner e x)))
+						(setq e (dispatch-grobner e x))
 						(setq sol ($algsys e x))
 						(unkeep-float sol))
 		 		(t
