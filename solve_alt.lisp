@@ -194,6 +194,7 @@
 			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation and one unknown
 			   (setq eqlist (keep-float (car eqlist)))
 			   (setq sol ($substitute nonatom-subst (solve-single-equation eqlist (car varl))))
+
 				 (unkeep-float sol))
 
 			  ((null (cdr varl)) ;one unknown, more than one equation
