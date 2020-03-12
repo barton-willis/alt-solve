@@ -11,7 +11,11 @@
 ;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
 ;;; cuts (don't use radcan, for example).
 (defun try-to-crunch-to-zero (e) "Ratsimp with algebraic = true and domain = complex."
-	(let (($algebraic t) ($domain '$complex)) (sratsimp e))) ; was (fullratsimp e)))
+	(let (($algebraic t) ($domain '$complex))
+	 ;;;  (sratsimp (apply-identities-xxx e))))
+	;;		(sratsimp (sqrtdenest e)))) ; was (fullratsimp e)))
+	(sratsimp e)))
+
 
 ;;; Solve a*x + b = 0 for x. Return both a CL list of the solution (-b/a) and a CL list of the multiplicity.
 (defun my-solve-linear (x a b) "Return solution and multiplicity of ax+b=0."
@@ -309,6 +313,7 @@
 								(t
 									(values (list (take '(mequal) 0 q)) (list 1))))))
 					(setq sol (append sol zzz))
+				;;	(setq sol (mapcar #'(lambda (s) (sratsimp (sqrtdenest s))) sol)) ;;experimental
 					(setq p-multiplicities (append p-multiplicities (mapcar #'(lambda (s) (mul s m)) mss)))))
 				  (setq $multiplicities (simplifya (cons '(mlist) p-multiplicities) t))
 			  	(simplifya (cons '(mlist) sol) t)))))

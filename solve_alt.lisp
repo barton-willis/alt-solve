@@ -921,7 +921,6 @@
 
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
-
 				 (setq m (cond (($listp $multiplicities)
 								(mapcar #'(lambda (q) (mul ms q)) (cdr $multiplicities)))
 							 (t
