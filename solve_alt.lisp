@@ -746,8 +746,9 @@
 (defun solve-triangular-system (eqs vars)
 		;(mtell "Top of solve-triangular-system ~%")
 	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars) (free-sol nil))
-
-		   (cond ((null eqs)
+            (setq eqs (mapcar #'(lambda (q) (try-to-crunch-to-zero q
+				            #'apply-identities-xxx  #'sqrtdenest #'fullratsimp)) eqs))
+				    (cond ((null eqs)
 				        ;; No equations to solve, so all variables are free.
 								;; Return ((var1 = %r1 var2 = %r2...varn = %rn))
 				        ;; (mtell "null equations ~%")

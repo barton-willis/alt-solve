@@ -9,13 +9,14 @@
 (defmvar *solve-factors-biquadratic* t)
 
 ;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
-;;; cuts (don't use radcan, for example).
-(defun try-to-crunch-to-zero (e) "Ratsimp with algebraic = true and domain = complex."
-	(let (($algebraic t) ($domain '$complex))
-	 ;;;  (sratsimp (apply-identities-xxx e))))
-	;;		(sratsimp (sqrtdenest e)))) ; was (fullratsimp e)))
-	(sratsimp e)))
-
+;;; cuts (don't use radcan, for example). We first apply the functions in the &rest parameter
+;;; fns and finish with a finall call to sratsimp. Possible members of fns include
+;;; #'sqrtdenest, #'fullratsimp, and #'apply-identities-xxx.
+(defun try-to-crunch-to-zero (e &rest fns) "Ratsimp with algebraic = true and domain = complex."
+		(let (($algebraic t) ($domain '$complex))
+		  (dolist (fk fns)
+			   (setq e (funcall fk e)))
+		(sratsimp e)))
 
 ;;; Solve a*x + b = 0 for x. Return both a CL list of the solution (-b/a) and a CL list of the multiplicity.
 (defun my-solve-linear (x a b) "Return solution and multiplicity of ax+b=0."
@@ -282,7 +283,6 @@
 
 				  (push x cfs)
 
-
 				(multiple-value-bind (zzz mss)
 					(cond
 						((eql n 0)
@@ -313,7 +313,6 @@
 								(t
 									(values (list (take '(mequal) 0 q)) (list 1))))))
 					(setq sol (append sol zzz))
-				;;	(setq sol (mapcar #'(lambda (s) (sratsimp (sqrtdenest s))) sol)) ;;experimental
 					(setq p-multiplicities (append p-multiplicities (mapcar #'(lambda (s) (mul s m)) mss)))))
 				  (setq $multiplicities (simplifya (cons '(mlist) p-multiplicities) t))
 			  	(simplifya (cons '(mlist) sol) t)))))
