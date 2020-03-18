@@ -136,10 +136,14 @@
 					  (setq sol2 (mapcar #'third sol2))
 					  (values (mapcar #'(lambda (q) (take '(mequal) v (sub q shift))) (append sol1 sol2)) (append ms1 ms2))))))))
 
-;;; Solve p=0 using polynomial decomposition. I'm not sure this always gets the multiplicities correct.
-(defun poly-solve-by-decomp (pp x) "Solve p=0 using polynomial decomposition."
+;;; Solve p=0 using polynomial decomposition. I'm not sure this always gets the multiplicities
+;;; correct. I think polydecomp has a bug when algebraic is true; for example
+;;;     (%i2) block([algebraic : true], polydecomp(%i*x^2+1,x));
+;;;            (%o2) [(%i-2)*x^2+1,-%i*x]
+
+(defun poly-solve-by-decomp (pp x mx) "Solve p=0 using polynomial decomposition."
 	(let ((sol) (p) (pk) ($solvedecomposes nil) ($solveexplicit t))
-		  (setq p (cdr ($polydecomp pp x)))
+		  (setq p (cdr (let (($algebraic nil)) ($polydecomp pp x))))
 		  (catch 'bailout (setq sol nil)
 				 (setq sol (cdr (polynomial-solve (pop p) x)))
 
@@ -153,7 +157,7 @@
 						(setq sol (mapcan #'(lambda (q) (mapcar #'third (cdr (polynomial-solve (sub pk q) x)))) sol)))
 				 (mapcar #'(lambda (q) (take '(mequal) x q)) sol))
 
-		   (setq $multiplicities (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))
+		   (setq $multiplicities (mapcar #'(lambda (q) (declare (ignore q)) mx) sol))
 		   (setq $multiplicities (cons '(mlist) $multiplicities))
 
 		   (cond (sol
@@ -300,7 +304,7 @@
 
 						((and (> n 4) $solvedecomposes)
 						 (setq q ($expand q))
-						 (setq xsol (poly-solve-by-decomp q x))
+						 (setq xsol (poly-solve-by-decomp q x mx))
 						 (when $solveexplicit
 							 (setq xsol (remove-if #'(lambda (q) (eql 0 ($lhs q))) xsol)))
 						 (values xsol (mapcar #'(lambda (w) (declare (ignore w)) 1) xsol)))
