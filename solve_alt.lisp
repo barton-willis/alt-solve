@@ -862,10 +862,6 @@
 ;;; things like solve(sin(x)=1/2,x) --> [x=(12*%pi*%z1+%pi)/6,x=(12*%pi*%z2+5*%pi)/6]. Thus we'll locally
 ;;; set $solve_inverse_package to *function-inverses-alt*.
 
-
-;;; Locally $realonly is true--I once had problems running the testsuite without setting $realonly
-;;; to nil, but that's no longer true. Nevertheless, we set it to true.
-
 ;;; The non-user level option variable *solve-factors-biquadratic* is a silly workaround.  The testsuite
 ;;; has a handful of definite integration problems of the form integrate(1/(a + b*sin(x)^2,x, c,d). These
 ;;; lead to solving biquadratics. Standard Maxima doesn't factor the biquadratic--that gives solutions
@@ -918,12 +914,10 @@
 					  (setq e (apply-identities-xxx e))
 				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump))
 												  ($logcontract e)))) ;; was (setq e (let (($logsimp t)) ($radcan e))))
-
-
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
 				 (setq m (cond (($listp $multiplicities)
-								(mapcar #'(lambda (q) (mul ms q)) (cdr $multiplicities)))
+								(mapcar #'(lambda (q) (mul ms q)) (reverse (cdr $multiplicities))))
 							 (t
 							  (mtell "Yikes--multiplicities didn't get set ~%")
 							  (mapcar #'(lambda (q) (declare (ignore q)) 1) sol)))))
