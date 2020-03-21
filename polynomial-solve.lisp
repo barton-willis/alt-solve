@@ -97,11 +97,12 @@
 ;;; Solve the quartic p4 x^4 + p3 x^3 + p2 x^2 + p1 x + p0=0. Return both a CL list of the solutions and the
 ;;; list of the multiplicities.
 (defun my-solve-quartic (v p4 p3 p2 p1 p0) "Return solutions and multiplicities of p4 v^4+p3 v^3+p2 v^2+ p1 v + p0=0."
-	;;(mtell "solving quartic ~%")
-	;(displa `((mlist) ,p4 ,p3 ,p2 ,p1 ,p0))
+	(mtell "solving quartic ~%")
+	;;(displa `((mlist) ,p4 ,p3 ,p2 ,p1 ,p0))
 	(let ((pp4) (pp3) (pp2) (pp1) (pp0) (m) (g (gensym)) (x) (mm) (shift))
 
 		 (cond ((and (zerop1 p3) (zerop1 p1))
+		 	  ;;(mtell "solving biquadratic ~%")
 				(my-solve-biquadratic v p4 p2 p0))
 			 (t
 			  (setq shift (div p3 (mul 4 p4)))

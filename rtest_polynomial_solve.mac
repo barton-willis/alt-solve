@@ -248,14 +248,53 @@ ssolve((x-2)^3*(x-4)^2*(x-6),x);
 multiplicities;
 [3,2,1]$
 
-ssolve((x-2)^a*(x-4)^2*(x-6),x);
+ssolve((x-2)^107*(x-4)^2*(x-6),x);
 [x=2,x=4,x=6]$
 
 multiplicities;
-[a,2,1]$
+[107,2,1]$
 
+ssolve((x-2)*(x-4)^107*(x-6),x);
+[x=2,x=4,x=6]$
+
+multiplicities;
+[1,107,1]$
+
+ssolve((x-2)*(x-4)*(x-6)^107,x);
+[x=2,x=4,x=6]$
+
+multiplicities;
+[1,1,107]$
+
+ssolve(%i*(x-2)*(x-4)*(x-6)^107,x);
+[x=2,x=4,x=6]$
+
+multiplicities;
+[1,1,107]$
 
 /*quartic & related */
+
+checked_sol(x^4-x^3+x+1,x);
+[0,0,0,0]$
+
+multiplicities;
+[1,1,1,1]$
+
+checked_sol(x^4-2*x^3+x+1,x);
+[0,0,0,0]$
+
+multiplicities;
+[1,1,1,1]$
+
+
+ssolve(x^4+x^3+x+1,x);
+[x=-1,x=-((sqrt(3)*%i-1)/2),x=(sqrt(3)*%i+1)/2]$
+
+multiplicities;
+[2,1,1]$
+
+checked_sol(x^4+x^3+x+1,x);
+[0,0,0]$
 
 checked_sol(x^4+a*x^2+b,x);
 [0,0,0,0]$
@@ -275,23 +314,106 @@ checked_sol(x^4+x,x);
 multiplicities;
 [1,1,1,1]$
 
-(sol : solve(a*x^4+b*x^3+c*x^2+c*x+e,x),0);
+(sol : solve(a*x^4+b*x^3+c*x^2+d*x+e,x),0);
 0$
 
-subst([a=1,b=0,c=2,c=0, d=0,e=1], sol);
-[x=-%i,x=-%i,x=%i,x=%i]$
+(extra_simp(e) :=
+  block([algebraic : true, domain : complex],
+     expand(rootscontract(ratsimp(?sqrtdenest(e))))),0);
+0$
 
-subst([a=-1,b=0,c=2,c=0, d=0,e=-1], sol);
+block([domain : real], ratsimp(extra_simp(rectform(block([algebraic : true, domain : complex],
+   subst([a=1,b=0,c=0, d=0,e=1], sol))))));
+[x=-((sqrt(2)*%i+sqrt(2))/2),
+ x=-((sqrt(2)*%i-sqrt(2))/2),
+ x=(sqrt(2)*%i-sqrt(2))/2,
+ x=(sqrt(2)*%i+sqrt(2))/2]$
+
+subst([a=-1,b=0,c=2, d=0,e=-1], sol);
 [x=1,x=1,x=-1,x=-1]$
 
 (sol : solve(x^4+a*x^3 + b*x^2+c*x+d,x),0);
 0$
 
-sort(subst([a=1,b=0,c=0,d=27/256],sol));
+extra_simp(sort(subst([a=1,b=0,c=0,d=27/256],sol)));
 [x=-3/4,x=-3/4,x=1/4-%i/2^(3/2),x=%i/2^(3/2)+1/4]$
 
-sort(subst([a=-2,b=0,c=0,d=27/16],sol));
-[x=3/2,x=3/2,x=-%i/sqrt(2)-1/2,x=%i/sqrt(2)-1/2]$
+extra_simp(sort(subst([a=-2,b=0,c=0,d=27/16],sol)));
+[x=3/2,x=3/2,x=%i/sqrt(2)-1/2,x=-%i/sqrt(2)-1/2]$
 
-subst([a=0, c=0,d=b^2/4,b=-25],sol);
-[x=-(5*sqrt(3))/sqrt(6),x=-(5*sqrt(3))/sqrt(6),x=(5*sqrt(3))/sqrt(6),x=(5*sqrt(3))/sqrt(6)]$
+extra_simp(subst([a=0, c=0,d=b^2/4,b=-25],sol));
+[x=-(5/sqrt(2)),x=-(5/sqrt(2)),x=5/sqrt(2),x=5/sqrt(2)]$
+
+checked_sol(x^4+x^2+1,x);
+[0,0,0,0]$
+
+multiplicities;
+[1,1,1,1]$
+
+/* I'm not sure how to check the solution of a quartic in general--sqrtdenest and friends don't
+seem to be up to the task. I'll compromise and do a simple-minded numerical check. */
+
+(numerically_checked_sol(p,x, digits,r) := block([sol : solve(p,x),fpprec : digits,slop : 10^r],
+     map(lambda([q], is(q < slop/10^digits)), map(lambda([s], cabs(bfloat(rectform(ratsimp(?sqrtdenest(subst(s, p))))))) , sol))),0);
+0$
+
+numerically_checked_sol(x^4-2*x^3+x+1,x,25,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4+x+1,x,10,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4+x+1,x,20,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4+x+1,x,40,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4+x+1,x,80,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4+x^3+x+1,x,10,1);
+[true,true,true]$
+
+numerically_checked_sol(x^4+x+1,x,20,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4+x+1,x,40,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4+x+1,x,80,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4-23*x^3 + x+1,x,10,1);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4-23*x^3 + 107*x^2 + x+1,x,10,4);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4-23*x^3 + 107*x^2 + x+1,x,20,4);
+[true,true,true,true]$
+
+numerically_checked_sol(x^4-23*x^3 + 107*x^2 + x+1,x,40,4);
+[true,true,true,true]$
+
+/* Quasi-palindromic equation */
+(eq : a0*x^4+a1*x^3+a2*x^2+a1*m*x+a0*m^2,0)$
+0$
+
+checked_sol(subst([a0=1,a1=1,a2=1,m=1],eq),x);
+[0,0,0,0]$
+
+checked_sol(subst([a0=1,a1=1,a2=1,m=-1],eq),x);
+[0,0,0,0]$
+
+checked_sol(subst([a0=%i,a1=1,a2=1,m=-1],eq),x);
+[0,0,0,0]$
+
+checked_sol(subst([a0=%i,a1=10,a2=1,m=(25-%i)/2],eq),x);
+[0,0]$
+
+checked_sol(eq,x);
+[0,0,0,0]$
+
+(remvalue(eq),0);
+0$
