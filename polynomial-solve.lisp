@@ -14,6 +14,7 @@
 ;;; #'sqrtdenest, #'fullratsimp, and #'apply-identities-xxx.
 (defun try-to-crunch-to-zero (e &rest fns) "Ratsimp with algebraic = true and domain = complex."
 		(let (($algebraic t) ($domain '$complex))
+		  ;;(push #'sqrtdenest fns)
 		  (dolist (fk fns)
 			   (setq e (funcall fk e)))
 		(sratsimp e)))
@@ -41,8 +42,9 @@
 			   		  (take '(mequal) x (try-to-crunch-to-zero (div (sub d b) (mul 2 a)))))
 				      (list 1 1))))))
 
-;;; Return a CL list of the solutions to the cubic equation a x^3 + b x^2 + c x + d= 0 and a CL list of the
-;;; multiplicities.
+;;; Return a CL list of the solutions to the cubic equation a x^3 + b x^2 + c x + d= 0 and a CL list of
+;;; the multiplicities. See https://en.wikipedia.org/wiki/Cubic_equation#Discriminant_and_nature_of_the_roots
+
 (defun my-solve-cubic (x a b c d) "Return solutions and multiplicities of ax^3+bx^2+cx+d=0."
 	(let ((d0) (discr) (d1) (K) (xi) (xii) (sol nil) (n))
 		 ;(print "solving cubic" t)
@@ -58,16 +60,17 @@
 			  (setq K (div (sub d1 (simpnrt (mul -27 a a discr) 2)) 2))
   		      (setq K (try-to-crunch-to-zero K)))
 
-		 (setq K (simpnrt k 3))
-		 (cond ((and (zerop1 discr) (zerop1 d0))
-				(values (list (div b (mul -3 a))) (list 3)))
+		 (setq K (simpnrt K 3))
 
-			   ((zerop1 discr)
-				(setq $multiplicities (list 2 1))
-				(values
-				 	(list (div (sub (mul 9 a d) (mul b c)) (mul 2 d0))
-						  (div (add (mul 4 a b c) (mul -9 a a d) (mul b b b)) (mul a d0)))
-				    (list 2 1)))
+		 (cond ((and (zerop1 discr) (zerop1 d0))
+			      	(values (list (take '(mequal) x (try-to-crunch-to-zero (div b (mul -3 a))))) (list 3)))
+
+			    ((zerop1 discr)
+		    		(values
+			      	 	(list
+									(take '(mequal) x (try-to-crunch-to-zero (div (sub (mul 9 a d) (mul b c)) (mul 2 d0))))
+					    	  (take '(mequal) x (try-to-crunch-to-zero (div (add (mul 4 a b c) (mul -9 a a d) (mul -1 b b b)) (mul a d0)))))
+				        (list 2 1)))
 			   (t
 				(setq xi (list 1 (div (sub (mul '$%i (simpnrt 3 2)) 1) 2) (div (sub (mul -1'$%i (simpnrt 3 2)) 1) 2)))
 				(setq n 0)

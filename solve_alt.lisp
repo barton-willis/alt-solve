@@ -337,7 +337,7 @@
 		  		(setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
 		  		(simplifya (cons '(mlist) (mapcar #'car alist)) t)))))
 
-(defvar $the_unsolved nil);this is purely for debugging
+(defmvar $the_unsolved '(($set)));this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
 (when $solveverbose
@@ -377,7 +377,7 @@
 
 			($solveexplicit ; give up & return the empty set
 			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") e x)
-			  (push (list '(mlist) e x) $the_unsolved)
+			  ;(setq $the_unsolved ($adjoin (list '(mlist) e x) $the_unsolved))
 			  (setq $multiplicities (take '(mlist) m))
 			  (take '(mlist)))
 
@@ -883,12 +883,13 @@
 ;; of the form <var>=<function of independent variables>, and *failures
 ;; contains equations which if solved would yield additional solutions.
 
-(defvar $list_of_equations nil)
+(defvar $list_of_equations '(($set)))
+
 (defun solve (e x ms)
   (when $solveverbose
       (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
 
-	;;;(push (list e x) $list_of_equations) ; debugging-like thing
+	;(setq $list_of_equations ($adjoin (list '(mlist) e x) $list_of_equations)) ; debugging-like thing
 ;;;  (displa (mfuncall '$reset))
 	(let ((sol) (mss)
 	      ;($savefactors t) ;new--not sure why
@@ -901,6 +902,7 @@
 				($use_to_poly t)
 				;($realonly nil) ;not sure about this
 				($negdistrib t) ;not sure about this--likely needed!
+		    ;;($algebraic t)
 				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
 				(m))
 		 	(setq x (if x x *var))
@@ -910,7 +912,7 @@
 				 ;; Arguably it has no solutions, but the definite integrate code needs to
 				 ;; find the solution x = %pi. Some trigsimp, radcan, and factoring cancels the
 				 ;; troublesome factor and allows solve to return %pi as a solution.
-			   (when (or limitp (boundp '*defint-assumptions*))
+			   (when (or t limitp (boundp '*defint-assumptions*))
 					  (setq e (apply-identities-xxx e))
 				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump))
 												  ($logcontract e)))) ;; was (setq e (let (($logsimp t)) ($radcan e))))

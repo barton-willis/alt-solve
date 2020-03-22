@@ -272,6 +272,49 @@ ssolve(%i*(x-2)*(x-4)*(x-6)^107,x);
 multiplicities;
 [1,1,107]$
 
+/* tests for special case branch (zero discriminant) in my-solve-cubic */
+block([solvefactors : false], solve( x^3-3*sqrt(5)*x^2+15*x-5^(3/2),x));
+[x=sqrt(5)]$
+
+multiplicities;
+[3]$
+
+block([solvefactors : false], solve(x^3-3*%i*x^2-3*sqrt(2)*x^2+3*2^(3/2)*%i*x+3*x-5*%i+sqrt(2),x));
+[x=%i+sqrt(2)]$
+
+multiplicities;
+[3]$
+
+block([solvefactors : false], solve(-%i*x^3+x^3+18*%i*x^2-18*x^2-108*%i*x+108*x+216*%i-216,x));
+[x=6]$
+
+multiplicities;
+[3]$
+
+block([solvefactors : false], solve(x^3-11*x^2+40*x-48,x));
+[x=4,x=3]$
+
+multiplicities;
+[2,1]$
+
+block([solvefactors : false], ssolve(x^3-11*x^2+40*x-48,x));
+[x=3,x=4]$
+
+multiplicities;
+[1,2]$
+
+block([solvefactors : false], ssolve(%i*x^3+x^3-11*%i*x^2-11*x^2+40*%i*x+40*x-48*%i-48,x));
+[x=3,x=4]$
+
+multiplicities;
+[1,2]$
+
+block([solvefactors : false], ssolve(x^3+2*%i*x^2+sqrt(3)*x^2+2*sqrt(3)*%i*x-x-sqrt(3),x));
+[x=-sqrt(3),x=-%i]$
+
+multiplicities;
+[1,2]$
+
 /*quartic & related */
 
 checked_sol(x^4-x^3+x+1,x);
