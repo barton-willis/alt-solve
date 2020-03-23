@@ -236,6 +236,7 @@
 			        (setq $multiplicities (simplifya $multiplicities t))))
 	      sol))
 
+
 ;;; Solve e=0 for x, where e is a polynomial in x. The optional variable mx gives the multiplicity so far.
 ;;; To solve, for example, (x^2+x+1)^3, the variable mx would be 3 and the polynomial x^2+x+1.
 
@@ -275,6 +276,7 @@
 			  (setq sol nil)
 			  (when (and $solvefactors (or *solve-factors-biquadratic* (not (biquadratic-p e x))))
 				  (setq e ($gfactor e)))
+
 			  (setq e (if (mtimesp e) (cdr e) (list e)))
 			  (dolist (q e)
 				  (setq m mx)
@@ -306,7 +308,7 @@
 
 						((and (eql n 6) (solve-cyclotomic-polynomial-degree-6 cfs)))
 
-						((and (> n 4) $solvedecomposes)
+						((and $solvedecomposes)
 						 (setq q ($expand q))
 						 (setq xsol (poly-solve-by-decomp q x mx))
 						 (when $solveexplicit

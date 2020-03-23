@@ -460,3 +460,6 @@ checked_sol(eq,x);
 
 (remvalue(eq),0);
 0$
+
+block([sovlefactors : true], checked_sol(737280*z^8-576000*z^5+46080*z^2,z));
+[0,0,0,0,0,0,0]$

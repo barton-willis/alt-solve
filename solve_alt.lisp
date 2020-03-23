@@ -387,7 +387,7 @@
 			  ;; Standard Maxima chooses to solve for some equation kernel, but I don't know
 			  ;; how it chooses the kernel--so use a silly heuristic for choosing a kernel.
 			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning an implicit solution.~%") e x)
-			  (push (list '(mlist) e x) $the_unsolved)
+			  ;(push (list '(mlist) e x) $the_unsolved)
 			  (let ((ker))
 				   (setq ker (if (and (mplusp e) (not ($freeof x (first (last e))))) (first (last e)) x))
 				   (setq $multiplicities (take '(mlist) m))
@@ -520,6 +520,8 @@
 														 (t nil)))
 
 											 (setq sol (solve-single-equation ee g)) ;solve for g
+
+
 											 (cond
 						 						  ((eql sol '$all) '$all)
 						 					  	(finv
@@ -617,8 +619,8 @@
 						 (setq sol (cdr sol))
 						 (setq sol-all nil)
 						 (dolist (sx sol)
-						    ;(mtell "solution sx = ~M submin = ~M ~%" sx submin)
-						    (setq sx ($substitute sx submin))
+						    ;;;(mtell "solution sx = ~M submin = ~M ~%" sx submin)
+						    (setq sx (checked-subst sx submin));;; was ($substitute sx submin))
 								(setq sol-all (append (cdr (solve-single-equation sx x m use-trigsolve)) sol-all)))
 			       (setq sol (simplifya (cons '(mlist) sol-all) t)))
 					(when do-rectform
