@@ -14,17 +14,18 @@
 ;;; #'sqrtdenest, #'fullratsimp, and #'apply-identities-xxx.
 (defun try-to-crunch-to-zero (e &rest fns) "Ratsimp with algebraic = true and domain = complex."
 		(let (($algebraic t) ($domain '$complex))
-		  ;;(push #'sqrtdenest fns)
 		  (dolist (fk fns)
 			   (setq e (funcall fk e)))
 		(sratsimp e)))
 
-;;; Solve a*x + b = 0 for x. Return both a CL list of the solution (-b/a) and a CL list of the multiplicity.
+;;; Solve a*x + b = 0 for x. Return both a CL list of the solution (x= -b/a) and a CL list of the
+;;; multiplicities. This code assumes that a =/= 0.
 (defun my-solve-linear (x a b) "Return solution and multiplicity of ax+b=0."
 	(values (list (take '(mequal) x (try-to-crunch-to-zero (div (mul -1 b) a)))) (list 1)))
 
 ;;; Return a CL list of the solutions to the quadratic equation ax^2+bx+c = 0 and a CL list of the
 ;;; multiplicities. The function simpnrt makes some effort to find even power factors.
+;;; This code assumes that a =/= 0.
 
 ;;; We don't special case b = 0; arguably x = +/- sqrt(-c a)/a is simpler than is
 ;;; x = +/- sqrt(c/a); additionally when I tried special casing b = 0, the testsuite had lots of problems.
@@ -44,6 +45,7 @@
 
 ;;; Return a CL list of the solutions to the cubic equation a x^3 + b x^2 + c x + d= 0 and a CL list of
 ;;; the multiplicities. See https://en.wikipedia.org/wiki/Cubic_equation#Discriminant_and_nature_of_the_roots
+;;; This code assumes that a =/= 0.
 
 (defun my-solve-cubic (x a b c d) "Return solutions and multiplicities of ax^3+bx^2+cx+d=0."
 	(let ((d0) (discr) (d1) (K) (xi) (xii) (sol nil) (n))
@@ -81,7 +83,7 @@
 				(values sol (list 1 1 1))))))
 
 ;;; Solve the biquadratic p4 x^4 + p2 x^2 + p0 = 0. Return both a CL list of the solutions and
-;;; the list of the multiplicities.
+;;; the list of the multiplicities. This code assumes that a =/= 0.
 (defun my-solve-biquadratic (x p4 p2 p0) "Solve the biquadratic p4 x^4 + p2 x^2 + p0 = 0."
 	(multiple-value-bind (sol m) (my-solve-quadratic x p4 p2 p0)
 		(setq sol (mapcar #'third sol)) ; remove x = part of solutions
@@ -98,10 +100,8 @@
 ;;; This code does not detect the quasi-palindromic case.
 
 ;;; Solve the quartic p4 x^4 + p3 x^3 + p2 x^2 + p1 x + p0=0. Return both a CL list of the solutions and the
-;;; list of the multiplicities.
+;;; list of the multiplicities. This code assumes that p4 =/= 0.
 (defun my-solve-quartic (v p4 p3 p2 p1 p0) "Return solutions and multiplicities of p4 v^4+p3 v^3+p2 v^2+ p1 v + p0=0."
-	(mtell "solving quartic ~%")
-	;;(displa `((mlist) ,p4 ,p3 ,p2 ,p1 ,p0))
 	(let ((pp4) (pp3) (pp2) (pp1) (pp0) (m) (g (gensym)) (x) (mm) (shift))
 
 		 (cond ((and (zerop1 p3) (zerop1 p1))
@@ -140,7 +140,7 @@
 					  (setq sol2 (mapcar #'third sol2))
 					  (values (mapcar #'(lambda (q) (take '(mequal) v (sub q shift))) (append sol1 sol2)) (append ms1 ms2))))))))
 
-;;; Solve p=0 using polynomial decomposition. I'm not sure this always gets the multiplicities
+;;; Solve pp=0 using polynomial decomposition. FIX ME: This doesn't get the multiplicities
 ;;; correct. I think polydecomp has a bug when algebraic is true; for example
 ;;;     (%i2) block([algebraic : true], polydecomp(%i*x^2+1,x));
 ;;;            (%o2) [(%i-2)*x^2+1,-%i*x]
@@ -176,6 +176,8 @@
 
 ;;; Solve the degree six cyclotomic polynomials. When the input isn't cyclotomic, return nil. Special casing all
 ;;; this is somewhat error prone--a general cyclotomic polynomial detector and solver might be more robust.
+;;; Return a CL list of the solutions (x = ...) and a CL list of the multiplicities. The unknown x
+;;; is the first member of the list cfs and the polynomial coeficients follow.
 (defun solve-cyclotomic-polynomial-degree-6 (cfs) "Solve the degree six cyclotomic polynomials."
 	(let ((x) (lc) (sol nil))
 		 (setq x (pop cfs))
@@ -183,28 +185,28 @@
 		 (setq cfs (mapcar #'(lambda (q) (div q lc)) cfs))
 
 		 (cond ((every #'alike1 cfs (list 1 1 1 1 1 1 1))
-				 (mtell "solved 6th cyclotomic~%")
+				 (mtell "solved 6th cyclotomic case 1 ~%")
 			 	 (setq sol (mapcar #'(lambda (s) (div s 7)) (list 2 4 6 8 10 12))))
 
 				((every #'alike1 cfs (list 1 -1 1 -1 1 -1 1))
-				 (mtell "solved 6th cyclotomic~%")
+				 (mtell "solved 6th cyclotomic  case 2 ~%")
 				 (setq sol (mapcar #'(lambda (s) (div s 7)) (list 1 3 5 9 11 13))))
 
 			 	((every #'alike1 cfs (list 1 0 0 -1 0 0 1))
-				  (mtell "solved 6th cyclotomic~%")
-				 (setq sol (mapcar #'(lambda (s) (div s 9)) (list 1 11 13 5 7 17))))
+				  (mtell "solved 6th cyclotomic  case 3 ~%")
+			 	  (setq sol (mapcar #'(lambda (s) (div s 9)) (list 1 11 13 5 7 17))))
 
-	            ((every #'alike1 cfs (list 1 0 0 1 0 0 1))
-				  (mtell "solved 6th cyclotomic~%")
+	      ((every #'alike1 cfs (list 1 0 0 1 0 0 1))
+				  (mtell "solved 6th cyclotomic  case 4 ~%")
 				  (setq sol (mapcar #'(lambda (s) (div s 9)) (list 2 4 5 7 10)))))
 
-			(values  (mapcar #'(lambda (q) (take '(mequal) x (power '$%e (mul '$%i '$%pi q)))) sol)
+			(values (mapcar #'(lambda (q) (take '(mequal) x (power '$%e (mul '$%i '$%pi q)))) sol)
 					 (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))))
 
 ;;; Solve a x^n + b = 0 for x. Set the $multiplicities and return a CL list of the solutions. The optional
 ;;; variable mx is the multiplicity so far. For degrees four or less, this function returns nil--lower degree
 ;;; polynomials need to be solved by my-solve-linear & friends. That might allow equations to be represented
-;;; in a less surprising way.
+;;; in a less surprising way. This code assumes that a =/= 0.
 
 (defun solve-poly-x^n+b (p x &optional (mx 1)) "Solve a x^n + b = 0 for x."
 	(let ((a) (b) (sol nil) (n) (k 0) ($algebraic t) ($domain '$complex) ($m1pbranch t))
