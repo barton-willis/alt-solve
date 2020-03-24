@@ -887,6 +887,7 @@
 
 (defvar $list_of_equations '(($set)))
 
+
 (defun solve (e x ms)
   (when $solveverbose
       (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
@@ -906,10 +907,9 @@
 				($negdistrib t) ;not sure about this--likely needed!
 		    ;;($algebraic t)
 				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
+				($multiplicities nil)
 				(m))
 		 	(setq x (if x x *var))
-		 	(let (($multiplicities nil))
-
 			   ;; clunkly workaround for bug with integrate(sqrt(1+cos(x)),x,-%pi,%pi).
 				 ;; For this case, we need to solve (cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1).
 				 ;; Arguably it has no solutions, but the definite integrate code needs to
@@ -926,13 +926,15 @@
 
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
-				 (setq m (cond (($listp $multiplicities)
-								(mapcar #'(lambda (q) (mul ms q)) (reverse (cdr $multiplicities))))
+				 (setq m
+					     (cond (($listp $multiplicities)
+						  	  	;(mapcar #'(lambda (q) (mul ms q)) (reverse (cdr $multiplicities))))
+								    	(reverse (cdr $multiplicities)))
 							 (t
-							  (mtell "Yikes--multiplicities didn't get set ~%")
-							  (mapcar #'(lambda (q) (declare (ignore q)) 1) sol)))))
+						  	  (mtell "Yikes--multiplicities didn't get set ~%")
+							    (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))))
 
-		    (setq m (reverse m))
+		    ;(setq m (reverse m)) ;; seems bogus $multiplicities already reversed.
 
 		  	(setq *roots nil)
 		  	(setq *failures nil)
