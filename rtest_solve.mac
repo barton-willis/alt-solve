@@ -2529,6 +2529,10 @@ map(lambda([sx], ratsimp(subst(sx, eqs))), sol);
 (remvalue(eqs), remvalue(sol),0);
 0$
 
+/* need more redundant equation tests */
+solve([a^2-d^2,-d^3+a*(1-d^2)+d],d);
+[d=-a]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
