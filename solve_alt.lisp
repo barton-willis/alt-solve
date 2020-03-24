@@ -909,15 +909,21 @@
 				(m))
 		 	(setq x (if x x *var))
 		 	(let (($multiplicities nil))
+
 			   ;; clunkly workaround for bug with integrate(sqrt(1+cos(x)),x,-%pi,%pi).
 				 ;; For this case, we need to solve (cos(x)+1)*sqrt(sin(x)^2/(cos(x)+1)^2+1).
 				 ;; Arguably it has no solutions, but the definite integrate code needs to
 				 ;; find the solution x = %pi. Some trigsimp, radcan, and factoring cancels the
 				 ;; troublesome factor and allows solve to return %pi as a solution.
-			   (when (or t limitp (boundp '*defint-assumptions*))
-					  (setq e (apply-identities-xxx e))
+
+				 ;; To allow the cancelation of (cos(x)+1)*sqrt(2/(cos(x)+1)) with ratsimp,
+				 ;; we need to set $domain to $real. All this is a bit scary.
+
+			   (let (($domain '$real))
+			 		  (setq e (apply-identities-xxx e))
 				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump))
 												  ($logcontract e)))) ;; was (setq e (let (($logsimp t)) ($radcan e))))
+
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
 				 (setq m (cond (($listp $multiplicities)
