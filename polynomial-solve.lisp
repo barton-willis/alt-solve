@@ -198,10 +198,11 @@
 
 	      ((every #'alike1 cfs (list 1 0 0 1 0 0 1))
 				  (mtell "solved 6th cyclotomic  case 4 ~%")
-				  (setq sol (mapcar #'(lambda (s) (div s 9)) (list 2 4 5 7 10)))))
+				  (setq sol (mapcar #'(lambda (s) (div s 9)) (list 2 4 8 10 14 16)))))
 
-			(values (mapcar #'(lambda (q) (take '(mequal) x (power '$%e (mul '$%i '$%pi q)))) sol)
-					 (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))))
+			(values
+				 (mapcar #'(lambda (q) (take '(mequal) x (power '$%e (mul '$%i '$%pi q)))) sol)
+				 (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))))
 
 ;;; Solve a x^n + b = 0 for x. Set the $multiplicities and return a CL list of the solutions. The optional
 ;;; variable mx is the multiplicity so far. For degrees four or less, this function returns nil--lower degree
@@ -308,7 +309,10 @@
 						((eql n 4)
 							(apply 'my-solve-quartic cfs))
 
-						((and (eql n 6) (solve-cyclotomic-polynomial-degree-6 cfs)))
+            ;; calling solve-cyclotomic-polynomial-degree-6 twice is unfortunate.
+						;; But how to fix?
+						((and (eql n 6) (solve-cyclotomic-polynomial-degree-6 cfs))
+						 (solve-cyclotomic-polynomial-degree-6 cfs))
 
 						((and $solvedecomposes)
 						 (setq q ($expand q))

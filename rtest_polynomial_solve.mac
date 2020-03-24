@@ -463,3 +463,109 @@ checked_sol(eq,x);
 
 block([sovlefactors : true], checked_sol(737280*z^8-576000*z^5+46080*z^2,z));
 [0,0,0,0,0,0,0]$
+
+/* solve 6th degree cyclotomic polynomial */
+
+/* factor of x^7-1 */
+
+/* correct number of solutions? */
+cardinality(setify(rectform(solve(x^6+x^5+x^4+x^3+x^2+x+1,x))));
+6$
+
+trigrat(checked_sol(x^6+x^5+x^4+x^3+x^2+x+1,x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+trigrat(checked_sol(expand((1+sqrt(5))*(x^6+x^5+x^4+x^3+x^2+x+1)),x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+trigrat(checked_sol(expand(-1*(x^6+x^5+x^4+x^3+x^2+x+1)),x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+/* factor of x^7+1 */
+
+cardinality(setify(rectform(solve(x^6-x^5+x^4-x^3+x^2-x+1,x))));
+6$
+
+trigrat(checked_sol((x^6-x^5+x^4-x^3+x^2-x+1),x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+trigrat(checked_sol(expand(a * (x^6-x^5+x^4-x^3+x^2-x+1)),x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+trigrat(checked_sol(expand((-2/3) * (x^6-x^5+x^4-x^3+x^2-x+1)),x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+/* factor of x^9+1 */
+
+cardinality(setify(rectform(solve(x^6-x^3+1,x))));
+6$
+
+trigrat(checked_sol(x^6-x^3+1,x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+trigrat(checked_sol(107*x^6-107*x^3+107,x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+/* factor of x^9-1 */
+
+cardinality(setify(rectform(solve(x^6+x^3+1,x))));
+6$
+
+trigrat(checked_sol(x^6+x^3+1,x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+trigrat(checked_sol(28*x^6+28*x^3+28,x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+trigrat(checked_sol(%pi*x^6+%pi*x^3+%pi,x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+/* factor of x^9+1 */
+
+cardinality(setify(rectform(solve(x^6-x^3+1,x))));
+6$
+
+trigrat(checked_sol(x^6-x^3+1,x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
+
+trigrat(checked_sol(5*x^6-5*x^3+5,x));
+[0,0,0,0,0,0]$
+
+multiplicities;
+[1,1,1,1,1,1]$
