@@ -58,6 +58,8 @@
 	($load "myalgsys.lisp"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
+;;; To avoid some test failures with rtest_solve_rec, put this definition in
+;;; linearalgebra/polynomialp.lisp
 (defun polynomialp (p vars coeffp exponp)
   (or
    (mfuncall coeffp p)
@@ -746,7 +748,7 @@
 ;;; The set of variables in the n-th set is a proper subset of the set of variables in all
 ;;; subsequent sets.
 (defun solve-triangular-system (eqs vars)
-		;(mtell "Top of solve-triangular-system ~%")
+		;(mtell "Top of solve-triangular-system eqs = ~M vars = ~M ~%" (cons '(mlist) eqs) (cons '(mlist) vars))
 	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars) (free-sol nil))
             (setq eqs (mapcar #'(lambda (q) (try-to-crunch-to-zero q
 				            #'apply-identities-xxx  #'sqrtdenest #'fullratsimp)) eqs))
