@@ -887,25 +887,15 @@
 
 (defvar $list_of_equations '(($set)))
 
-
 (defun solve (e x ms)
   (when $solveverbose
       (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
-
 	;(setq $list_of_equations ($adjoin (list '(mlist) e x) $list_of_equations)) ; debugging-like thing
-;;;  (displa (mfuncall '$reset))
 	(let ((sol) (mss)
-	      ;($savefactors t) ;new--not sure why
-				;(genvar nil) ; new--question about this
-				;($ratfac t) ; new--not sure why
-				;($derivsubst nil) ; new
 				($solve_inverse_package *function-inverses-alt*)
-				;($solveradcan t)
 				($solve_ignores_conditions t)
 				($use_to_poly t)
-				;($realonly nil) ;not sure about this
 				($negdistrib t) ;not sure about this--likely needed!
-		    ;;($algebraic t)
 				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
 				($multiplicities nil)
 				(m))
@@ -921,21 +911,16 @@
 
 			   (let (($domain '$real))
 			 		  (setq e (apply-identities-xxx e))
-				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump))
-												  ($logcontract e)))) ;; was (setq e (let (($logsimp t)) ($radcan e))))
+				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump)) ($logcontract e))))
 
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
 				 (setq m
 					     (cond (($listp $multiplicities)
-						  	  	;(mapcar #'(lambda (q) (mul ms q)) (reverse (cdr $multiplicities))))
 								    	(reverse (cdr $multiplicities)))
 							 (t
-						  	  (mtell "Yikes--multiplicities didn't get set ~%")
+						  	  (mtell "Warning: multiplicities didn't get set solving ~M for ~M ~%" e x)
 							    (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))))
-
-		    ;(setq m (reverse m)) ;; seems bogus $multiplicities already reversed.
-
 		  	(setq *roots nil)
 		  	(setq *failures nil)
 		  	(dolist (q sol)
