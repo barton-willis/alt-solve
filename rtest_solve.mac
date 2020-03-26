@@ -1545,7 +1545,7 @@ block([solve_ignores_conditions : true], ssolve(x * log(x) = a,x));
 /* one-to-one cruncher & related */
 
 ssolve(exp(x) = exp(x^2-1),x);
-[x=-(sqrt(5-8*%i*%pi*%z0)-1)/2,x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
+[x=-((sqrt(5-8*%i*%pi*%z0)-1)/2),x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
 
 ssolve(exp(x) - exp(x^2-1),x);
 [x=-((sqrt(5-8*%i*%pi*%z0)-1)/2),x=(sqrt(5-8*%i*%pi*%z0)+1)/2]$
