@@ -1580,14 +1580,14 @@ ssolve(exp(x*(x-1))=exp(a*(a-1)),x);
 block([solve_ignores_conditions : true], ssolve(log(x*(x-1))=log(a*(a-1)),x));
 [x=1-a,x=a]$
 
-block([algebraic : true], solve(x^(3/2) = (1 + %i) / sqrt(2),x));
+block([algebraic : true], rectform(ssolve(x^(3/2) = (1 + %i) / sqrt(2),x)));
 [x=%i/2+sqrt(3)/2]$
 
-block([algebraic : true], solve(x^(3/2) = (-1 + %i) / sqrt(2),x));
+block([algebraic : true], rectform(ssolve(x^(3/2) = (-1 + %i) / sqrt(2),x)));
 [x=-%i/2-sqrt(3)/2,x=%i]$
 
-block([algebraic : true], solve(x^(3/2) = (-1 - %i) / sqrt(2),x));
-[x=%i/2-sqrt(3)/2,x=-%i]$
+block([algebraic : true], rectform(ssolve(x^(3/2) = (-1 - %i) / sqrt(2),x)));
+[x=-%i,x=%i/2+sqrt(3)/2]$
 
 block([algebraic : true], solve(x^(3/2) = - 1,x));
 [x=(sqrt(3)*%i-1)/2,x=-((sqrt(3)*%i+1)/2)]$
@@ -1595,7 +1595,7 @@ block([algebraic : true], solve(x^(3/2) = - 1,x));
 block([algebraic : true], solve(x^(3/2) = 1,x));
 [x=1]$
 
-block([algebraic : true], solve(x^(3/2) = (1/2 + sqrt(3) * %i/2),x));
+block([algebraic : true], ratsimp(solve(x^(3/2) = (1/2 + sqrt(3) * %i/2),x)));
 [x=((sqrt(3)*%i+1)/2)^(2/3)]$
 
 /* Maxima testsuite */
