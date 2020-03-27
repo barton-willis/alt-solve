@@ -116,7 +116,7 @@ ssolve([x*log(x) = 0 ,x=1],x);
 ssolve([x*log(x) = 0 ,x=11/10],x);
 []$
 
-ssolve([x*log(x) = 0 ,log(x)=1],x);
+ssolve([x*log(x) = 0 ,log(x)=0],x);
 [x=1]$
 
 ssolve([(x-4)/(x-2),  (x-2)*(x-4)/(x-%pi)],x);
@@ -134,7 +134,7 @@ ssolve([sqrt(x-4) ,x-a],x);
 ssolve([sqrt(x-4) ,x-4],x);
 [x=4]$
 
-ssolve([sqrt(x-4)+1 ,x-5],x);
+ssolve([sqrt(x-4)-1 ,x-5],x);
 [x=5]$
 
 ssolve([abs(x-4) = 9  ,x+5=0],x);
