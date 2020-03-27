@@ -104,6 +104,48 @@ ssolve([x-1=0, 5*x-5=0],x);
 ssolve([x/(x-1)=0, x-1=0],x);
 []$
 
+ssolve([sin(x)=0,x=8],x);
+[]$
+
+ssolve([sin(x)=0,x=%pi],x);
+[x=%pi]$
+
+ssolve([x*log(x) = 0 ,x=1],x);
+[x=1]$
+
+ssolve([x*log(x) = 0 ,x=11/10],x);
+[]$
+
+ssolve([x*log(x) = 0 ,log(x)=1],x);
+[x=1]$
+
+ssolve([(x-4)/(x-2),  (x-2)*(x-4)/(x-%pi)],x);
+[x=4]$
+
+ssolve([x^8 *exp(x)=0,  x^2+5*x=0],x);
+[x=0]$
+
+ssolve([x^8 *exp(x)=0,  x^2+5*x=0,x^9],x);
+[x=0]$
+
+ssolve([sqrt(x-4) ,x-a],x);
+[]$
+
+ssolve([sqrt(x-4) ,x-4],x);
+[x=4]$
+
+ssolve([sqrt(x-4)+1 ,x-5],x);
+[x=5]$
+
+ssolve([abs(x-4) = 9  ,x+5=0],x);
+[x=-5]$
+
+ssolve([abs(x-4) = 9  ,x-13=0],x);
+[x=13]$
+
+ssolve([abs(x-4) = 9  ,(x-13)*(x-107)=0],x);
+[x=13]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 

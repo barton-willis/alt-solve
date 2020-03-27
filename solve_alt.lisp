@@ -691,16 +691,22 @@
 	(setq eqs (mapcar #'try-to-crunch-to-zero eqs)) ;simplify eqs
 	(setq eqs (remove-if #'zerop1 eqs)) ;remove all vanishing equations
 
-	;; Solve the eqations one at a time and collect the intersection of the
-	;; solutions. Some problems remain--if x = %c0, for example, we need a
-	;; specialized intersection. And there are additional problems with %zXXX
-	;; kinds of solutions too.
-	(let ((sol ($setify ($solve (pop eqs) x)))) ;solve first equation & setify solution
-        (dolist (ex eqs)
-				    (when ($emptyp sol) ;early bailout when intersection is empty
-						   (setq eqs nil))
-				    (setq sol ($intersection sol ($nicedummies ($setify ($solve (pop eqs) x))))))
-				($listify sol))) ;convert set of solutions to a list
+  ;; Maybe the polynomial case should be caught higher up? We'll do it here for now.
+	;; The $flatten call is ugly.
+  (cond ((every #'(lambda (q) ($polynomialp q (list '(mlist) x) #'(lambda (s) ($freeof x s))
+				   	#'(lambda (s) (and (integerp s) (>= s 0))))) eqs)
+					($flatten (solve-multiple-equations eqs (list x))))
+    	;; Solve the eqations one at a time and collect the intersection of the
+     	;; solutions. Some problems remain--if x = %c0, for example, we need a
+   	  ;; specialized intersection. And there are additional problems with %zXXX
+	    ;; kinds of solutions too.
+			(t
+         (let ((sol ($setify ($solve (pop eqs) x)))) ;solve first equation & setify solution
+            (dolist (ex eqs)
+				       (when ($emptyp sol) ;early bailout when intersection is empty
+					   	   (setq eqs nil))
+				       (setq sol ($intersection sol ($nicedummies ($setify ($solve (pop eqs) x))))))
+				   ($listify sol))))) ;convert set of solutions to a list
 
 (defun set-of-vars (e)
 	(let (($listconstvars nil)) ($setify ($listofvars e))))
