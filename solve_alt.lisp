@@ -581,7 +581,7 @@
    (let ((cnd (in-domain e)))
 			(setq cnd (mfuncall '$is ($substitute eq cnd)))
 			(if (not cnd) (displa "Caught one!!!!!!!!!!"))
-			(if cnd ($substitute eq e) nil)))
+			(if cnd ($substitute eq e) eq)))
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
   (when $solveverbose
@@ -682,41 +682,25 @@
 
 (defun equation-complexity-guess (a b) (< (my-size a) (my-size b))) ; my-size defined in trig_identities
 
-;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt to set the
-;;; multiplicities to anything reasonable--it resets  multiplicities to the default.
+;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt
+;;; to set the multiplicities to anything reasonable--it resets  multiplicities to the default.
 (defun redundant-equation-solve (eqs x)
-	;(mtell "using redundant solve ~%")
-	(let ((eqset) (sol) (checked-sol nil))
-		 (setq eqs (mapcar #'meqhk (cdr eqs))) ;eqs is now a CL list
-		 (setq eqset (simplifya (cons '($set) eqs) t)) ;eqset is a Maxima set of expressions
+	(mtell "top of redundant solve eqs = ~M x = ~M ~%" eqs x)
+	(setq eqs (if (or ($listp eqs) ($setp eqs)) (cdr eqs) eqs))
+	(setq eqs (mapcar #'meqhk eqs)) ;convert a=b to a-b. This is important!
+	(setq eqs (mapcar #'try-to-crunch-to-zero eqs)) ;simplify eqs
+	(setq eqs (remove-if #'zerop1 eqs)) ;remove all vanishing equations
 
-		 (dolist (ek eqs) ; for each equation ek, ratsubst 0 for ek and adjoin ek back into the equations
-			 (when (not ($freeof x ek)) ; disallow subsitution when ek is freeof x
-				 (setq eqset ($ratsubst 0 ek eqset))
-				 (setq eqset ($disjoin 0 eqset))
-				 (setq eqset ($adjoin ek eqset))))
-
-    ; (mtell "The eq set is ~M ~%" eqset)
-		 (setq eqset (sort (cdr eqset) #'equation-complexity-guess)) ; effort to find simplest equation
-		 (setq sol (let (($solveexplicit t)) (solve-single-equation (first eqset) x)))
-		 ;;include only solutions that can be verified--likely this will sometimes miss legitimate solutions.
-		 (push '(mlist) eqs) ; restore eqs to a Maxima list
-		 (when ($listp sol) ; sol could be $all, maybe?
-			 (setq sol (cdr sol))
-		   (while sol
-			   (setq sx (pop sol))
-				 (cond ((every #'(lambda (q) (zerop1 (try-to-crunch-to-zero q))) (cdr ($substitute sx eqs)))
-						     (push sx checked-sol))
-					     (t
-								 (setq sol nil) ;bailout of while loop
-								 (setq checked-sol nil))))
-
-		     (cond ((consp checked-sol)
-	     	         (mfuncall '$reset '$multiplicities)
-    	    	     (simplifya (cons '(mlist) checked-sol) t))
-				       (t
-								  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") eqs x)
-								  (simplifya (cons '(mlist) checked-sol) t))))))
+	;; Solve the eqations one at a time and collect the intersection of the
+	;; solutions. Some problems remain--if x = %c0, for example, we need a
+	;; specialized intersection. And there are additional problems with %zXXX
+	;; kinds of solutions too.
+	(let ((sol ($setify ($solve (pop eqs) x)))) ;solve first equation & setify solution
+        (dolist (ex eqs)
+				    (when ($emptyp sol) ;early bailout when intersection is empty
+						   (setq eqs nil))
+				    (setq sol ($intersection sol ($nicedummies ($setify ($solve (pop eqs) x))))))
+				($listify sol))) ;convert set of solutions to a list
 
 (defun set-of-vars (e)
 	(let (($listconstvars nil)) ($setify ($listofvars e))))

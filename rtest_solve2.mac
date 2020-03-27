@@ -90,6 +90,20 @@ ssolve([x+10*y,z+w,(z-2*z)^2,(z-w)^2],[w,x,y,z]);
 algsys([x+10*y,sqrt(5)*(z-w),(y-2*z)^2,sqrt(10)*(x-w)^2],[w,x,y,z]);
 [[w=0,x=0,y=0,z=0]]$
 
+/* redundant solve tests */
+
+ssolve([(x+3) = 0, (x+3)*(x-7)=0],x);
+[x=-3]$
+
+ssolve([x+3 = 0, (x+3)*(x-7)=0,x+5=0],x);
+[]$
+
+ssolve([x-1=0, 5*x-5=0],x);
+[x=1]$
+
+ssolve([x/(x-1)=0, x-1=0],x);
+[]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
