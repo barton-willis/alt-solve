@@ -694,8 +694,8 @@
   ;; Maybe the polynomial case should be caught higher up? We'll do it here for now.
 	;; The $flatten call is ugly.
   (cond ((every #'(lambda (q) ($polynomialp q (list '(mlist) x) #'(lambda (s) ($freeof x s))
-				   	#'(lambda (s) (and (integerp s) (>= s 0))))) eqs)
-					($flatten (solve-multiple-equations eqs (list x))))
+				       	#'(lambda (s) (and (integerp s) (>= s 0))))) eqs)
+			    ($flatten (solve-multiple-equations eqs (list x))))					
     	;; Solve the eqations one at a time and collect the intersection of the
      	;; solutions. Some problems remain--if x = %c0, for example, we need a
    	  ;; specialized intersection. And there are additional problems with %zXXX
