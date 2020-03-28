@@ -859,7 +859,6 @@
 	  			 (setq x ($setify x))
 	  			 (setq e (triangularize-eqs e x))
 	  			 (setq sol (let (($solve_ignores_conditions t)) (solve-triangular-system (cdr e) (cdr x))))
-					 (if sol (simplifya (cons '(mlist) sol) t) ee)))))
 
 					 (cond ((and $solveexplicit (null sol))
 					         (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") e x)
