@@ -171,8 +171,8 @@ ssolve([%e^x = %e^107,y^2=1],[x,y]);
 block([solveexplicit : true], solve([x*cos(y)=9, x+y=12],[x,y]));
 []$
 
-block([solveexplicit : false], solve([x*cos(y)=9, x+y=12],[x,y]));
-[x*cos(y)=9, x+y=12]$
+block([solveexplicit : false], ratsimp(ssolve([x*cos(y)=9, x+y=12],[x,y])));
+[0=x*cos(y)-9,0=y+x-12]$
 
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
