@@ -146,6 +146,34 @@ ssolve([abs(x-4) = 9  ,x-13=0],x);
 ssolve([abs(x-4) = 9  ,(x-13)*(x-107)=0],x);
 [x=13]$
 
+/* solve two equations */
+ssolve([-1=0, x^2+x+1=0],x);
+[]$
+
+ssolve([-1=0, x^2+x+1=0],[x]);
+[]$
+
+ssolve([-1=0, x^2+x+1=0],[x,y]);
+[]$
+
+block([%rnum : 0], ssolve([%e^x = y,0=0],[x,y]));
+[[y=%r1],[x=log(y)+2*%i*%pi*%z0]]$
+
+ssolve([%e^x = 7,y=1],[x,y]);
+[[x=2*%i*%pi*%z0+log(7),y=1]]$
+
+ssolve([%e^x = 7,y^2=1],[x,y]);
+[[x=2*%i*%pi*%z0+log(7),y=-1],[x=2*%i*%pi*%z0+log(7),y=1]]$
+
+ssolve([%e^x = %e^107,y^2=1],[x,y]);
+[[x=2*%i*%pi*%z0+107,y=-1],[x=2*%i*%pi*%z0+107,y=1]]$
+
+block([solveexplicit : true], solve([x*cos(y)=9, x+y=12],[x,y]));
+[]$
+
+block([solveexplicit : false], solve([x*cos(y)=9, x+y=12],[x,y]));
+[x*cos(y)=9, x+y=12]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 

@@ -695,7 +695,7 @@
 	;; The $flatten call is ugly.
   (cond ((every #'(lambda (q) ($polynomialp q (list '(mlist) x) #'(lambda (s) ($freeof x s))
 				       	#'(lambda (s) (and (integerp s) (>= s 0))))) eqs)
-			    ($flatten (solve-multiple-equations eqs (list x))))					
+			    ($flatten (solve-multiple-equations eqs (list x))))
     	;; Solve the eqations one at a time and collect the intersection of the
      	;; solutions. Some problems remain--if x = %c0, for example, we need a
    	  ;; specialized intersection. And there are additional problems with %zXXX
@@ -738,10 +738,14 @@
 ;;; The set of variables in the n-th set is a proper subset of the set of variables in all
 ;;; subsequent sets.
 (defun solve-triangular-system (eqs vars)
-		;(mtell "Top of solve-triangular-system eqs = ~M vars = ~M ~%" (cons '(mlist) eqs) (cons '(mlist) vars))
+    (when $solveverbose
+	   	(mtell "Top of solve-triangular-system eqs = ~M vars = ~M ~%"
+				  (cons '(mlist) eqs) (cons '(mlist) vars)))
+
 	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars) (free-sol nil))
             (setq eqs (mapcar #'(lambda (q) (try-to-crunch-to-zero q
 				            #'apply-identities-xxx  #'sqrtdenest #'fullratsimp)) eqs))
+
 				    (cond ((null eqs)
 				        ;; No equations to solve, so all variables are free.
 								;; Return ((var1 = %r1 var2 = %r2...varn = %rn))
@@ -750,7 +754,6 @@
 
 	           ((every #'zerop1 (cdr (first eqs)))
 						     ;; The first equation is a set of zeros--move on to next equation
-							   (mtell "trival equation = ~M ~%" (first eqs))
 	               (solve-triangular-system (rest eqs) vars)) ; remove first equation & solve the rest
 
 						 (t
@@ -761,27 +764,34 @@
 
 							 (cond (($emptyp eqvars)
 						        	 ;; No unknowns but remaining nontrival equation(s), so return nil
-					        		 (mtell "assuming nonzero ~M ~%" (cons '(mlist) eqs))
+					        		 (mtell "Unable to show that ~M vanishes; returning [] ~%" (cons '(mlist) eqs))
 					       	 	   nil)
 										 (t
 											 (setq vars (simplifya (cons '($set) vars) t))  ; vars is now a set.
 									     (setq vars ($setdifference vars eqvars)) ; remove eqvars from unknowns
 											 (setq vars (cdr vars)) ;return vars to a CL list.
 											 (setq eqvars (cdr eqvars)) ;return eqvars to a CL list
-	               			 (setq x (pop eqvars)) ; could choose any variable?
 	               			 (setq e (pop eqs))
-											 (setq free-sol nil)
-											 (dolist (ex eqvars) ;all remaining variables in eqvars are free!
-											    (push (take '(mequal) ex (next-rnum-variable)) free-sol))
+                       (cond ((and (eql 1 (length eqvars)) (eql 1 ($cardinality e))) ;one equation & unknown
+											          (setq sol (solve-single-equation (cadr e) (car eqvars))))
 
-					        		 (setq sol (cond ((eql 1 ($cardinality e))
-								                  ;(mtell "dispatch solve-single-equation on ~M ~%" e)
-								                  (solve-single-equation (cadr e) x))
-																(t
-																	(redundant-equation-solve e x))))
-			 		        	   (setq sol (cdr sol)) ; remove (mlist)
-					      			 (setq sol (append free-sol sol)) ;bogus?
-						    		   (setq ssol nil)
+														((eql 1 ($cardinality e)) ;one equation two or more unknowns
+																	(setq sol (solve-single-equation (cadr e) (car eqvars)))
+																	(setq sol (cdr sol)) ; remove (mlist)
+																	(when sol
+																		(setq sol
+																			(append
+																	  		sol
+																	  		(mapcar #'(lambda (q) (take '(mequal) q (next-rnum-variable))) (cdr eqvars)))))
+																	sol)
+
+                             ((eql 1 (length eqvars)) ;several equations, one unknown.
+														     (setq sol (redundant-equation-solve (cdr e) (car eqvars))))
+
+														 (t  (setq sol nil)))  ;several equations, several unknown--give up.
+
+			 		        	  (setq sol (cdr sol)) ; remove (mlist)
+  					    		   (setq ssol nil)
 	                     (dolist (sx sol)
 								          ;; Don't panic! We have popped one equation and at least one variable.
 								           (setq ssol
@@ -846,6 +856,7 @@
 	  			 (setq x ($setify x))
 	  			 (setq e (triangularize-eqs e x))
 	  			 (setq sol (let (($solve_ignores_conditions t)) (solve-triangular-system (cdr e) (cdr x))))
+					 (print `(returned from solve-triangular-system sol = ,sol))
 					 (setq sol (mapcar #'(lambda (q) (cons '(mlist) q)) sol))
 					 (if sol (simplifya (cons '(mlist) sol) t) ee)))))
 
