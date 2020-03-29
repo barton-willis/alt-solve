@@ -10,7 +10,7 @@
 
 ;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
 ;;; cuts (don't use radcan, for example). We first apply the functions in the &rest parameter
-;;; fns and finish with a finall call to sratsimp. Possible members of fns include
+;;; fns and finish with a final call to sratsimp. Possible members of fns include
 ;;; #'sqrtdenest, #'fullratsimp, and #'apply-identities-xxx.
 (defun try-to-crunch-to-zero (e &rest fns) "Ratsimp with algebraic = true and domain = complex."
 		(let (($algebraic t) ($domain '$complex))
@@ -103,7 +103,6 @@
 ;;; list of the multiplicities. This code assumes that p4 =/= 0.
 (defun my-solve-quartic (v p4 p3 p2 p1 p0) "Return solutions and multiplicities of p4 v^4+p3 v^3+p2 v^2+ p1 v + p0=0."
 	(let ((pp4) (pp3) (pp2) (pp1) (pp0) (m) (g (gensym)) (x) (mm) (shift))
-
 		 (cond ((and (zerop1 p3) (zerop1 p1))
 		 	  ;;(mtell "solving biquadratic ~%")
 				(my-solve-biquadratic v p4 p2 p0))
@@ -177,7 +176,7 @@
 ;;; Solve the degree six cyclotomic polynomials. When the input isn't cyclotomic, return nil. Special casing all
 ;;; this is somewhat error prone--a general cyclotomic polynomial detector and solver might be more robust.
 ;;; Return a CL list of the solutions (x = ...) and a CL list of the multiplicities. The unknown x
-;;; is the first member of the list cfs and the polynomial coeficients follow.
+;;; is the first member of the list cfs and the polynomial coefficients follow.
 (defun solve-cyclotomic-polynomial-degree-6 (cfs) "Solve the degree six cyclotomic polynomials."
 	(let ((x) (lc) (sol nil))
 		 (setq x (pop cfs))
@@ -238,7 +237,6 @@
 				      (push '(mlist) $multiplicities)
 			        (setq $multiplicities (simplifya $multiplicities t))))
 	      sol))
-
 
 ;;; Solve e=0 for x, where e is a polynomial in x. The optional variable mx gives the multiplicity so far.
 ;;; To solve, for example, (x^2+x+1)^3, the variable mx would be 3 and the polynomial x^2+x+1.
