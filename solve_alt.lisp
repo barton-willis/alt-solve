@@ -833,12 +833,12 @@
 	;; $multiplicities to its default.
 	 (mfuncall '$reset '$multiplicities)
 	 (setq e (mapcar #'keep-float e)) ; protect floats in boxes.
-	 ;; The second member of equation-simplify holds multiplicity data--thus extact just the first
-	 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
-
-	 ;; maybe this should be before equation-simplify, but that causes slowness.
+	 ;; collect the domain conditions in cnd.
 	 (setq cnd (or $solve_ignores_conditions
 		 (reduce #'(lambda (a b) (take '(mand) a b)) (mapcar #'in-domain e))))
+	 ;; The second member of equation-simplify holds multiplicity data--thus extract just the first
+	 ;; member returned by equation-simplify.
+ 	 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 
 		(push '(mlist) e) ;convert e and x to Maxima lists.
 		(push '(mlist) x)
