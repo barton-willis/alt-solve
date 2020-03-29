@@ -861,15 +861,15 @@
 	  			 (setq sol (let (($solve_ignores_conditions t)) (solve-triangular-system (cdr e) (cdr x))))
 
 					 (cond ((and $solveexplicit (null sol))
-					         (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") e x)
-					 			   (simplifya (list '(mlist)) t))
+					          (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") e x)
+					 			    (simplifya (list '(mlist)) t))
 
                  ((and (not $solveexplicit) (null sol))
-								     (simplifya (cons '(mlist) (mapcar #'(lambda (q) (take '(mequal) 0 q)) (cdr ee))) t))
+								    (simplifya (cons '(mlist) (mapcar #'(lambda (q) (take '(mequal) 0 q)) (cdr ee))) t))
 
-							  (t
-				       	  (setq sol (mapcar #'(lambda (q) (cons '(mlist) q)) sol))
-					        (simplifya (cons '(mlist) sol) t)))))))
+							   (t
+				       	    (setq sol (mapcar #'(lambda (q) (cons '(mlist) q)) sol))
+					          (simplifya (cons '(mlist) sol) t)))))))
 
 ;;; This is the entry-level function for system level calls to solve. Solutions are pushed into the
 ;;; special variable *roots.
