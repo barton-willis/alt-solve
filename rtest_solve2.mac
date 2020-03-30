@@ -174,6 +174,20 @@ block([solveexplicit : true], solve([x*cos(y)=9, x+y=12],[x,y]));
 block([solveexplicit : false], ratsimp(ssolve([x*cos(y)=9, x+y=12],[x,y])));
 [0=x*cos(y)-9,0=y+x-12]$
 
+/* regression--see bug #10 */
+
+block([solve_ignores_conditions : true], solve(-1 = sqrt(x),x));
+[]$
+
+block([solve_ignores_conditions : true], solve(1 = sqrt(x),x));
+[x=1]$
+
+block([solve_ignores_conditions : false], solve(-1 = sqrt(x),x));
+[]$
+
+block([solve_ignores_conditions : false], solve(1 = sqrt(x),x));
+[x=1]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 

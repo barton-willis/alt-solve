@@ -253,17 +253,14 @@
 (defun my-ask-boolean (cnd)
 	(let ((answer (if $solve_ignores_conditions t (mfuncall '$maybe (to-poly-fixup cnd)))))
 		  (cond
+			 ((not cnd) cnd) ;when cnd is false, return false.
 			 ((or (eql answer t) (eql answer nil)) answer)
 			 (t
 			  (setq answer (retrieve `((mtext) ,(intl:gettext "Is ") ,cnd ,(intl:gettext "?")) nil))
 			  (cond
 				  ((member answer '($yes |$y| |$Y|) :test #'eql)
-
-				   ;;(mapcar #'(lambda (q) (mfuncall '$assume q)) cnd)
 				   t)
-
 				  ((member answer '($no |$n| |$N|) :test #'eql) nil)
-
 				  (t
 				   (mtell (intl:gettext "Acceptable answers are yes, y, Y, no, n, N. ~%"))
 				   (my-ask-boolean cnd)))))))
@@ -685,7 +682,7 @@
 ;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt
 ;;; to set the multiplicities to anything reasonable--it resets  multiplicities to the default.
 (defun redundant-equation-solve (eqs x)
-	(mtell "top of redundant solve eqs = ~M x = ~M ~%" eqs x)
+	;;(mtell "top of redundant solve eqs = ~M x = ~M ~%" eqs x)
 	(setq eqs (if (or ($listp eqs) ($setp eqs)) (cdr eqs) eqs))
 	(setq eqs (mapcar #'meqhk eqs)) ;convert a=b to a-b. This is important!
 	(setq eqs (mapcar #'try-to-crunch-to-zero eqs)) ;simplify eqs
