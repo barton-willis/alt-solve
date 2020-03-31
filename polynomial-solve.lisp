@@ -6,8 +6,6 @@
 
 (in-package :maxima)
 
-(defmvar *solve-factors-biquadratic* t)
-
 ;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
 ;;; cuts (don't use radcan, for example). We first apply the functions in the &rest parameter
 ;;; fns and finish with a final call to sratsimp. Possible members of fns include
@@ -243,9 +241,6 @@
 
 ;;; This function doesn't check that the input e is a polynomial.
 
-;;; The silly option variable *solve-factors-biquadratic* is explained in solve_alt.lisp. This mechanism could be
-;;; expunged, resulting in a handful of correct, but failed testsuite tests.
-
 ;;; Incidentally: gfactor(2+(-sqrt(a^2+4)+a)*x) --> ((a-sqrt(a^2+4))*(2*x-sqrt(a^2+4)-a))/2.
 
 ;;; I'm not sure why domain is set to complex. It's my understanding that algsys eliminates spurious solutions by
@@ -275,7 +270,7 @@
 				(simplifya (cons '(mlist) sol) t))
 			 (t
 			  (setq sol nil)
-			  (when (and $solvefactors) ; (or *solve-factors-biquadratic* (not (biquadratic-p e x))))
+			  (when $solvefactors
 				  (setq e ($gfactor e)))
 
 			  (setq e (if (mtimesp e) (cdr e) (list e)))

@@ -240,7 +240,7 @@
 				(setq e ($radcan e)))
 		 (setq e ($num (sratsimp e)))
 		 (setq e (apply-identities-xxx e *pythagorean-identities*)) ; was (apply-identities e *pythagorean-identities*))
-		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
+		 (setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
 
 
@@ -872,15 +872,6 @@
 ;;; things like solve(sin(x)=1/2,x) --> [x=(12*%pi*%z1+%pi)/6,x=(12*%pi*%z2+5*%pi)/6]. Thus we'll locally
 ;;; set $solve_inverse_package to *function-inverses-alt*.
 
-;;; The non-user level option variable *solve-factors-biquadratic* is a silly workaround.  The testsuite
-;;; has a handful of definite integration problems of the form integrate(1/(a + b*sin(x)^2,x, c,d). These
-;;; lead to solving biquadratics. Standard Maxima doesn't factor the biquadratic--that gives solutions
-;;; that are needlessly complicated. But for such definite integrals, factoring the biquadratic
-;;; and solving yields solutions that are arguably more complex than not factoring. So a weird trick--
-;;; factoring the biquadraic is controlled with the option variable *solve-factors-biquadratic*. When
-;;; the global *defint-assumptions* is bound, set *solve-factors-biquadratic* to nil. This stupid
-;;; Maxima trick simply allows the testsuite to have fewer needless failures.
-
 ;;; I think solve isn't supposed to alter $multiplicities--it's a mess.
 
 ;;; Quote from solve.lisp
@@ -904,7 +895,6 @@
 				($solve_ignores_conditions t)
 				($use_to_poly t)
 				($negdistrib t) ;not sure about this--likely needed!
-				(*solve-factors-biquadratic* t);(not (boundp '*defint-assumptions*)))
 				($multiplicities nil)
 				(m))
 		 	(setq x (if x x *var))
