@@ -32,7 +32,7 @@ map(lambda([s], radcan(rectform(subst(s, 2^x+4^x=6)))), sol);
 sol : ssolve(%e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2),yx);
 [yx=4*%i*%pi*%z0+2*log(2)+2*%i*%pi,yx=4*%i*%pi*%z1+2*log(2)]$
 
-/* and let's check these soltuions!*/
+/* and let's check these solutions!*/
 trigsimp(rectform(subst(first(sol), %e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2))));
 0$
 
@@ -187,6 +187,26 @@ block([solve_ignores_conditions : false], solve(-1 = sqrt(x),x));
 
 block([solve_ignores_conditions : false], solve(1 = sqrt(x),x));
 [x=1]$
+
+/* And for fun: problems from ``A College Algebra,''  Henry Burchard Fine (1904)  */
+
+ssolve([h*a^2 = 27, h^2/4 + 2*(a/2)^2 = 27/4],[a,h]);
+[[a= -(3*%i)/sqrt(2),h= -6],[a=(3*%i)/sqrt(2),h= -6],[a=3,h=3],[a= -3,h=3]]$
+
+(sol : ssolve(2*x^8-9*x^7+18*x^6-30*x^5 + 32*x^4-30*x^3+18*x^2-9*x+2,x),0);
+0$
+
+map(lambda([q], ratsimp(subst(q, 2*x^8-9*x^7+18*x^6-30*x^5 + 32*x^4-30*x^3+18*x^2-9*x+2))),sol);
+[0,0,0,0,0,0,0,0]$
+
+(sol : ssolve(6*x^7 -x^6+2*x^5 -7*x^4 -7*x^3+2*x^2 -x+6,x),0);
+0$
+
+map(lambda([q], ratsimp(subst(q,6*x^7 -x^6+2*x^5 -7*x^4 -7*x^3+2*x^2 -x+6))), sol);
+[0,0,0,0,0,0]$
+
+(remvalue(sol),0);
+0$
 
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$

@@ -275,7 +275,7 @@
 				(simplifya (cons '(mlist) sol) t))
 			 (t
 			  (setq sol nil)
-			  (when (and $solvefactors (or *solve-factors-biquadratic* (not (biquadratic-p e x))))
+			  (when (and $solvefactors) ; (or *solve-factors-biquadratic* (not (biquadratic-p e x))))
 				  (setq e ($gfactor e)))
 
 			  (setq e (if (mtimesp e) (cdr e) (list e)))

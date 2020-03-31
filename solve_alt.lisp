@@ -340,10 +340,7 @@
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
 (when $solveverbose
-	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~%" e x m use-trigsolve)
-		(print `(e = ,e))
-		(print `(x = ,x))
-		($read ))
+	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~%" e x m use-trigsolve))
 
 	(let ((cnd)) ; did have ($assume_pos nil), but why?
 	   (setq cnd (if $solve_ignores_conditions t (in-domain e)))
@@ -907,7 +904,7 @@
 				($solve_ignores_conditions t)
 				($use_to_poly t)
 				($negdistrib t) ;not sure about this--likely needed!
-				(*solve-factors-biquadratic* (not (boundp '*defint-assumptions*)))
+				(*solve-factors-biquadratic* t);(not (boundp '*defint-assumptions*)))
 				($multiplicities nil)
 				(m))
 		 	(setq x (if x x *var))
