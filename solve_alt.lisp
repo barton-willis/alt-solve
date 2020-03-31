@@ -240,7 +240,7 @@
 				(setq e ($radcan e)))
 		 (setq e ($num (sratsimp e)))
 		 (setq e (apply-identities-xxx e *pythagorean-identities*)) ; was (apply-identities e *pythagorean-identities*))
-		 (setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
+		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
 
 
