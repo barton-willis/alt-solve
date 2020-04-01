@@ -126,10 +126,10 @@
   (mfuncall '$reset '$%rnum_list) ;not sure about this?
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
 	   ;; Allow eqlist and varl to be sets.
-	   (when (and (consp eqlist) (consp (car eqlist)) (eql '$set (caar eqlist)))
+	   (when ($setp eqlist)
 		   (setq eqlist ($listify eqlist)))
 
-	   (when (and (consp varl) (consp (car varl)) (eql '$set (caar varl)))
+	   (when ($setp varl)
 		   (setq varl ($listify varl)))
 
 	   ;; When varl is empty, solve for the nonconstant variables. Set varl to a CL list and remove
@@ -141,7 +141,7 @@
 					((null varl) (let (($listconstvars nil)) (cdr ($listofvars eqlist))))
 					(($listp varl) (cdr varl))
 					(t (list varl)))
-			  :from-end t))
+			   :test #'alike1 :from-end t))
 
 	 ;; Create the equation list (this is a CL list, not Maxima list). For a inequation that isn't equality,
 	 ;; throw an error.

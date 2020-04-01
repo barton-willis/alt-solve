@@ -36,10 +36,10 @@
 		  	   (t
 		   		  (setq d (simpnrt d 2)) ;any branch is OK
 			     	 (values
-			  	    (list
-			   		  (take '(mequal) x (try-to-crunch-to-zero (mul -1 (div (add d b) (mul 2 a)))))
-			   		  (take '(mequal) x (try-to-crunch-to-zero (div (sub d b) (mul 2 a)))))
-				      (list 1 1))))))
+			     	    (list
+			   	    	  (take '(mequal) x (try-to-crunch-to-zero (mul -1 (div (add d b) (mul 2 a)))))
+			   		      (take '(mequal) x (try-to-crunch-to-zero (div (sub d b) (mul 2 a)))))
+				         (list 1 1))))))
 
 ;;; Return a CL list of the solutions to the cubic equation a x^3 + b x^2 + c x + d= 0 and a CL list of
 ;;; the multiplicities. See https://en.wikipedia.org/wiki/Cubic_equation#Discriminant_and_nature_of_the_roots
@@ -241,6 +241,7 @@
 
 ;;; This function doesn't check that the input e is a polynomial.
 
+
 ;;; Incidentally: gfactor(2+(-sqrt(a^2+4)+a)*x) --> ((a-sqrt(a^2+4))*(2*x-sqrt(a^2+4)-a))/2.
 
 ;;; I'm not sure why domain is set to complex. It's my understanding that algsys eliminates spurious solutions by
@@ -324,4 +325,4 @@
 					(setq sol (append sol zzz))
 					(setq p-multiplicities (append p-multiplicities (mapcar #'(lambda (s) (mul s m)) mss)))))
 				  (setq $multiplicities (simplifya (cons '(mlist) p-multiplicities) t))
-			  	(simplifya (cons '(mlist) sol) t)))))
+			   	(simplifya (cons '(mlist) sol) t))))) ; optionally can do (sort-solutions ...)

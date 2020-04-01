@@ -2166,8 +2166,8 @@ solve(x^2+4*x+4,x);
 [x=-2]$
 
 /* #2916 Solving log((x-2)^2) only gives one solution */
-block([logexpand : false], solve([log((x-2)^2)], [x]));
-[x=3,x=1]$
+block([logexpand : false], ssolve([log((x-2)^2)], [x]));
+[x=1,x=3]$
 
 /* #2891 Unable to solve simple system */
 solve([x=p*cos(q),y=p*sin(q)],[p,q]);
