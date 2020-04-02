@@ -25,7 +25,7 @@
 (defmvar $use_to_poly t)
 
 ;;; When $solve_ignores_conditions is true, ....?
-(defmvar $solve_ignores_conditions nil)
+(defmvar $solve_ignores_conditions t)
 
 ;;; Wrap $new_variable into a function that switches to the context 'initial' before declaring
 ;;; the type. After the declaration, return to the original context. Maybe this functionality
@@ -248,11 +248,12 @@
 	(let ((q))
 		(setq q ($substitute #'(lambda (s) (take '(mgreaterp) s 0)) '$isnonnegative_p cnd))
 		(setq q ($substitute #'(lambda (a b) (mnqp a b)) '$notequal q))
+		(setq q ($substitute #'(lambda (a b) (take '(mand) a b)) '%and q))
 		($substitute #'(lambda (a b) (mnqp a b)) 'mnotequal q)))
 
 ;;; When "maybe" is unable to determine if the predicate "cnd" is either true or false,
 ;;; ask the user.  In the current context, assume cnd or its negation, depending on the
-;;; input from the user. Return either true or false. Keep promting for an answer until the
+;;; input from the user. Return either true or false. Keep prompting for an answer until the
 ;;; user gives a proper response (no, n, N, yes, y, Y).
 (defun my-ask-boolean (cnd)
   ;;(mtell "Top of ask cnd = ~M ~%" cnd)
