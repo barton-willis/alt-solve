@@ -741,7 +741,7 @@
 ;;; The set of variables in the n-th set is a proper subset of the set of variables in all
 ;;; subsequent sets.
 (defun solve-triangular-system (eqs vars)
-    (when (or t $solveverbose)
+    (when $solveverbose
 	   	(mtell "Top of solve-triangular-system eqs = ~M vars = ~M ~%"
 				  (cons '(mlist) eqs) (cons '(mlist) vars)))
 
@@ -753,7 +753,7 @@
 							((null eqs)
 				        ;; No equations to solve, so all variables are free.
 								;; Return ((var1 = %r1 var2 = %r2...varn = %rn))
-				         (mtell "null equations vars = ~M ~%" (cons '(mlist) vars))
+				         ;(mtell "null equations vars = ~M ~%" (cons '(mlist) vars))
 								(list (mapcar #'(lambda (s) (take '(mequal) s (next-rnum-variable))) vars)))
 
 	           ((every #'zerop1 (cdr (first eqs)))
@@ -768,7 +768,8 @@
 
 							 (cond (($emptyp eqvars)
 						        	 ;; No unknowns but remaining nontrival equation(s), so return nil
-					        		 (mtell "Unable to show that ~M vanishes; returning [] ~%" (cons '(mlist) eqs))
+					        		 (mtell (intl:gettext "Unable to show that ~M vanishes; returning the empty list ~%"
+												  (cons '(mlist) eqs)))
 					       	 	   nil)
 										 (t
 											 (setq vars (simplifya (cons '($set) vars) t))  ; vars is now a set.
@@ -777,13 +778,13 @@
 											 (setq eqvars (cdr eqvars)) ;return eqvars to a CL list
 	               			 (setq e (pop eqs))
                        (cond ((and (eql 1 (length eqvars)) (eql 1 ($cardinality e))) ;one equation & unknown
-												        (mtell "one equation one unknown ~%")
+												        ;(mtell "one equation one unknown ~%")
 											          (setq sol (solve-single-equation (cadr e) (car eqvars))))
 
 														((eql 1 ($cardinality e)) ;one equation and two or more unknowns
-															    (print "at 1")
+															   ; (print "at 1")
 																	(setq sol (solve-single-equation (cadr e) (car eqvars)))
-																	(mtell "sol = ~M ~%" sol)
+																;	(mtell "sol = ~M ~%" sol)
 																	(setq sol (cdr sol)) ; remove (mlist)
 																	(when sol
 																		(setq sol
@@ -791,8 +792,7 @@
 																	  		sol
 																	  		(mapcar #'(lambda (q) (take '(mequal) q (next-rnum-variable))) (cdr eqvars)))))
 																	(push '(mlist) sol)
-																	(setq sol `((mlist) ,sol))
-																		(mtell "sol2 = ~M ~%" sol))
+																	(setq sol `((mlist) ,sol)))
 
                              ((eql 1 (length eqvars)) ;several equations, one unknown.
 														     (setq sol (redundant-equation-solve (cdr e) (car eqvars))))
@@ -874,8 +874,6 @@
 								    (simplifya (cons '(mlist) (mapcar #'(lambda (q) (take '(mequal) 0 q)) (cdr ee))) t))
 
 							   (t
-									  (print "Dude! I'm here")
-										(print `(sol = ,sol))
 				       	    (setq sol (mapcar #'(lambda (q) (cons '(mlist) q)) sol))
 					          (simplifya (cons '(mlist) sol) t)))))))
 
