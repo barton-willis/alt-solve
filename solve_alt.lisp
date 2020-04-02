@@ -25,7 +25,7 @@
 (defmvar $use_to_poly t)
 
 ;;; When $solve_ignores_conditions is true, ....?
-(defmvar $solve_ignores_conditions t)
+(defmvar $solve_ignores_conditions nil)
 
 ;;; Wrap $new_variable into a function that switches to the context 'initial' before declaring
 ;;; the type. After the declaration, return to the original context. Maybe this functionality
@@ -250,7 +250,13 @@
 		(setq q ($substitute #'(lambda (a b) (mnqp a b)) '$notequal q))
 		($substitute #'(lambda (a b) (mnqp a b)) 'mnotequal q)))
 
+;;; When "maybe" is unable to determine if the predicate "cnd" is either true or false,
+;;; ask the user.  In the current context, assume cnd or its negation, depending on the
+;;; input from the user. Return either true or false. Keep promting for an answer until the
+;;; user gives a proper response (no, n, N, yes, y, Y).
 (defun my-ask-boolean (cnd)
+  ;;(mtell "Top of ask cnd = ~M ~%" cnd)
+	;;(print $context)
 	(let ((answer (if $solve_ignores_conditions t (mfuncall '$maybe (to-poly-fixup cnd)))))
 		  (cond
 			 ((not cnd) cnd) ;when cnd is false, return false.
@@ -259,8 +265,11 @@
 			  (setq answer (retrieve `((mtext) ,(intl:gettext "Is ") ,cnd ,(intl:gettext "?")) nil))
 			  (cond
 				  ((member answer '($yes |$y| |$Y|) :test #'eql)
+					 (mfuncall '$assume (to-poly-fixup cnd))
 				   t)
-				  ((member answer '($no |$n| |$N|) :test #'eql) nil)
+				  ((member answer '($no |$n| |$N|) :test #'eql)
+            (mfuncall '$assume (take '(mnot) (to-poly-fixup cnd)))
+						nil)
 				  (t
 				   (mtell (intl:gettext "Acceptable answers are yes, y, Y, no, n, N. ~%"))
 				   (my-ask-boolean cnd)))))))
@@ -732,24 +741,23 @@
 ;;; The set of variables in the n-th set is a proper subset of the set of variables in all
 ;;; subsequent sets.
 (defun solve-triangular-system (eqs vars)
-    (when $solveverbose
+    (when (or t $solveverbose)
 	   	(mtell "Top of solve-triangular-system eqs = ~M vars = ~M ~%"
 				  (cons '(mlist) eqs) (cons '(mlist) vars)))
 
-	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars) (free-sol nil))
+	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars))
             (setq eqs (mapcar #'(lambda (q) (try-to-crunch-to-zero q
-				            #'apply-identities-xxx  #'sqrtdenest #'fullratsimp)) eqs))
+							       #'apply-identities-xxx  #'sqrtdenest #'fullratsimp)) eqs))
 
 				    (cond
 							((null eqs)
 				        ;; No equations to solve, so all variables are free.
 								;; Return ((var1 = %r1 var2 = %r2...varn = %rn))
-				        ;; (mtell "null equations ~%")
+				         (mtell "null equations vars = ~M ~%" (cons '(mlist) vars))
 								(list (mapcar #'(lambda (s) (take '(mequal) s (next-rnum-variable))) vars)))
 
 	           ((every #'zerop1 (cdr (first eqs)))
 						     ;; The first equation is a set of zeros--move on to next equation
-								 (print 'vanish)
 	               (solve-triangular-system (rest eqs) vars)) ; remove first equation & solve the rest
 
 						 (t
@@ -769,10 +777,13 @@
 											 (setq eqvars (cdr eqvars)) ;return eqvars to a CL list
 	               			 (setq e (pop eqs))
                        (cond ((and (eql 1 (length eqvars)) (eql 1 ($cardinality e))) ;one equation & unknown
+												        (mtell "one equation one unknown ~%")
 											          (setq sol (solve-single-equation (cadr e) (car eqvars))))
 
-														((eql 1 ($cardinality e)) ;one equation two or more unknowns
+														((eql 1 ($cardinality e)) ;one equation and two or more unknowns
+															    (print "at 1")
 																	(setq sol (solve-single-equation (cadr e) (car eqvars)))
+																	(mtell "sol = ~M ~%" sol)
 																	(setq sol (cdr sol)) ; remove (mlist)
 																	(when sol
 																		(setq sol
@@ -780,7 +791,8 @@
 																	  		sol
 																	  		(mapcar #'(lambda (q) (take '(mequal) q (next-rnum-variable))) (cdr eqvars)))))
 																	(push '(mlist) sol)
-																	sol)
+																	(setq sol `((mlist) ,sol))
+																		(mtell "sol2 = ~M ~%" sol))
 
                              ((eql 1 (length eqvars)) ;several equations, one unknown.
 														     (setq sol (redundant-equation-solve (cdr e) (car eqvars))))
@@ -862,6 +874,8 @@
 								    (simplifya (cons '(mlist) (mapcar #'(lambda (q) (take '(mequal) 0 q)) (cdr ee))) t))
 
 							   (t
+									  (print "Dude! I'm here")
+										(print `(sol = ,sol))
 				       	    (setq sol (mapcar #'(lambda (q) (cons '(mlist) q)) sol))
 					          (simplifya (cons '(mlist) sol) t)))))))
 
