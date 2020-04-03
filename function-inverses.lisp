@@ -264,10 +264,17 @@
 (defun mabs-inverse (x)
 	(let ((sgn ($asksign x)))
 		 (cond ((or (eq sgn '$pos) (eq sgn '$pz))
-				(list x (mul -1 x)))
-			   ((eq sgn '$zero)
-				(list 0))
-			   (t nil))))
+			        	(list x (mul -1 x)))
+			      ((eq sgn '$zero)
+			        	(list 0))
+			      (t nil))))
+
+(defun mabs-inverse (x)
+		(let ((sgn (my-ask-boolean (take '(mgreaterp) x 0))))
+					(cond (sgn (list x (mul -1 x)))
+								(t
+									(setq sgn (my-ask-boolean (take '($equal) 0 x)))
+									 (if sgn (list 0) nil)))))
 
 (setf (gethash 'mabs *function-inverses*) #'mabs-inverse)
 (setf (gethash 'mabs *function-inverses-alt*) #'mabs-inverse)

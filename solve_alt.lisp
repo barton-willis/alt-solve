@@ -433,6 +433,7 @@
 (defun solve-by-kernelize (e x m)
   (when $solveverbose
 		(mtell "Top of solve-by-kernelize e = ~M x = ~M ~%" e x))
+
 	(let (($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
 		  (mult-acc nil) (xxx) (mult-save))
 		 (setq e (kernelize e x))
