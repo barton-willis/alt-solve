@@ -16,6 +16,7 @@ push(["rtest_solve",[88, 156, 214, 260, 287, 326, 327, 340, 342, 343,
 
 push("rtest_linsolve", testsuite_files)$
 
+
 push("rtest_polynomial_solve",testsuite_files)$
 
 run_testsuite(share_tests = true);

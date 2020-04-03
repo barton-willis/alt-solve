@@ -43,7 +43,7 @@ The \altsolve\/ package aims to be a replacement for Maxima's solve function. Th
 \item to find all real and complex solutions to equations, but take care to not return spurious solutions.
 
 \end{alphalist}
-Additionally, \altsolve\/  aims to be compatible with Maxima's current solve function. For compatibilty, we require:
+Additionally, \altsolve\/  aims to be compatible with Maxima's current solve function. Specifically:
 
 \begin{alphalist}[]
 
@@ -53,7 +53,7 @@ Additionally, \altsolve\/  aims to be compatible with Maxima's current solve fun
 
  \item The \altsolve\/ code requires only modest modifications to Maxima's core.
 
-\item Except for algebraically equivalent, but different results, \altsolve\/  runs the testsuite and the share testsuite with no errors and in roughy the same time as the standard Maxima.
+\item Except for algebraically equivalent but different results, \altsolve\/  runs the testsuite and the share testsuite with no errors and in roughy the same time as the standard Maxima.
 
 \item The code runs under all Common Lisp versions that are supported by Maxima.
 \end{alphalist}
@@ -88,7 +88,7 @@ argument gives the equations to be solved. The first argument is either a Maxima
 a list of Maxima expressions, or a set of Maxima expressions. If any of these expressions is
 not explicitly of the form \(a = b\), the expression is assumed to vanish.
 
-When given, the second argument gives the unknowns. The unknowns can either be a list, set, or
+When given, the second argument gives the unknowns. The unknowns can either be a list, a set, or
 a single unknown. Duplicate unknowns are expunged. If not specified, the unknowns defaults to
 the set of all nonconstant variables in the first argument.
 

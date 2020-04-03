@@ -245,35 +245,60 @@
 
 
 (defun to-poly-fixup (cnd)
-	(let ((q))
+	(let ((q) ($opsubst t))
 		(setq q ($substitute #'(lambda (s) (take '(mgreaterp) s 0)) '$isnonnegative_p cnd))
 		(setq q ($substitute #'(lambda (a b) (mnqp a b)) '$notequal q))
 		(setq q ($substitute #'(lambda (a b) (take '(mand) a b)) '%and q))
 		($substitute #'(lambda (a b) (mnqp a b)) 'mnotequal q)))
 
+;;; True iff the operator of e is mor.
+(defun or-p (e) (and (consp e) (eql (caar e) 'mor)))
+
+;;; True iff the operator of e is mand.
+(defun and-p (e) (and (consp e)  (eql (caar e) 'mand)))
+
 ;;; When "maybe" is unable to determine if the predicate "cnd" is either true or false,
 ;;; ask the user.  In the current context, assume cnd or its negation, depending on the
 ;;; input from the user. Return either true or false. Keep prompting for an answer until the
 ;;; user gives a proper response (no, n, N, yes, y, Y).
+
+;;; I think setting answer to true when $solve_ignores_conditions is true isn't
+;;; right. But I need to carefully re-think how the the entire conditional system
+;;; for solutions works.
 (defun my-ask-boolean (cnd)
-  ;;(mtell "Top of ask cnd = ~M ~%" cnd)
-	;;(print $context)
-	(let ((answer (if $solve_ignores_conditions t (mfuncall '$maybe (to-poly-fixup cnd)))))
-		  (cond
-			 ((not cnd) cnd) ;when cnd is false, return false.
-			 ((or (eql answer t) (eql answer nil)) answer)
-			 (t
-			  (setq answer (retrieve `((mtext) ,(intl:gettext "Is ") ,cnd ,(intl:gettext "?")) nil))
-			  (cond
-				  ((member answer '($yes |$y| |$Y|) :test #'eql)
-					 (mfuncall '$assume (to-poly-fixup cnd))
-				   t)
-				  ((member answer '($no |$n| |$N|) :test #'eql)
-            (mfuncall '$assume (take '(mnot) (to-poly-fixup cnd)))
-						nil)
-				  (t
-				   (mtell (intl:gettext "Acceptable answers are yes, y, Y, no, n, N. ~%"))
-				   (my-ask-boolean cnd)))))))
+  (setq cnd (to-poly-fixup cnd))
+	(let ((context $context) ;workaround for a bug somewhere?
+		     (answer (if $solve_ignores_conditions t (mfuncall '$maybe cnd))))
+
+    ;; The definite integration code sometimes introduces a new variable, often named
+		;; yx, and puts 'internal on its symbol list. We don't want to be asked questions
+		;; about these internal symbols, so we hold our breath and assume the condition is
+		;; true. Sadly it doesn't seem to be the case that assumptions about internal variables
+		;; get recorded in the lists *defint-assumptions*, *current-assumptions*, or
+		;; *global-defint-assumptions*. See the function intcv defined in defint.
+    (when (some #'identity (mapcar #'(lambda (q) (get q 'internal)) (cdr ($listofvars cnd))))
+		    (mtell "Found internal variable assuming ~M is true. ~%" cnd)
+				(setq answer t))
+
+		;	(mtell "answer = ~M ~%" answer)
+		  (cond ((or (eql answer t) (eql answer nil)) answer)
+	  	   	  (t
+		   	      (setq answer (retrieve `((mtext) ,(intl:gettext "Is ") ,cnd ,(intl:gettext "?")) nil))
+							;; The function 'assume' gives an error for attempting to assume an
+							;; 'or' expression. So we attempt to check if cnd is a valid input to
+							;; 'assume.' Maybe a better approach would be to wrap an error catch around
+							;; 'assume.'
+			        (cond ((member answer '($yes |$y| |$Y|) :test #'eql)
+							         (when (not (or-p cnd))
+						              (mfuncall '$assume cnd))
+				              t)
+				            ((member answer '($no |$n| |$N|) :test #'eql)
+										   (when (not (and-p cnd))
+                          (mfuncall '$assume (take '(mnot) cnd)))
+					             nil)
+			      	     (t
+				              (mtell (intl:gettext "Acceptable answers are yes, y, Y, no, n, N. ~%"))
+				              (my-ask-boolean cnd)))))))
 
 ;;; Remove the members of sol that do not satisfy cnd. The members of the CL list sol have
 ;;; the form solution.multiplicity. The Maxima expression cnd is generally a conjunction
@@ -769,8 +794,8 @@
 
 							 (cond (($emptyp eqvars)
 						        	 ;; No unknowns but remaining nontrival equation(s), so return nil
-					        		 (mtell (intl:gettext "Unable to show that ~M vanishes; returning the empty list ~%"
-												  (cons '(mlist) eqs)))
+					        		 (mtell (intl:gettext "Unable to show that ~M vanishes; returning the empty list ~%")
+												  (cons '(mlist) eqs))
 					       	 	   nil)
 										 (t
 											 (setq vars (simplifya (cons '($set) vars) t))  ; vars is now a set.
