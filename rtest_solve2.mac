@@ -218,6 +218,29 @@ ssolve(6*x^2=28/x^2,[x^2]);
 ssolve(6*x^2=28/x^2,[x^2,x^2]);
 [x^2=-sqrt(42)/3,x^2=sqrt(42)/3]$
 
+/* Testsuite problems that challenge the ask/don't ask system. */
+
+integrate(log(x^(7/2)+1)/x^2,x,0,inf);
+%pi/sin((2*%pi)/7)$
+
+integrate(log(sqrt(q^2-1)+1),q,0,1);
+-1 + %i*(sqrt(2) - 1)*%pi/2  + sqrt(2)*atanh(1/sqrt(2))$
+
+integrate(sin(4*asin(x)),x);
+-(15*((1-x^2)^(3/2)/5-(x^2*(1-x^2)^(3/2))/5)+sqrt(1-x)*sqrt(x+1)*(93*x^4-106*x^2+13))/60$
+
+block([numer : true], integrate(sin(4*asin(x)),x,1/2, 3/4));
+0.09667085773175951$
+
+integrate(1/(sqrt(1-%exp(z))+sqrt(1+%exp(z))),z);
+-(1/2)* exp(-z)*(-sqrt(1 - exp(z)) + sqrt(exp(z) + 1) + exp(z)*atanh(sqrt(1 - exp(z))) + exp(z)*atanh(sqrt(exp(z) + 1)))$
+
+integrate(log(t*(1-t))^4/(1-t),t,0,1/2);
+integrate(log((1-t)*t)^4/(1-t),t,0,1/2)$
+
+integrate(log(t*(1-t))^5/(1-t),t,0,1/2);
+integrate(log(t*(1-t))^5/(1-t),t,0,1/2)$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 

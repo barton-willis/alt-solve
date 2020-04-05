@@ -124,6 +124,7 @@
 (defun $solve (eqlist &optional (varl nil))
   (mfuncall '$reset '$multiplicities)
   (mfuncall '$reset '$%rnum_list) ;not sure about this?
+
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
 	   ;; Allow eqlist and varl to be sets.
 	   (when ($setp eqlist)
@@ -184,6 +185,12 @@
 	 (unwind-protect
 	  (progn
 			(setq cntx ($supcontext)) ;make asksign and friends data vanish after exiting $solve.
+        (dolist (cx (cdr $contexts))
+				   (mfuncall '$activate cx)) ;not sure about this!
+
+				(dolist (cx (cdr $contexts))
+				   (mfuncall '$assume (mfuncall '$facts cx)))
+
 		  (cond
 
 			  ((null varl)
@@ -243,13 +250,15 @@
 		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
 
-
+;;; Convert to-poly style predicates to Maxima predicates. In particular, do
+;;; $isnonnegative_p -> >, =/= -> $notequal, %and --> mand.
 (defun to-poly-fixup (cnd)
 	(let ((q) ($opsubst t))
 		(setq q ($substitute #'(lambda (s) (take '(mgreaterp) s 0)) '$isnonnegative_p cnd))
-		(setq q ($substitute #'(lambda (a b) (mnqp a b)) '$notequal q))
-		(setq q ($substitute #'(lambda (a b) (take '(mand) a b)) '%and q))
-		($substitute #'(lambda (a b) (mnqp a b)) 'mnotequal q)))
+		;(setq q ($substitute #'(lambda (a b) (mnqp a b)) '$notequal q))
+		(setq q ($substitute #'(lambda (a b) (take '($notequal) a b)) 'mnotequal cnd))
+		($substitute #'(lambda (a b) (take '(mand) a b)) '%and q)))
+	;;;	($substitute #'(lambda (a b) (mnqp a b)) 'mnotequal q)))
 
 ;;; True iff the operator of e is mor.
 (defun or-p (e) (and (consp e) (eql (caar e) 'mor)))
@@ -266,19 +275,28 @@
 ;;; right. But I need to carefully re-think how the the entire conditional system
 ;;; for solutions works.
 (defun my-ask-boolean (cnd)
-  (setq cnd (to-poly-fixup cnd))
+  (setq cnd (to-poly-fixup cnd)) ;convert to-poly style to Maxima predicates
 	(let ((context $context) ;workaround for a bug somewhere?
 		     (answer (if $solve_ignores_conditions t (mfuncall '$maybe cnd))))
+      ;;  (answer (mfuncall '$maybe cnd))) ; not ready for this?
 
     ;; The definite integration code sometimes introduces a new variable, often named
 		;; yx, and puts 'internal on its symbol list. We don't want to be asked questions
 		;; about these internal symbols, so we hold our breath and assume the condition is
 		;; true. Sadly it doesn't seem to be the case that assumptions about internal variables
-		;; get recorded in the lists *defint-assumptions*, *current-assumptions*, or
-		;; *global-defint-assumptions*. See the function intcv defined in defint.
+		;; get recorded in any context. See the function intcv defined in defint.
     (when (some #'identity (mapcar #'(lambda (q) (get q 'internal)) (cdr ($listofvars cnd))))
-		    (mtell "Found internal variable assuming ~M is true. ~%" cnd)
+		    (mtell "Found internal variable--assuming ~M is true. ~%" cnd)
+				(mfuncall '$assume cnd)
 				(setq answer t))
+
+    ;; When a solution involves a %zXXX variable (say solve(sin(x)=0,x)), we simply append any
+		;; needed fact about %zXXX to the initial fact database. By appending to the initial context,
+		;; this fact is preserved after the solve process. Not sure about this....
+		(when (some #'identity (mapcar #'(lambda (q) (get q 'integer-gentemp)) (cdr ($listofvars cnd))))
+				 (mtell "Appending ~M to fact database. ~%" cnd)
+				 (let (($context '$initial) (context '$initial)) (mfuncall '$assume cnd))
+				 (setq answer t))
 
 		;	(mtell "answer = ~M ~%" answer)
 		  (cond ((or (eql answer t) (eql answer nil)) answer)

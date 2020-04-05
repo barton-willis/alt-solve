@@ -33,7 +33,8 @@
 							  (take '(mlessp) (mul -1 '$%pi a) ph)
 							  (take '(mleqp) ph (mul '$%pi a))))
 
-			  (setq ok (my-ask-boolean cnd))
+			 ; (setq ok (let (($solve_ignores_conditions nil)) (my-ask-boolean cnd)))
+			 (setq ok (my-ask-boolean cnd))
 			  (cond (ok
 					 (setq kmax (div 1 a))
 			  	     (setq kmin (- kmax 1)))
@@ -260,14 +261,6 @@
 
 		  (list '%log  #'(lambda (q) (list (take '(mexpt) '$%e q))))
 		  (list '%plog  #'(lambda (q) (list (take '(mexpt) '$%e q))))))
-
-(defun mabs-inverse (x)
-	(let ((sgn ($asksign x)))
-		 (cond ((or (eq sgn '$pos) (eq sgn '$pz))
-			        	(list x (mul -1 x)))
-			      ((eq sgn '$zero)
-			        	(list 0))
-			      (t nil))))
 
 (defun mabs-inverse (x)
 		(let ((sgn (my-ask-boolean (take '(mgreaterp) x 0))))
