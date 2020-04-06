@@ -168,14 +168,14 @@
 	 ;; stuff for solving for nonatoms. Should check for problems such as solve([xxx,yyy],[f(x),x])
 	 (dolist (xxx varl)
 		 (cond (($mapatom xxx)
-				(push (take '(mequal) xxx xxx) nonatom-subst))
+			      	(push (take '(mequal) xxx xxx) nonatom-subst))
 		       (t
-			    (setq g (gensym))
-			    (push (take '(mequal) xxx g) nonatom-subst)
-			    (setq eqlist (mapcar #'(lambda (q) ($ratsubst g xxx q)) eqlist))
-			    ;; is freeof xxx sufficiently strong?
-			    (when (some #'(lambda (q) (not ($freeof xxx q))) eqlist)
-			 	 (merror (intl:gettext "Solve: Cannot solve for non-atom.~%"))))))
+		    	    (setq g (gensym))
+			        (push (take '(mequal) xxx g) nonatom-subst)
+			        (setq eqlist (mapcar #'(lambda (q) ($ratsubst g xxx q)) eqlist))
+			        ;; is freeof xxx sufficiently strong?
+			        (when (some #'(lambda (q) (not ($freeof xxx q))) eqlist)
+		      	  	 (merror (intl:gettext "Solve: Cannot solve for non-atom.~%"))))))
 
 	 (setq nonatom-subst (reverse nonatom-subst))
 	 (setq varl (mapcar #'third nonatom-subst))  ;was $rhs
@@ -187,10 +187,6 @@
 			(setq cntx ($supcontext)) ;make asksign and friends data vanish after exiting $solve.
         (dolist (cx (cdr $contexts))
 				   (mfuncall '$activate cx)) ;not sure about this!
-
-				(dolist (cx (cdr $contexts))
-				   (mfuncall '$assume (mfuncall '$facts cx)))
-
 		  (cond
 
 			  ((null varl)
@@ -255,10 +251,8 @@
 (defun to-poly-fixup (cnd)
 	(let ((q) ($opsubst t))
 		(setq q ($substitute #'(lambda (s) (take '(mgreaterp) s 0)) '$isnonnegative_p cnd))
-		;(setq q ($substitute #'(lambda (a b) (mnqp a b)) '$notequal q))
 		(setq q ($substitute #'(lambda (a b) (take '($notequal) a b)) 'mnotequal cnd))
 		($substitute #'(lambda (a b) (take '(mand) a b)) '%and q)))
-	;;;	($substitute #'(lambda (a b) (mnqp a b)) 'mnotequal q)))
 
 ;;; True iff the operator of e is mor.
 (defun or-p (e) (and (consp e) (eql (caar e) 'mor)))
@@ -298,7 +292,6 @@
 				 (let (($context '$initial) (context '$initial)) (mfuncall '$assume cnd))
 				 (setq answer t))
 
-		;	(mtell "answer = ~M ~%" answer)
 		  (cond ((or (eql answer t) (eql answer nil)) answer)
 	  	   	  (t
 		   	      (setq answer (retrieve `((mtext) ,(intl:gettext "Is ") ,cnd ,(intl:gettext "?")) nil))
