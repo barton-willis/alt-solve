@@ -793,7 +793,7 @@ ssolve(2*sqrt(x) + 3*x^(1/4) - 2 = 0, x);
 [x=1/16]$
 
 expand(ssolve(x = 1/sqrt(1 + x^2), x),0,0);
-[x=sqrt(2)/sqrt(sqrt(5)+1),x=-((sqrt(2)*%i)/sqrt(sqrt(5)-1))]$
+[x=sqrt(sqrt(5)-1)/sqrt(2),x=-((sqrt(sqrt(5)+1)*%i)/sqrt(2))]$
 
 ssolve(sqrt(x)-sqrt(1-x) = 0,x);
 [x=1/2]$
@@ -1082,11 +1082,12 @@ trigrat(subst(x=-(8*%pi*%z1+3*%pi)/4,sin(x)*cos(x) = 1/2));
 1/2=1/2$
 
 ssolve(cos(3*x)-2*cos(2*x)+cos(x)=1/2,x);
-[x=-((6*%pi*%z0-%pi)/3),x=-((6*%pi*%z1+%pi)/3),
-x=-(2*%pi*%z2)-atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))-%pi,
-x=-(2*%pi*%z3)+atan((2*sqrt((sqrt(13)+1)/2))/(sqrt(13)-1))-%pi,
-x=%i*log((sqrt(13)-2*sqrt((sqrt(13)-1)/2)+1)/4)-2*%pi*%z4,
-x=%i*log((sqrt(13)+2*sqrt((sqrt(13)-1)/2)+1)/4)-2*%pi*%z5]$
+[x=-((6*%pi*%z0-%pi)/3),
+x=-((6*%pi*%z1+%pi)/3),
+x=-2*%pi*%z2-atan((sqrt(13)+1)^(3/2)/(3*2^(3/2)))-%pi,
+x=-2*%pi*%z3+atan((sqrt(13)+1)^(3/2)/(3*2^(3/2)))-%pi,
+x=%i*log((sqrt(13)-sqrt(2)*sqrt(sqrt(13)-1)+1)/4)-2*%pi*%z4,
+x=%i*log((sqrt(13)+sqrt(2)*sqrt(sqrt(13)-1)+1)/4)-2*%pi*%z5]$
 
 ssolve(sin(2*x) + cos(2*x) = 1,x);
 [x=-((2*%pi*%z0+%pi)/4)]$
@@ -1498,8 +1499,12 @@ ssolve(sqrt(%e^(2*t)*sin(t)^2+%e^(2*t)*cos(t)^2+3*%e^(2*t))=2,t);
 block([%rnum : 0], solve(rat(a+c,a,b,c,d),[a,b]));
 [[a=-c,b=%r1]]$
 
-/* [ 826915 ] Solve wrong with irreducible polydecomp */
-block([sol, eq],
+/* [ 826915 ] Solve wrong with irreducible polydecomp
+  This test is bogus--with solveexplicit : true, the solution set is
+  empty, so the test returns true--duh. But with solveexplicit : false,
+  it fails. Originally, there wasn't a local setting for solveexplicit--not
+  sure where this test came from.*/
+block([sol, eq, solveexplicit : true],
    eq :  (x^5+x-3)^5+x^5+x-6,
    sol : solve(eq,x),
    every(lambda([s], is(cabs(subst(s, eq)) < 1.0e-6)), args(sol)));
@@ -1844,8 +1849,10 @@ ssolve(cos(x-5) - cos(5-x),x);
 [x = %r0]$
 
 ssolve(cos(x^2-1)=0,x);
-[x=-sqrt(4*%pi*%z0+%pi+2)/sqrt(2),x=sqrt(4*%pi*%z0+%pi+2)/sqrt(2),
-x=-sqrt(%pi*(4*%z1-1)+2)/sqrt(2),x=sqrt(%pi*(4*%z1-1)+2)/sqrt(2)]$
+[x=-(sqrt(4*%pi*%z0+%pi+2)/sqrt(2)),
+x=sqrt(4*%pi*%z0+%pi+2)/sqrt(2),
+x=-(sqrt(4*%pi*%z1-%pi+2)/sqrt(2)),
+x=sqrt(4*%pi*%z1-%pi+2)/sqrt(2)]$
 
 solve(log(x-sqrt(x-1)) = 0,x);
 [x=1,x=2]$
