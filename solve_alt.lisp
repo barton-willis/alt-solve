@@ -125,7 +125,8 @@
   (mfuncall '$reset '$multiplicities)
   (mfuncall '$reset '$%rnum_list) ;not sure about this?
 
-  (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t))
+  (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t)
+      	($algebraic t)	($gcd '$subres))
 	   ;; Allow eqlist and varl to be sets.
 	   (when ($setp eqlist)
 		   (setq eqlist ($listify eqlist)))
@@ -948,6 +949,8 @@
 				($solve_inverse_package *function-inverses-alt*)
 				($solve_ignores_conditions t)
 				($use_to_poly t)
+				($algebraic t)
+				($gcd '$subres)
 				($negdistrib t) ;not sure about this--likely needed!
 				($multiplicities nil)
 				(m))
