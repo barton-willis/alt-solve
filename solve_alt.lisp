@@ -199,8 +199,7 @@
 			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation and one unknown
 			   (setq eqlist (keep-float (car eqlist)))
 			   (setq sol ($substitute nonatom-subst (solve-single-equation eqlist (car varl))))
-
-				 (unkeep-float sol))
+		  	 (unkeep-float sol))
 
 			  ((null (cdr varl)) ;one unknown, more than one equation
 			    (redundant-equation-solve (cons '(mlist) eqlist) (car varl)))
@@ -287,7 +286,10 @@
     ;; When a solution involves a %zXXX variable (say solve(sin(x)=0,x)), we simply append any
 		;; needed fact about %zXXX to the initial fact database. By appending to the initial context,
 		;; this fact is preserved after the solve process. Not sure about this....
-		(when (some #'identity (mapcar #'(lambda (q) (get q 'integer-gentemp)) (cdr ($listofvars cnd))))
+		(when (and
+			       (some #'identity (mapcar #'(lambda (q) (get q 'integer-gentemp))
+							   (cdr ($listofvars cnd))))
+						 (not (or-p cnd)))
 				 (mtell "Appending ~M to fact database. ~%" cnd)
 				 (let (($context '$initial) (context '$initial)) (mfuncall '$assume cnd))
 				 (setq answer t))
@@ -390,9 +392,11 @@
 
 	(let ((cnd)) ; did have ($assume_pos nil), but why?
 	   (setq cnd (if $solve_ignores_conditions t (in-domain e)))
+		; (mtell "e = ~M; in domain = ~M; cnd = ~M ~%" e (in-domain e) cnd)
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
 		 (setq e (first e))
+		 ;(mtell "e = ~M; in domain = ~M; cnd = ~M ~%" e (in-domain e) cnd)
 		 (cond
 
 			 ((or (zerop1 e) (and (consp e) (consp (car e)) (eql 'mlabox (caar e)) (zerop1 (unkeep-float e))))
