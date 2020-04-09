@@ -1948,8 +1948,8 @@ solve(eqns,[A,B,C,D,E,F]);
 
 /* #3312 solve does not identify multiplicities correctly */
 
-solve(subst(x= (-27/4)^(1/7), y^3 + x^3*y +x),y);
-[y=(4^(2/7)*27^(5/7))/9,y=-(4^(2/7)*27^(5/7))/18]$
+ssolve(subst(x= (-27/4)^(1/7), y^3 + x^3*y +x),y);
+[y=-((4^(2/7)*27^(5/7))/18),y=(4^(2/7)*27^(5/7))/9]$
 
 multiplicities;
 [2,1]$
