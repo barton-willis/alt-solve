@@ -53,6 +53,22 @@
 			 (list '%coth #'(lambda (q) (take '(mequal) (take '(%csch) q) (div (take '(%cosh) q) (take '(%sinh) q))))))))
 
 
+(maphash #'(lambda (key val) (declare (ignore val)) (remhash key *trig-power-reduce*)) *trig-power-reduce*)
+(mapcar #'(lambda (x) (setf (gethash (first x) *trig-power-reduce*) (second x)))
+  (list
+   ;; sin(x)^2=(1-cos(2*x))/2
+   (list '%sin #'(lambda (q)
+		 (take '(mequal) (power (take '(%sin) q 2)) (div (sub 1 (take '(%cos) (mul 2 q))) 2))))
+	 ;; cos(x)^2=(cos(2*x)+1)/2
+	 (list '%cos #'(lambda (q)
+		 (take '(mequal) (power (take '(%cos) q 2)) (div (add 1 (take '(%cos) (mul 2 q))) 2))))
+	 ;; sinh(x)^2=(cosh(2*x)-1)/2
+	 (list '%sinh #'(lambda (q)
+		 (take '(mequal) (power (take '(%sinh) q 2)) (div (sub (take '(%cosh) (mul 2 q)) 1) 2))))
+	 ;; cosh(x)^2=(cosh(2*x)+1)/2
+	 (list '%cosh #'(lambda (q)
+		 (take '(mequal) (power (take '(%cosh) q 2)) (div (add (take '(%cosh) (mul 2 q)) 1) 2))))))
+
 (defun apply-identities-xxx (e &optional (id-table *pythagorean-identities*))
 	(setq e ($ratdisrep e))
 	(maphash #'(lambda (key val)
