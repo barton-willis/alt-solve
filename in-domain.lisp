@@ -66,6 +66,6 @@
       	 (cond
 	      	 (($mapatom e) t)
 			  	 ((every #'(lambda (q) (not (among q e))) x) t)
-		       (fn (let (($factor_max_degree 10) ($errormsg nil)) (apply fn (cdr e))))
+					 (fn (apply fn (cdr e)))
 	   	     (t ;;assume operator is defined everywhere--return the conjunction of map in-domain onto argument list.
 			       (simplifya (cons '(mand) (mapcar #'(lambda (q) (in-domain q x)) (cdr e))) t))))))
