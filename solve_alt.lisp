@@ -24,8 +24,16 @@
 ;;; when $use_to_poly is false, never dispatch the to_poly_solver.
 (defmvar $use_to_poly t)
 
-;;; When $solve_ignores_conditions is true, ....?
-(defmvar $solve_ignores_conditions t)
+;;; When ask_mode is true, the function my-ask-boolean will prompt the user
+;;; for information and put that data into the factdata base in the current
+;;; context; when false,
+(defmvar $ask_mode t)
+
+(defun ask-mode-assign (a b)
+	(when (not (or (eql b t) (eql b nil)))
+        (merror "The value of ~M must either true or false ~%" a)))
+
+(setf (get '$ask_mode 'assign) #'ask-mode-assign)
 
 ;;; Wrap $new_variable into a function that switches to the context 'initial' before declaring
 ;;; the type. After the declaration, return to the original context. Maybe this functionality
@@ -54,7 +62,7 @@
 	($load "solve_alt_top_level.lisp")
 	($load "grobner.lisp")
 	($load "one-to-one-solve.lisp")
-	;;($load "fourier_elim.lisp")
+	($load "fourier_elim.lisp")
 	($load "myalgsys.lisp"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
@@ -188,6 +196,7 @@
 			(setq cntx ($supcontext)) ;make asksign and friends data vanish after exiting $solve.
         (dolist (cx (cdr $contexts))
 				   (mfuncall '$activate cx)) ;not sure about this!
+
 		  (cond
 
 			  ((null varl)
@@ -251,7 +260,7 @@
 (defun to-poly-fixup (cnd)
 	(let ((q) ($opsubst t))
 		(setq q ($substitute #'(lambda (s) (take '(mgreaterp) s 0)) '$isnonnegative_p cnd))
-		(setq q ($substitute #'(lambda (a b) (take '($notequal) a b)) 'mnotequal cnd))
+		(setq q ($substitute #'(lambda (a b) (take '(mor) a b)) '%or q))
 		($substitute #'(lambda (a b) (take '(mand) a b)) '%and q)))
 
 ;;; True iff the operator of e is mor.
@@ -265,38 +274,35 @@
 ;;; input from the user. Return either true or false. Keep prompting for an answer until the
 ;;; user gives a proper response (no, n, N, yes, y, Y).
 
-;;; I think setting answer to true when $solve_ignores_conditions is true isn't
-;;; right. But I need to carefully re-think how the the entire conditional system
-;;; for solutions works.
 (defun my-ask-boolean (cnd)
   (setq cnd (to-poly-fixup cnd)) ;convert to-poly style to Maxima predicates
 	(let ((context $context) ;workaround for a bug somewhere?
-		     (answer (if $solve_ignores_conditions t (mfuncall '$maybe cnd))))
-      ;;  (answer (mfuncall '$maybe cnd))) ; not ready for this?
+         (answer (mfuncall '$maybe cnd))) ; not ready for this?
 
     ;; The definite integration code sometimes introduces a new variable, often named
 		;; yx, and puts 'internal on its symbol list. We don't want to be asked questions
 		;; about these internal symbols, so we hold our breath and assume the condition is
 		;; true. Sadly it doesn't seem to be the case that assumptions about internal variables
 		;; get recorded in any context. See the function intcv defined in defint.
-    (when (some #'identity (mapcar #'(lambda (q) (get q 'internal)) (cdr ($listofvars cnd))))
-		    (mtell "Found internal variable--assuming ~M is true. ~%" cnd)
-				(mfuncall '$assume cnd)
-				(setq answer t))
+  ;  (when (some #'identity (mapcar #'(lambda (q) (get q 'internal)) (cdr ($listofvars cnd))))
+	;	    (mtell "Found internal variable--assuming ~M is true. ~%" cnd)
+	;			(mfuncall '$assume cnd)
+	;			(setq answer t))
 
     ;; When a solution involves a %zXXX variable (say solve(sin(x)=0,x)), we simply append any
 		;; needed fact about %zXXX to the initial fact database. By appending to the initial context,
 		;; this fact is preserved after the solve process. Not sure about this....
 		(when (and
+			       (not $ask_mode)
 			       (some #'identity (mapcar #'(lambda (q) (get q 'integer-gentemp))
 							   (cdr ($listofvars cnd))))
-						 (not (or-p cnd)))
+					 (not (or-p cnd)))
 				 (mtell "Appending ~M to fact database. ~%" cnd)
 				 (let (($context '$initial) (context '$initial)) (mfuncall '$assume cnd))
 				 (setq answer t))
 
 		  (cond ((or (eql answer t) (eql answer nil)) answer)
-	  	   	  (t
+	  	   	  ($ask_mode
 		   	      (setq answer (retrieve `((mtext) ,(intl:gettext "Is ") ,cnd ,(intl:gettext "?")) nil))
 							;; The function 'assume' gives an error for attempting to assume an
 							;; 'or' expression. So we attempt to check if cnd is a valid input to
@@ -312,7 +318,11 @@
 					             nil)
 			      	     (t
 				              (mtell (intl:gettext "Acceptable answers are yes, y, Y, no, n, N. ~%"))
-				              (my-ask-boolean cnd)))))))
+				              (my-ask-boolean cnd))))
+							 (t
+								 (mtell (intl:gettext	"assuming ~M ~%") cnd)
+								 (mfuncall '$assume cnd)
+								 t))))
 
 ;;; Remove the members of sol that do not satisfy cnd. The members of the CL list sol have
 ;;; the form solution.multiplicity. The Maxima expression cnd is generally a conjunction
@@ -385,6 +395,8 @@
 		  		(setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
 		  		(simplifya (cons '(mlist) (mapcar #'car alist)) t)))))
 
+
+
 (defmvar $the_unsolved '(($set)));this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
@@ -392,12 +404,10 @@
 	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~%" e x m use-trigsolve))
 
 	(let ((cnd)) ; did have ($assume_pos nil), but why?
-	   (setq cnd (if $solve_ignores_conditions t (in-domain e)))
-		; (mtell "e = ~M; in domain = ~M; cnd = ~M ~%" e (in-domain e) cnd)
+	   (setq cnd (or (not $ask_mode) (in-domain e (list x))))
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
 		 (setq e (first e))
-		 ;(mtell "e = ~M; in domain = ~M; cnd = ~M ~%" e (in-domain e) cnd)
 		 (cond
 
 			 ((or (zerop1 e) (and (consp e) (consp (car e)) (eql 'mlabox (caar e)) (zerop1 (unkeep-float e))))
@@ -883,8 +893,7 @@
 	 (mfuncall '$reset '$multiplicities)
 	 (setq e (mapcar #'keep-float e)) ; protect floats in boxes.
 	 ;; collect the domain conditions in cnd.
-	 (setq cnd (or $solve_ignores_conditions
-		 (reduce #'(lambda (a b) (take '(mand) a b)) (mapcar #'in-domain e))))
+	 (setq cnd (reduce #'(lambda (a b) (take '(mand) a b)) (mapcar #'in-domain e)))
 	 ;; The second member of equation-simplify holds multiplicity data--thus extract just the first
 	 ;; member returned by equation-simplify.
  	 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
@@ -907,7 +916,7 @@
 	  			 (setq e ($setify e))
 	  			 (setq x ($setify x))
 	  			 (setq e (triangularize-eqs e x))
-	  			 (setq sol (let (($solve_ignores_conditions t)) (solve-triangular-system (cdr e) (cdr x))))
+	  			 (setq sol (solve-triangular-system (cdr e) (cdr x)))
 
 					 (cond ((and $solveexplicit (null sol))
 					          (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") e x)
@@ -944,10 +953,16 @@
 (defun solve (e x ms)
   (when $solveverbose
       (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
+
+;	(mtell "solving ~M  for ~M ~%" e x)
+;	(mtell "$contexts = ~M ~%" $contexts)
+;	(mtell "$context =~M context  = ~M ~%" $context context)
+;	(mtell "facts = ~M ~%" ($facts))
+
 	;(setq $list_of_equations ($adjoin (list '(mlist) e x) $list_of_equations)) ; debugging-like thing
 	(let ((sol) (mss)
-				($solve_inverse_package *function-inverses-alt*)
-				($solve_ignores_conditions t)
+				($solve_inverse_package *function-inverses-alt*) ;compatibilty mode
+				($ask_mode nil)
 				($use_to_poly t)
 				($algebraic t)
 				($gcd '$subres)
@@ -962,11 +977,12 @@
 				 ;; troublesome factor and allows solve to return %pi as a solution.
 
 				 ;; To allow the cancelation of (cos(x)+1)*sqrt(2/(cos(x)+1)) with ratsimp,
-				 ;; we need to set $domain to $real. All this is a bit scary.
-
+				 ;; we need to set $domain to $real. All this is a bit scary. Finally extracting
+				 ;; the numerator allows for some spurious solutions to sneak through.
 			   (let (($domain '$real))
 			 		  (setq e (apply-identities-xxx e))
-				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump)) ($logcontract e))))
+				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump)) ($logcontract e)))
+						(setq e ($num e)))
 
 				 (setq sol ($solve e x)) ; was solve-single-equation, but x can be a non-mapatom.
 				 (setq sol (reverse (cdr sol))) ; reverse makes this more consistent with standard solve.
@@ -976,6 +992,9 @@
 							 (t
 						  	  (mtell "Warning: multiplicities didn't get set solving ~M for ~M ~%" e x)
 							    (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))))
+
+        ;(mtell "sol = ~M ~%" (cons '(mlist) sol))
+				;(mtell "m = ~M ~%" (cons '(mlist) m))
 		  	(setq *roots nil)
 		  	(setq *failures nil)
 		  	(dolist (q sol)
@@ -986,7 +1005,6 @@
 				  	  (t
 			   	    	(push mss *roots)
 				      	(push q *roots))))
-
 		   (rootsort *roots)
 		   (rootsort *failures)
 		 nil))

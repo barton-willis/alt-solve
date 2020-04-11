@@ -1,4 +1,4 @@
-(reset(), load("unwind_protect"), solve_ignores_conditions : false, realonly : false,
+(reset(), load("unwind_protect"), ask_mode : true, realonly : false,
 ratprint : false, solve_inverse_package : multivalued_inverse, use_grobner : true,
 thyme : elapsed_run_time (), 0);
 0$
@@ -15,7 +15,7 @@ f(x)=sin(x)*(at('diff(f(x),x,1),x=0)-2)+f(0)*cos(x)+2*x$
 trigexpand(expand(subst(first(sol),sin(x)=1/2)));
 1/2 = 1/2$
 
-(sol : block([solve_ignores_conditions : true], solve(tan(x)=1,x)),0);
+(sol : block([ask_mode : false], solve(tan(x)=1,x)),0);
 0$
 
 trigexpand(expand(subst(first(sol),tan(x) = 1)));
@@ -176,16 +176,16 @@ block([solveexplicit : false], ratsimp(ssolve([x*cos(y)=9, x+y=12],[x,y])));
 
 /* regression--see bug #10 */
 
-block([solve_ignores_conditions : true], solve(-1 = sqrt(x),x));
+block([ask_mode : false], solve(-1 = sqrt(x),x));
 []$
 
-block([solve_ignores_conditions : true], solve(1 = sqrt(x),x));
+block([ask_mode : false], solve(1 = sqrt(x),x));
 [x=1]$
 
-block([solve_ignores_conditions : false], solve(-1 = sqrt(x),x));
+block([ask_mode : true], solve(-1 = sqrt(x),x));
 []$
 
-block([solve_ignores_conditions : false], solve(1 = sqrt(x),x));
+block([ask_mode : true], solve(1 = sqrt(x),x));
 [x=1]$
 
 /* And for fun: problems from ``A College Algebra,''  Henry Burchard Fine (1904)  */
@@ -244,5 +244,5 @@ integrate(log(t*(1-t))^5/(1-t),t,0,1/2)$
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
-(reset(), solve_ignores_conditions : true, remvalue(thyme), 0);
+(reset(), ask_mode : false, remvalue(thyme), 0);
 0$

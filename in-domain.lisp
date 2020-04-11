@@ -12,8 +12,7 @@
 	(not (alike1 a b)))
 
 (defun not-zerop (a)
-	(take '(mnotequal) a 0))
-;;;	(take '($notequal) a 0))
+   (take '(mnotequal) a 0))
 
 (mapcar #'(lambda (x) (setf (gethash (first x) *in-domain*) (second x)))
 		(list
@@ -58,14 +57,15 @@
 									        		 (take '(mor) (not-zerop a) (take '(mgreaterp) b 0)))))))))
 
 
-(defun $indomain(e)
-	(in-domain e))
+(defun $indomain(e x)
+	(in-domain e (cdr x)))
 
-(defun in-domain (e)
-	(let ((fn (and (consp e) (consp (car e)) (gethash (caar e) *in-domain*))))
-
-		 (cond
-			 (($mapatom e) t)
-			 (fn (let (($factor_max_degree 10) ($errormsg nil)) (apply fn (cdr e))))
-			 (t ;;assume operator is defined everywhere--return the conjunction of map in-domain onto argument list.
-			  (simplifya (cons '(mand) (mapcar #'in-domain (cdr e))) t)))))
+(defun in-domain (e &optional (x nil))
+    (let ((fn (and (consp e) (consp (car e)) (gethash (caar e) *in-domain*))))
+    	(standardize-inequality
+      	 (cond
+	      	 (($mapatom e) t)
+			  	 ((every #'(lambda (q) (not (among q e))) x) t)
+		       (fn (let (($factor_max_degree 10) ($errormsg nil)) (apply fn (cdr e))))
+	   	     (t ;;assume operator is defined everywhere--return the conjunction of map in-domain onto argument list.
+			       (simplifya (cons '(mand) (mapcar #'(lambda (q) (in-domain q x)) (cdr e))) t))))))
