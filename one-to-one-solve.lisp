@@ -34,10 +34,10 @@
 				      (setq sol0 (solve-single-equation c0 x ml use-trigsolve))
 							(setq mx0 $multiplicities)
 	            (setq sol1 (solve-single-equation
-								   (add kn0 kn1 (mul -2 '$%pi ($new_variable '$integer))) x ml use-trigsolve))
+								   (add kn0 kn1 (mul -2 '$%pi (my-new-variable '$integer))) x ml use-trigsolve))
 							(setq mx1 $multiplicities)
 			   		  (setq sol2 (solve-single-equation (add kn0 (mul -1 kn1)
-								   (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x ml use-trigsolve))
+								   (mul -2 '$%pi (sub (my-new-variable '$integer) (div 1 2)))) x ml use-trigsolve))
               (setq mx2 $multiplicities)
 							(merge-solutions sol0 mx0 t sol1 mx1 t sol2 mx2 t))
 
@@ -45,10 +45,10 @@
 							(setq sol0 ($solve c0 x))
 							(setq mx0 $multiplicities)
 							(setq sol1 (solve-single-equation
-								  (add kn0 kn1 (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x ml use-trigsolve))
+								  (add kn0 kn1 (mul -2 '$%pi (sub (my-new-variable '$integer) (div 1 2)))) x ml use-trigsolve))
               (setq mx1 $multiplicities)
 						  (setq sol2 (solve-single-equation
-								  (add kn0 (mul -1 kn1) (mul -2 '$%pi ($new_variable '$integer))) x ml use-trigsolve))
+								  (add kn0 (mul -1 kn1) (mul -2 '$%pi (my-new-variable '$integer))) x ml use-trigsolve))
               (setq mx2 $multiplicities)
 						  (merge-solutions sol0 mx0 t sol1 mx1 t sol2 mx2 t))
 				(t
@@ -64,11 +64,11 @@
 							(setq mx0 $multiplicities)
 
 	            (setq sol1 (solve-single-equation
-								   (add kn0 kn1 (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x ml use-trigsolve))
+								   (add kn0 kn1 (mul -2 '$%pi (sub (my-new-variable '$integer) (div 1 2)))) x ml use-trigsolve))
 							(setq mx1 $multiplicities)
 
 			   		  (setq sol2 (solve-single-equation  (add kn0 (mul -1 kn1)
-								   (mul -2 '$%pi (sub ($new_variable '$integer) (div 1 2)))) x ml use-trigsolve))
+								   (mul -2 '$%pi (sub (my-new-variable '$integer) (div 1 2)))) x ml use-trigsolve))
 							(setq mx2 $multiplicities)
 
 							(merge-solutions sol0 mx0 t sol1 mx1 t sol2 mx2 t))
@@ -78,11 +78,11 @@
 							(setq mx0 $multiplicities)
 
 							(setq sol1 (solve-single-equation
-								 (add kn0 kn1 (mul -2 '$%pi ($new_variable '$integer))) x ml use-trigsolve))
+								 (add kn0 kn1 (mul -2 '$%pi (my-new-variable '$integer))) x ml use-trigsolve))
 							(setq mx1 $multiplicities)
 
 						  (setq sol2 (solve-single-equation
-								 (add kn0 (mul -1 kn1) (mul -2 '$%pi ($new_variable '$integer))) x ml use-trigsolve))
+								 (add kn0 (mul -1 kn1) (mul -2 '$%pi (my-new-variable '$integer))) x ml use-trigsolve))
 							(setq mx2 $multiplicities)
 
 							(merge-solutions sol0 mx0 t sol1 mx1 t sol2 mx2 t))
@@ -101,7 +101,7 @@
                (setq ph (take '($atan2) c0 c1))
 				       (solve-single-equation
 								 (add kn0 ph (mul -1 (take '(%asin) (div b r)))
-									 (mul '$%pi ($new_variable '$integer))) x ml use-trigsolve))
+									 (mul '$%pi (my-new-variable '$integer))) x ml use-trigsolve))
 			    	(t
 			    		nil))))
 
@@ -117,7 +117,7 @@
     (let ((sol0) (mx0) (sol1) (mx1))
         (cond ((and (alike1 c0 c1) (zerop1 b)) ;; c0*tan(kn0) + c1*tan(kn1) = 0
                  (setq sol0 (solve-single-equation
-									    (add kn0 kn1 (mul '$%pi ($new_variable '$integer))) x ml use-trigsolve))
+									    (add kn0 kn1 (mul '$%pi (my-new-variable '$integer))) x ml use-trigsolve))
 				    		 (setq mx0 $multiplicities)
                  (setq sol1 (solve-single-equation c0 x ml use-trigsolve))
 				    		 (setq mx1 $multiplicities)
@@ -125,7 +125,7 @@
 
           ((and (alike1 c0 (mul -1 c1)) (zerop1 b)) ;; c0*tan(kn0) - c1*tan(kn1) = 0
 			    				(setq sol0 (solve-single-equation
-										(add kn0 (mul -1 kn1) (mul '$%pi ($new_variable '$integer))) x  ml use-trigsolve))
+										(add kn0 (mul -1 kn1) (mul '$%pi (my-new-variable '$integer))) x  ml use-trigsolve))
 						    	(setq mx0 $multiplicities)
                   (setq sol1 (solve-single-equation c0 x ml use-trigsolve))
 						     	(setq mx1 $multiplicities)
@@ -146,7 +146,7 @@
 					    	  (add
 							    	(take '(%log) (mul c0 kn0))
 					          (mul -1 (take '(%log) (mul -1 c1 kn1)))
-							    	(mul 2 '$%pi '$%i  ($new_variable '$integer)))))
+							    	(mul 2 '$%pi '$%i  (my-new-variable '$integer)))))
 			  	(solve-single-equation e x ml use-trigsolve))
 					(t
 						nil))))
