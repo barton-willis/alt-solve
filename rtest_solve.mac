@@ -386,7 +386,7 @@ block([fpprec : 85], bfloat(integrate(1/((x-3)^4+1/2),x,0,1)));
 2.880633385273844572659866883904278472612670378445974387483616903956696876077902739384b-2$
 
 block([solveradcan : true], ssolve((cos(x)+1)^10,x));
-[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi]$
+[x=2*%pi*%z0-%pi,x=2*%pi*%z1+%pi]$
 
 multiplicities;
 [10,10]$
@@ -594,7 +594,7 @@ block([ask_mode : false],ssolve(cot(x) = a,x));
 [x=acot(a)+%pi*%z0]$
 
 ssolve(cosh(x) = a,x);
-[x=2*%i*%pi*%z0-acosh(a),x=acosh(a)+2*%i*%pi*%z1]$
+[x=2*%i*%pi*%z1-acosh(a),x=acosh(a)+2*%i*%pi*%z0]$
 
 block([ask_mode : false], ssolve(sech(x) = a,x));
 [x=2*%i*%pi*%z1-acosh(1/a),x=acosh(1/a)+2*%i*%pi*%z0]$
@@ -1396,8 +1396,8 @@ block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
 block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
 [[a=%r1,x=((sqrt(2)*%i+sqrt(2))*%r1)/2],
 [a=%r2,x=((sqrt(2)*%i-sqrt(2))*%r2)/2],
-[a=%r3,x=-(((sqrt(2)*%i+sqrt(2))*%r3)/2)],
-[a=%r0,x=-(((sqrt(2)*%i-sqrt(2))*%r0)/2)]]$
+[a=%r3,x=-((sqrt(2)*%i+sqrt(2))*%r3)/2],
+[a=%r4,x=-((sqrt(2)*%i-sqrt(2))*%r4)/2]]$
 
 
 ssolve((x-1)/(x+1) = 1, [x]);
