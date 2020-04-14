@@ -60,12 +60,12 @@
 (defun $indomain(e x)
 	(in-domain e (cdr x)))
 
+;;; I would like to include a final call to standardize-inequality. But standardize-inequality
+;;; simplifies x^2+1 =/= 0 to true.
 (defun in-domain (e &optional (x nil))
-    (let ((fn (and (consp e) (consp (car e)) (gethash (caar e) *in-domain*))))
-    	(standardize-inequality
-      	 (cond
-	      	 (($mapatom e) t)
-			  	 ((every #'(lambda (q) (not (among q e))) x) t)
-					 (fn (apply fn (cdr e)))
-	   	     (t ;;assume operator is defined everywhere--return the conjunction of map in-domain onto argument list.
-			       (simplifya (cons '(mand) (mapcar #'(lambda (q) (in-domain q x)) (cdr e))) t))))))
+		(let ((fn (and (consp e) (consp (car e)) (gethash (caar e) *in-domain*))))
+				 (cond (($mapatom e) t)
+						 	 ((every #'(lambda (q) (not (among q e))) x) t)
+						 			 (fn (apply fn (cdr e)))
+						 	 (t ;;assume operator is defined everywhere--return the conjunction of map in-domain onto argument list.
+						 			 (simplifya (cons '(mand) (mapcar #'(lambda (q) (in-domain q x)) (cdr e))) t)))))
