@@ -633,10 +633,13 @@
     (setq subs (mapcar #'(lambda (a b c) (take '(mequal) a (mul c (power kernel b)))) e p-list consts))
     (simplifya (cons '(mlist) subs) t))))
 
+(defun cl-list-of-vars (e)
+	(cdr (let (($listconstvars nil)) ($listofvars e))))
+
 (defun checked-subst (eq e)
-   (let ((cnd (in-domain e)))
+   (let ((cnd (in-domain e (cl-list-of-vars e))))
 			(setq cnd (mfuncall '$is ($substitute eq cnd)))
-			(if (not cnd) (displa "Caught one!!!!!!!!!!"))
+	;;;;		(if (not cnd) (displa "Caught one!!!!!!!!!!"))
 			(if cnd ($substitute eq e) eq)))
 
 (defun solve-mexpt-equation-extra (e x m use-trigsolve)
@@ -893,7 +896,8 @@
 	 (mfuncall '$reset '$multiplicities)
 	 (setq e (mapcar #'keep-float e)) ; protect floats in boxes.
 	 ;; collect the domain conditions in cnd.
-	 (setq cnd (reduce #'(lambda (a b) (take '(mand) a b)) (mapcar #'in-domain e)))
+	 (setq cnd (reduce #'(lambda (a b) (take '(mand) a b))
+		    (mapcar #'(lambda (q) (in-domain q x)) e)))
 	 ;; The second member of equation-simplify holds multiplicity data--thus extract just the first
 	 ;; member returned by equation-simplify.
  	 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
