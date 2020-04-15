@@ -386,7 +386,7 @@ block([fpprec : 85], bfloat(integrate(1/((x-3)^4+1/2),x,0,1)));
 2.880633385273844572659866883904278472612670378445974387483616903956696876077902739384b-2$
 
 block([solveradcan : true], ssolve((cos(x)+1)^10,x));
-[x=2*%pi*%z0-%pi,x=2*%pi*%z1+%pi]$
+[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi]$
 
 multiplicities;
 [10,10]$
