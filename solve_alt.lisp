@@ -25,8 +25,9 @@
 (defmvar $use_to_poly t)
 
 ;;; When ask_mode is true, the function my-ask-boolean will prompt the user
-;;; for information and put that data into the factdata base in the current
-;;; context; when false,
+;;; for information whose truth value cannot be determined from assumed facts
+;;; and put that data into the fact database in the current context; when false,
+;;; my-ask-boolean assumes the fact is true.
 (defmvar $ask_mode t)
 
 (defun ask-mode-assign (a b)
@@ -194,11 +195,7 @@
 	 (unwind-protect
 	  (progn
 			(setq cntx ($supcontext)) ;make asksign and friends data vanish after exiting $solve.
-        (dolist (cx (cdr $contexts))
-				   (mfuncall '$activate cx)) ;not sure about this!
-
 		  (cond
-
 			  ((null varl)
 		  	   (when $solvenullwarn
 			   	    (mtell (intl:gettext "Solve: variable list is empty, continuing anyway.~%")))
@@ -269,10 +266,12 @@
 ;;; True iff the operator of e is mand.
 (defun and-p (e) (and (consp e)  (eql (caar e) 'mand)))
 
-;;; When "maybe" is unable to determine if the predicate "cnd" is either true or false,
-;;; ask the user.  In the current context, assume cnd or its negation, depending on the
-;;; input from the user. Return either true or false. Keep prompting for an answer until the
-;;; user gives a proper response (no, n, N, yes, y, Y).
+;;; When "maybe" is unable to determine if the predicate "cnd" is either true or false
+;;; and the option variable ask_mode is true, ask the user. In the current context,
+;;  assume cnd or its negation, depending on the input from the user. Keep prompting
+;;; the user until the user gives a proper response (no, n, N, yes, y, Y).
+
+;;; When ask_mode is false, append cnd to the current context.
 
 (defun my-ask-boolean (cnd)
   (setq cnd (to-poly-fixup cnd)) ;convert to-poly style to Maxima predicates
@@ -957,12 +956,6 @@
 (defun solve (e x ms)
   (when $solveverbose
       (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
-
-;	(mtell "solving ~M  for ~M ~%" e x)
-;	(mtell "$contexts = ~M ~%" $contexts)
-;	(mtell "$context =~M context  = ~M ~%" $context context)
-;	(mtell "facts = ~M ~%" ($facts))
-
 	;(setq $list_of_equations ($adjoin (list '(mlist) e x) $list_of_equations)) ; debugging-like thing
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*) ;compatibilty mode
@@ -997,8 +990,6 @@
 						  	  (mtell "Warning: multiplicities didn't get set solving ~M for ~M ~%" e x)
 							    (mapcar #'(lambda (q) (declare (ignore q)) 1) sol))))
 
-        ;(mtell "sol = ~M ~%" (cons '(mlist) sol))
-				;(mtell "m = ~M ~%" (cons '(mlist) m))
 		  	(setq *roots nil)
 		  	(setq *failures nil)
 		  	(dolist (q sol)
@@ -1009,8 +1000,8 @@
 				  	  (t
 			   	    	(push mss *roots)
 				      	(push q *roots))))
-		   (rootsort *roots)
-		   (rootsort *failures)
+		   ;(rootsort *roots)  not needed, I think
+		   ; (rootsort *failures)
 		 nil))
 
 ;;; This function solves x*exp(x) = constant. The match to x*exp(x) must be explicit; for example,
