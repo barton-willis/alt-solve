@@ -6,6 +6,9 @@
 
 (in-package :maxima)
 
+(defun my-real (e)
+   (try-to-crunch-to-zero (div (add e (take '($conjugate) e)) 2)))
+
 (defvar *function-inverses* (make-hash-table))
 
 (defun power-inverse-standard-xxx (q a)
@@ -139,7 +142,18 @@
 									(t (list (take '(%cot) q))))))
 
     ;; Maybe this should check if the -pi/2 < Re(q) <= pi/2
-		(list '%atan #'(lambda (q) (list (take '(%tan) q))))
+		(list '%atan #'(lambda (q)
+        (let ((qr (my-real q)) (cnd))
+					   (setq cnd
+							  (my-ask-boolean (take '(mand)
+						    	 (take '(mlessp) (div '$%pi -2) qr)
+						   	   (take '(mlessp) qr (div '$%pi 2)))))
+						(cond ((eql cnd t)
+						       	(list (take '(%tan) q)))
+								  (t
+										nil)))))
+
+
 
 
 		 (list '%sinh #'(lambda (q) (list

@@ -241,6 +241,35 @@ integrate(log((1-t)*t)^4/(1-t),t,0,1/2)$
 integrate(log(t*(1-t))^5/(1-t),t,0,1/2);
 integrate(log(t*(1-t))^5/(1-t),t,0,1/2)$
 
+/*tests for atan(X) = a equations */
+
+solve(atan(x) = 1/2,x);
+[x=tan(1/2)]$
+
+solve(atan(x) = %i,x);
+[x=%i*tanh(1)]$
+
+solve(atan(x) = 1/2+%i,x);
+[x=tan((2*%i+1)/2)]$
+
+solve(atan(x) = 1/2+107*%i,x);
+[x=tan((214*%i+1)/2)]$
+
+block([cnt : newcontext(),a],
+    unwind_protect(
+        (assume(-%pi/2 < a, a < %pi/2), solve(atan(x)=a,x)), killcontext(cnt)));
+[x=tan(a)]$
+
+block([cnt : newcontext(),a],
+	    unwind_protect(
+	        (assume(a > %pi/2), solve(atan(x)=a,x)), killcontext(cnt)));
+[]$
+
+block([cnt : newcontext(),a],
+	    unwind_protect(
+	        (assume(a < -%pi/2), solve(atan(x)=a,x)), killcontext(cnt)));
+[]$
+               
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
