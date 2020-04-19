@@ -9,6 +9,9 @@
 (defun my-real (e)
    (try-to-crunch-to-zero (div (add e (take '($conjugate) e)) 2)))
 
+(defun my-imag (e)
+	 (try-to-crunch-to-zero (div (sub e (take '($conjugate) e)) (mul 2 '$%i))))
+
 (defvar *function-inverses* (make-hash-table))
 
 (defun power-inverse-standard-xxx (q a)
@@ -141,13 +144,22 @@
 								(cond ((zerop1 q) (list))
 									(t (list (take '(%cot) q))))))
 
-    ;; Maybe this should check if the -pi/2 < Re(q) <= pi/2
 		(list '%atan #'(lambda (q)
-        (let ((qr (my-real q)) (cnd))
+        (let ((qr (my-real q)) (qi (my-imag q)) (cnd))
+				     ;;require -pi/2 < Re(q) <= pi/2 or Re(q)=-pi/2 & Im(q) <  0 or Re(q)=pi/2 & Im(q) > 0
 					   (setq cnd
-							  (my-ask-boolean (take '(mand)
-						    	 (take '(mlessp) (div '$%pi -2) qr)
-						   	   (take '(mlessp) qr (div '$%pi 2)))))
+							  (my-ask-boolean
+									(take '(mor)
+							   	 	  (take '(mand)
+						     	       (take '(mlessp) (div '$%pi -2) qr)
+						   	         (take '(mlessp) qr (div '$%pi 2)))
+											(take '(mand)
+													(take '(mequal) qr (div '$%pi -2))
+													(take '(mlessp) qi 0))
+											(take '(mand)
+													(take '(mequal) qr (div '$%pi 2))
+													(take '(mlessp) 0 qi)))))
+
 						(cond ((eql cnd t)
 						       	(list (take '(%tan) q)))
 								  (t
