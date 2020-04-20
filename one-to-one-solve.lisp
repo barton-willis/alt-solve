@@ -170,9 +170,21 @@
 							(sub kn0 (power (div (sub (power 5 (div 1 2)) 1) 2) (div 1 2)))
 							 x ml use-trigsolve))
 				  (t nil)))
-
 (setf (gethash (list '%acos '%atan) *one-to-one-reduce*) #'acos-atan-solve)
 (setf (gethash (list '%atan '%acos) *one-to-one-reduce*) #'acos-atan-solve)
+
+;; attempt to solve c0*abs(kn0) + c1*abs(kn1) + b = 0 for x
+(defun abs-abs-solve  (x c0 kn0 c1 kn1 b &optional (ml 1) (use-trigsolve nil))
+   (cond ((and (alike c0 (mul -1 c1)) (zerop1 b)) ;; looking at |kn0| = |kn1|
+					(let ((sol0) (sol1) (mx0) (mx1))
+							(setq sol0 (solve-single-equation (sub kn0 kn1) x ml use-trigsolve))
+							(setq mx0 $multiplicities)
+							(setq sol1 (solve-single-equation (add kn0 kn1) x ml use-trigsolve))
+							(setq mx1 $multiplicities)
+							(merge-solutions sol0 mx0 t sol1 mx1 t)))
+				(t nil)))
+
+(setf (gethash (list 'mabs 'mabs) *one-to-one-reduce*) #'abs-abs-solve)
 
 (defun kernelize-fn (e fn &optional (subs nil))
 		(let ((g (gensym)) (kn nil) (xop) (xk) (eargs nil))
@@ -246,7 +258,7 @@
 	           (and
 						  	(consp e)
 						  	(consp (car e))
-						  	(member (caar e) (list '%sin '%cos '%tan '%log 'mexpt '%atan '%asin '%acos) :test #'eql))))
+						  	(member (caar e) (list '%sin '%cos '%tan '%log 'mexpt '%atan '%asin '%acos 'mabs) :test #'eql))))
 		     	  (setq ee (kernelize-fn e #'is-a-kernel))
 		    		(setq subs (second ee))
 						(setq gvars (mapcar #'cdr subs)) ;CL

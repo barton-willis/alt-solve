@@ -2,10 +2,78 @@
 ratprint : false, solve_inverse_package : multivalued_inverse, 0);
 0$
 
+/* conjugate */
+
+
+(declare(z,complex,q,complex),0);
+0$
+
+ssolve(conjugate(z)=1,z);
+[z=1]$
+
+ssolve(conjugate(z)=-1,z);
+[z=-1]$
+
+ssolve(conjugate(z)=%i,z);
+[z=-%i]$
+
+ssolve(conjugate(z)=a+%i*b,z);
+[z=a-%i*b]$
+
+ssolve(conjugate(z)=q,z);
+[z=conjugate(q)]$
+
+ssolve(conjugate(z)=-q,z);
+[z=-conjugate(q)]$
+
+ssolve(conjugate(z) = conjugate(q),z);
+[z=q]$
+
+ssolve(conjugate(z) = conjugate(z),z);
+[z=%c0]$
+
+ssolve(conjugate(z) = 1,z);
+[z=1]$
+
+ssolve(5*conjugate(z) = 107,z);
+[z=107/5]$
+
+(remove(z,complex), remove(q,complex),0);
+0$
+
+/* abs */
+
+block([cnt : newcontext()],
+	        (unwind_protect (
+	           (assume(a > 0), ssolve(abs(x)=a,x)),
+	           killcontext(cnt))));
+[x=-a,x=a]$
+
+block([cnt : newcontext()],
+	        (unwind_protect (
+	           (assume(a > 0), ssolve(abs(x)=-a,x)),
+	           killcontext(cnt))));
+[]$
+
+ssolve(abs(x) = %i,x);
+[]$
+
+ssolve(abs(x) = 5+%i,x);
+[]$
+
+ssolve(abs(x) = abs(a),x);
+[x=-a,x=a]$
+
+block([%rnum : 28], solve(abs(x) = abs(x),x));
+[x=%r28]$
+
+ssolve(abs(x) = abs(1-x/2),x);
+[x=2/3,x=-2]$
+
 /* inverse sine */
 
 ssolve(sin(x)=-1,x);
-[x=(4*%pi*%z0+3*%pi)/2,x=(4*%pi*%z1-%pi)/2]$
+[x=(4*%pi*%z0-%pi)/2,x=(4*%pi*%z1+3*%pi)/2]$
 
 ssolve(sin(x)=1,x);
 [x=(4*%pi*%z0+%pi)/2]$
@@ -14,7 +82,16 @@ ssolve(sin(x)=0,x);
 [x=%pi*%z0]$
 
 ssolve(sin(x)=a,x);
-[x=-asin(a)+2*%pi*%z1+%pi,x=asin(a)+2*%pi*%z0]$
+[x=-asin(a)+2*%pi*%z0+%pi,x=asin(a)+2*%pi*%z1]$
+
+ssolve(sin(x)=sin(a),x);
+[x=-a+2*%pi*%z0-%pi,x=a+2*%pi*%z1]$
+
+block([%rnum : 0], ssolve(sin(x)=sin(x),x));
+[x=%r0]$
+
+ssolve(sin(x)=sin(-x),x);
+[x=%pi*%z0]$
 
 /* inverse csc */
 ssolve(csc(x)=-1,x);
