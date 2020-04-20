@@ -6,11 +6,17 @@
 
 (in-package :maxima)
 
+(defun mm< (a b) (take '(mlessp) a b))
+(defun mm<= (a b) (take '(mleqp) a b))
+(defun mm= (a b) (take '(mequal) a b))
+
 (defun my-real (e)
-   (try-to-crunch-to-zero (div (add e (take '($conjugate) e)) 2)))
+   ;(try-to-crunch-to-zero (div (add e (take '($conjugate) e)) 2)))
+	 ($realpart e))
 
 (defun my-imag (e)
-	 (try-to-crunch-to-zero (div (sub e (take '($conjugate) e)) (mul 2 '$%i))))
+	 ;(try-to-crunch-to-zero (div (sub e (take '($conjugate) e)) (mul 2 '$%i))))
+	 ($imagpart e))
 
 (defvar *function-inverses* (make-hash-table))
 
@@ -136,9 +142,43 @@
 		 ;; a fairly crabbed way--would need -pi/2 < Re(q) < pi/2 or Re(q)=-pi/2 and Im(q) >= 0 or
 		 ;; Re(q) = pi/2 and Im(q) < 0. Much the same applies for the other inverse functions.
 
-		 (list '%asin #'(lambda (q) (list (take '(%sin) q))))
+		 (list '%asin #'(lambda (q)
+   	 	  (let ((qr (my-real q)) (qi (my-imag q)) (cnd))
+					;;require -pi/2 <= Re(q) <= pi/2 or Re(q)=-pi/2 & Im(q) >=  0 or Re(q) = pi/2 & Im(q) <= 0
+					(setq cnd
+						 (my-ask-boolean
+							 (take '(mor)
+									 (take '(mand)
+											 (mm< (div '$%pi -2) qr)
+										   (mm< qr (div '$%pi 2)))
+									 (take '(mand)
+											 (mm= qr (div '$%pi -2))
+											 (mm<= 0 qi))
+									 (take '(mand)
+											 (mm= qr (div '$%pi 2))
+											 (mm<= qi 0)))))
+				 (cond ((eql cnd t) (list (take '(%sin) q)))
+							 (t nil)))))
 
-		 (list '%acos #'(lambda (q) (list (take '(%cos) q))))
+		 (list '%acos #'(lambda (q) (let ((qr (my-real q)) (qi (my-imag q)) (cnd))
+				 ;;require 0 < Re(q) < pi or Re(q)=0 & Im(q) >= 0 or Re(q)=pi & Im(q) <= 0
+				 (setq cnd
+						(my-ask-boolean
+							(take '(mor)
+									(take '(mand)
+										 (take '(mlessp) 0 qr)
+										 (take '(mlessp) qr '$%pi))
+
+									(take '(mand)
+											(take '(mequal) qr 0)
+											(take '(mgeqp) qi 0))
+
+									(take '(mand)
+											(take '(mequal) qr '$%pi)
+											(take '(mgreqp) 0 qi)))))
+
+				(cond ((eql cnd t) (list (take '(%cos) q)))
+							(t nil)))))
 
 		 (list '%acot #'(lambda (q)
 								(cond ((zerop1 q) (list))
@@ -151,22 +191,19 @@
 							  (my-ask-boolean
 									(take '(mor)
 							   	 	  (take '(mand)
-						     	       (take '(mlessp) (div '$%pi -2) qr)
-						   	         (take '(mlessp) qr (div '$%pi 2)))
+						     	       (mm< (div '$%pi -2) qr)
+						   	         (mm<= qr (div '$%pi 2)))
 											(take '(mand)
-													(take '(mequal) qr (div '$%pi -2))
-													(take '(mlessp) qi 0))
+													(mm= qr (div '$%pi -2))
+													(mm< qi 0))
 											(take '(mand)
-													(take '(mequal) qr (div '$%pi 2))
-													(take '(mlessp) 0 qi)))))
+													(mm= qr (div '$%pi 2))
+													(mm< qi 0)))))
 
 						(cond ((eql cnd t)
 						       	(list (take '(%tan) q)))
 								  (t
 										nil)))))
-
-
-
 
 		 (list '%sinh #'(lambda (q) (list
 									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%asinh) q))
@@ -183,7 +220,6 @@
 									(list
 									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%acosh) (div 1 q)))
 									 (sub (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%acosh) (div 1 q)))))))
-
 
 		 (list '%csch #'(lambda (q) (list
 									 (add (mul 2 '$%pi '$%i (my-new-variable '$integer)) (take '(%acsch) (div 1 q)))
@@ -209,9 +245,24 @@
 		 (list '%asech #'(lambda (q) (list (take '(%sech) q))))
 		 (list '%acoth #'(lambda (q) (list (take '(%coth) q))))
 
-		 ;; could be super strict and require -pi < q <= pi.
-		 (list '%log  #'(lambda (q) (list (take '(mexpt) '$%e q))))
-		 (list '%plog  #'(lambda (q) (list (take '(mexpt) '$%e q))))))
+		 ;; Require -pi < Im(q) <= pi.
+		 (list '%log  #'(lambda (q)
+           (let ((qi (my-imag q)) (cnd))
+						  (setq cnd
+								(my-ask-boolean
+					   	  		(take '(mand) ;;require -pi < Im(q) <= pi.
+								       (mm< (mul -1 '$%pi) qi)
+								       (mm<= qi '$%pi))))
+			(if cnd (list (take '(mexpt) '$%e q)) nil))))
+
+		 (list '%plog  #'(lambda (q)
+			 (let ((qi (my-imag q)) (cnd))
+				 (setq cnd
+					 (my-ask-boolean
+							 (take '(mand) ;;require -pi < Im(q) <= pi.
+									(mm< (mul -1 '$%pi) qi)
+									(mm<= qi '$%pi))))
+				(if cnd (list (take '(mexpt) '$%e q)) nil))))))
 
 (defvar *function-inverses-alt* (make-hash-table))
 
