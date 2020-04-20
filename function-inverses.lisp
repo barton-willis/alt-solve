@@ -6,6 +6,7 @@
 
 (in-package :maxima)
 
+;;;because I can't remember mlessp, mleqp, and ...
 (defun mm< (a b) (take '(mlessp) a b))
 (defun mm<= (a b) (take '(mleqp) a b))
 (defun mm= (a b) (take '(mequal) a b))
@@ -95,9 +96,6 @@
 															(add (take '(%log) q)
 																		(mul 2 '$%pi '$%i (my-new-variable '$integer))))))))))
 
-
-
-
 		  (list '%sin #'(lambda (q)
 								(cond ((zerop1 q)
 										(list (mul '$%pi (my-new-variable '$integer))))
@@ -128,19 +126,14 @@
 								 (sub (mul 2 '$%pi (my-new-variable '$integer)) (take '(%asec) q))))))
 
 		 (list '%tan #'(lambda (q)
-							   (cond
-								   ((zerop1 (add 1 (mul q q))) (list))
-								   (t (list (add (mul '$%pi (my-new-variable '$integer)) (take '(%atan) q)))))))
+								 (cond  ((zerop1 (add 1 (mul q q))) (list))
+								         (t (list (add (mul '$%pi (my-new-variable '$integer)) (take '(%atan) q)))))))
 
 		 (list '%cot #'(lambda (q)
 							   (cond
 								   ((zerop1 (add 1 (mul q q))) (list))
 								   (t
 									(list (add (mul '$%pi (my-new-variable '$integer)) (take '(%acot) q)))))))
-
-		 ;; This is OK if asin is multivalued, I guess. Otherwise, it needs to be conditionalized in
-		 ;; a fairly crabbed way--would need -pi/2 < Re(q) < pi/2 or Re(q)=-pi/2 and Im(q) >= 0 or
-		 ;; Re(q) = pi/2 and Im(q) < 0. Much the same applies for the other inverse functions.
 
 		 (list '%asin #'(lambda (q)
    	 	  (let ((qr (my-real q)) (qi (my-imag q)) (cnd))
