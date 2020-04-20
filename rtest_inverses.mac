@@ -1,0 +1,33 @@
+(load("unwind_protect"), ask_mode : true, realonly : false,
+ratprint : false, solve_inverse_package : multivalued_inverse, 0);
+0$
+
+/* inverse sine */
+
+ssolve(sin(x)=-1,x);
+[x=(4*%pi*%z0+3*%pi)/2,x=(4*%pi*%z1-%pi)/2]$
+
+ssolve(sin(x)=1,x);
+[x=(4*%pi*%z0+%pi)/2]$
+
+ssolve(sin(x)=0,x);
+[x=%pi*%z0]$
+
+ssolve(sin(x)=a,x);
+[x=-asin(a)+2*%pi*%z1+%pi,x=asin(a)+2*%pi*%z0]$
+
+/* inverse csc */
+ssolve(csc(x)=-1,x);
+[x=(4*%pi*%z0-%pi)/2,x=(4*%pi*%z1+3*%pi)/2]$
+
+ssolve(csc(x)=1,x);
+[x=(4*%pi*%z0+%pi)/2]$
+
+ssolve(csc(x)=a,x);
+[x=-acsc(a)+2*%pi*%z1+%pi,x=acsc(a)+2*%pi*%z0]$
+
+ssolve(csc(x)=2,x);
+[x=(12*%pi*%z0+%pi)/6,x=(12*%pi*%z1+5*%pi)/6]$
+
+ssolve(csc(x)=csc(2),x);
+[x=2*%pi*%z0+%pi-2,x=2*%pi*%z1+2]$

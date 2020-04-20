@@ -107,11 +107,13 @@
 										 (add (mul 2 '$%pi (my-new-variable '$integer)) (sub '$%pi (take '(%asin) q))))))))
 
 		 (list '%csc #'(lambda (q)
-							   (if (zerop1 q)
-								   (list)
-								   (list
-									(add (mul 2 '$%pi (my-new-variable '$integer)) (take '(%acsc) q))
-									(add (mul 2 '$%pi (my-new-variable '$integer)) (sub '$%pi (take '(%acsc) q)))))))
+		           (cond ((zerop1 q) nil)
+								     ((onep1 q)
+										  (list (div (add (mul 4 '$%pi (my-new-variable '$integer)) '$%pi) 2)))
+										(t
+								     (list
+							   	 	   (add (mul 2 '$%pi (my-new-variable '$integer)) (take '(%acsc) q))
+							       	 (add (mul 2 '$%pi (my-new-variable '$integer)) (sub '$%pi (take '(%acsc) q))))))))
 
 		  (list '%cos #'(lambda (q)
 								(if (eql q 1) (list (mul 2 '$%pi (my-new-variable '$integer)))

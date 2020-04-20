@@ -20,4 +20,6 @@ push("rtest_polynomial_solve",testsuite_files)$
 
 push(["rtest_wester_equations", [14, 15, 31, 32, 55, 58, 65]], testsuite_files)$
 
+push("rtest_inverses",testsuite_files)$
+
 run_testsuite(share_tests = false, display_known_bugs = true, time=true);
