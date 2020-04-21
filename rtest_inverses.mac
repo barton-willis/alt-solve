@@ -61,14 +61,30 @@ ssolve(abs(x) = %i,x);
 ssolve(abs(x) = 5+%i,x);
 []$
 
-ssolve(abs(x) = abs(a),x);
-[x=-a,x=a]$
+block([cnt : newcontext()],
+(unwind_protect (
+	 (assume(notequal(a,0)), ssolve(abs(x)=abs(a),x)),
+	 killcontext(cnt))));
+[x=-abs(a),x=abs(a)]$
 
 block([%rnum : 28], solve(abs(x) = abs(x),x));
 [x=%r28]$
 
 ssolve(abs(x) = abs(1-x/2),x);
 [x=2/3,x=-2]$
+
+solve(28*abs(x-1) + abs(x-5) = 10,x);
+[x=23/29,x=11/9]$
+
+block([cntx : newcontext()],
+    unwind_protect(
+        (assume(a > 5/2), ssolve(a*abs(x-1) + abs(x-5) = 10,x)), killcontext(cntx)));
+[x=(a+5)/(a-1),x=(a-5)/(a+1)]$
+
+block([cntx : newcontext()],
+	    unwind_protect(
+	        (assume(1 < a, a < 5/2), ssolve(a*abs(x-1) + abs(x-5) = 10,x)), killcontext(cntx)));
+[x=(a+15)/(a+1),x=(a-5)/(a+1)]$
 
 /* inverse sine */
 

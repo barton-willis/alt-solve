@@ -48,6 +48,11 @@
 						($new_variable knd))
 				(msetq $context cntx))))
 
+;;;Because I can't remember mlessp, mleqp, and ...
+(defun mm< (a b) (take '(mlessp) a b))
+(defun mm<= (a b) (take '(mleqp) a b))
+(defun mm= (a b) (take '(mequal) a b))
+
 ;;; Load all need files--maybe SBCL still needs to be in interpret mode.
 
 #+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)

@@ -6,11 +6,6 @@
 
 (in-package :maxima)
 
-;;;because I can't remember mlessp, mleqp, and ...
-(defun mm< (a b) (take '(mlessp) a b))
-(defun mm<= (a b) (take '(mleqp) a b))
-(defun mm= (a b) (take '(mequal) a b))
-
 (defun my-real (e)
    ;(try-to-crunch-to-zero (div (add e (take '($conjugate) e)) 2)))
 	 ($realpart e))
