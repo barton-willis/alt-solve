@@ -86,6 +86,56 @@ block([cntx : newcontext()],
 	        (assume(1 < a, a < 5/2), ssolve(a*abs(x-1) + abs(x-5) = 10,x)), killcontext(cntx)));
 [x=(a+15)/(a+1),x=(a-5)/(a+1)]$
 
+/* signum */
+ssolve(signum(x)=0,x);
+[x=0]$
+
+ssolve(signum(x)=1,x);
+[x=%e^%r0]$
+
+ssolve(signum(x)=-1,x);
+[x=-%e^%r0]$
+
+ssolve(signum(x)=%i,x);
+[x=%i*%e^%r0]$
+
+ssolve(signum(x)=-%i,x);
+[x=-%i*%e^%r0]$
+
+ssolve(signum(x)=107,x);
+[]$
+
+ssolve(signum(x)=107 + %i,x);
+[]$
+
+ssolve(signum(x-42)=1,x);
+[x=%e^%r0+42]$
+
+ssolve(signum(x-42)=-1,x);
+[x=42-%e^%r0]$
+
+/* unit_step */
+
+ssolve(unit_step(x)=-1,x);
+[x=-%e^%r0]$
+
+ssolve(unit_step(x)=0,x);
+[x=-%e^%r0]$
+
+ssolve(unit_step(x)=1,x);
+[x=%e^%r0]$
+
+ssolve(unit_step(x)=%i,x);
+[]$
+
+block([cntx : newcontext()], unwind_protect((assume(a <=0),
+    ssolve(unit_step(x)=a,x)), killcontext(cntx)));
+[x=-%e^%r0]$
+
+block([cntx : newcontext()], unwind_protect((assume(a  > 0),
+    ssolve(unit_step(x)=a,x)), killcontext(cntx)));
+[x=%e^%r0]$
+
 /* inverse sine */
 
 ssolve(sin(x)=-1,x);

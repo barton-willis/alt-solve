@@ -226,6 +226,22 @@
 
 		 (list '$conjugate #'(lambda (q) (list (take '($conjugate) q))))
 
+		 (list '%signum #'(lambda (q)
+		      (let ((qmag (sratsimp (mul q (take '($conjugate) q)))))
+					(cond ((my-ask-boolean (mm= qmag 1))
+					       (list (mul (take '(mexpt) '$%e (my-new-variable '$real)) q)))
+							((my-ask-boolean (mm= qmag 0))
+							   (list 0))
+						  (t
+								 nil)))))
+
+     (list '$unit_step #'(lambda (q)
+			   (cond ((my-ask-boolean (mm= q (take '($conjugate) q)))
+				         (if (my-ask-boolean (mm<= q 0))
+							    (list (mul -1 (take '(mexpt) '$%e (my-new-variable '$real))))
+								  (list (take '(mexpt) '$%e (my-new-variable '$real)))))
+							 (t nil))))
+
 		 ;; not sure about all these....
 		 (list '%asinh #'(lambda (q) (list (take '(%sinh) q))))
 		 (list '%acosh #'(lambda (q) (list (take '(%cosh) q))))
