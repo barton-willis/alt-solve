@@ -71,6 +71,7 @@
 
 (mapcar #'(lambda (x) (setf (gethash (first x) *function-inverses*) (second x)))
 		(list
+
 		 ; a^X=q --> if q=0 then empty else
 		 (list 'exponential-inverse #'(lambda (q a)
 											  (cond ((zerop1 q) nil)
@@ -82,8 +83,7 @@
 		  (list 'power-inverse #'power-inverse-standard)
 
 		 ; x^x = q -->
-		 (list 'lambert-like-inverse #'(lambda (q a)
-											   (declare (ignore a))
+		 (list 'lambert-like-inverse #'(lambda (q)
 											   (cond
 												   ((zerop1 q) nil)
 												   (t

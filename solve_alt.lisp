@@ -398,8 +398,6 @@
 		  		(setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
 		  		(simplifya (cons '(mlist) (mapcar #'car alist)) t)))))
 
-
-
 (defmvar $the_unsolved '(($set)));this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
@@ -453,6 +451,51 @@
 				   (setq $multiplicities (take '(mlist) m))
 				   (take '(mlist) (take '(mequal) ker (sub ker e))))))))
 
+;;; For a given function fun, kernel ker, and variable x, return the inverse
+;;; of fun and the adjusted kernel. Examples:
+
+;;; When fun is a function of one variable, the adjusted kernel is the argument of ker:
+;;;  fun = %sin, ker = sin(x-1), x = x  --> (asin  x-1)
+
+;;; When fun is a function of two or more variables, for example mexpt, we have
+;;;  fun = mexpt, ker = 5^x, x = x --> (q -> (log q)/(log 5), x)  (adjusted kernel is x)
+;;;  fun = mexpt, ker = (3x)^5, x = x --> (q -> q^(1/5), 3x)  (adjusted kernel is 3x)
+;;;  fun = mexpt, ker = (6x)^(6x), x = x --> (q -> lambert_w (....), 6x)
+
+;;; Yes, fun and ker have redundant data (because fun is the caar of ker). But OK.
+
+(defun solve-get-inverse (fun ker x)
+    (let ((fn))
+       (cond
+				 ((eql fun 'mexpt)
+		        (cond ((alike1 (second ker) (third ker)) ;looking at x^x = b
+					          (list
+											(gethash 'lambert-like-inverse $solve_inverse_package)
+											(second ker)))
+
+							 	 ((among x (second ker)) ;looking at x^a = b
+									      (print "case 2")
+									  (setq fn (gethash 'power-inverse $solve_inverse_package))
+										(list
+											#'(lambda (q) (funcall fn q (third ker)))
+											(second ker)))
+
+								 ((among x (third ker)) ;looking at a^x = b
+									   (print "case 3")
+										 (setq fn (gethash 'exponential-inverse $solve_inverse_package))
+										 (list
+											 #'(lambda (q) (funcall fn q (second ker)))
+											 (third ker)))))
+
+									;	 (list
+										;	 #'(lambda (q)
+                    ;       (if (zerop1 q) nil
+										;		 (list (div (take '(%log) q) (take '(%log) (second ker))))))
+										;	 (third ker)))))
+				 (t	(list
+					      (gethash fun $solve_inverse_package)
+								(second ker))))))
+
 ;;; This function attempts to identify a term F(x) such e is a function of only F(x). And when it is,
 ;;; first solve for F(x), and second solve for x. The function F has a known inverse. Unifying the
 ;;; cases, for example,  of F(x) = x^a and F(x) = cos(x) is problematic. Maybe these cases can be unified,
@@ -478,14 +521,19 @@
 					 (setq $multiplicities (mapcar #'(lambda (s) 1) sol)))
 				(setq mult-save (mapcar #'(lambda (q) (mult m q)) (cdr $multiplicities)))
 				(setq sol (mapcar #'third (cdr sol)))  ;third = $rhs
-				(setq fun-inverse (gethash fun $solve_inverse_package))
+
+				;; Return the inverse of the function fun and the adjusted kernel. For
+				;; and explanation and examples, see the documentation for solve-get-inverse.
+        (setq fun-inverse (solve-get-inverse fun ker x))
+        (setq ker (second fun-inverse))
+				(setq fun-inverse (first fun-inverse))
 				;; after this, sol is a list of lists
-				(setq sol (mapcar #'(lambda (q) (apply fun-inverse (list q))) sol))
+		    (setq sol (mapcar #'(lambda (q) (apply fun-inverse (list q))) sol))
+
 				(setq mult-save (mapcar #'(lambda (a b)
 											(mapcar #'(lambda (c) (declare (ignore c)) b) a)) sol mult-save))
 
 				(setq sol (reduce #'append sol))
-				(setq ker (second ker))
 				(setq mult-save (reduce #'append mult-save))
 				(setq sol (mapcar #'(lambda (q) (take '(mequal) ker q)) sol))
 
@@ -508,17 +556,24 @@
 				(simplifya (cons '(mlist) acc) t))
 			 (t nil))))
 
-(defun kernelize (e x &optional (subs nil))
-  (when $solveverbose
-		(mtell "Top of kernelize; e = ~M  x = ~M ~%" e x)
-		(print `(e = ,e))
-		(print `(x = ,x)))
+;; is-a-kernel exception for a^b.  We requre that either a=b or only one of
+;; a or b depends on x. For example, 5^x, or x^5, or x^x are OK as kernels.
+;; But x^sin(x) isn't an OK kernel.
+(defun invertible-mexptp (e x)
+    (and (mexptp e)
+	      	(or
+							(and (among x (second e)) (not (among x (third e))))
+							(and (not (among x (second e))) (among x (third e)))
+							(alike1 (second e) (third e)))))
 
+(defun kernelize (e x &optional (subs nil))
 	(let ((g (gensym)) (kn nil) (xop) (xk) (eargs) (is-a-kernel))
 	   (setq is-a-kernel (and
 			                   (consp e)
 												 (consp (car e))
-												 (gethash (caar e) $solve_inverse_package)
+												 (or
+													  (gethash (caar e) $solve_inverse_package)
+														(invertible-mexptp e x))
 												 (among x e)))
 		 (cond
 			 (($mapatom e) (list e subs))
@@ -553,10 +608,8 @@
 
 (defun solve-mexpt-equation (e x m use-trigsolve)
 	(let ((kernels) (ker) (ee) (g (gensym)) (zz) (xx) (finv nil) (sol))
-    (when $solveverbose
-			(mtell "Top of solve-mexpt-equation ~%")
-			(print `(e = ,e x = ,x))
-			($read ))
+    (when (or t $solveverbose)
+			(mtell "Top of solve-mexpt-equation  e = ~M x = ~M ~%" e x))
 		;;gather all terms in e of the form X^Y into a list of the form [[X1,Y1], ... [Xn,Yn]]
 	  (setq kernels	(cdr ($gatherargs e 'mexpt))) ;remove '(mlist)
     (setq kernels (remove-if #'(lambda (q) ($freeof x q)) kernels))
