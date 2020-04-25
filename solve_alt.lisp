@@ -97,14 +97,21 @@
 (defmvar *big-float-box-label* (gensym))
 
 (defun keep-float (e) "Convert floats and big floats to rational form and put them inside labeled boxes."
-    (cond
-        (($mapatom e)
-         (cond ((floatp e)
-                (take '(mlabox) ($rationalize e) *float-box-label*))
+    (let ((xx) (ee))
+      (cond
+         (($mapatom e)
+          (cond ((floatp e)
+					        (setq xx ($rationalize e))
+					  			(setq ee (take '(mlabox) xx *float-box-label*))
+						  		(mfuncall '$assume (take '($equal) ee xx))
+                  ee)
                (($bfloatp e)
-                (take '(mlabox) ($rationalize e) *big-float-box-label*))
+						  	  (setq xx ($rationalize e))
+                  (setq ee (take '(mlabox) ($rationalize e) *big-float-box-label*))
+					  			(mfuncall '$assume (take '($equal) ee xx))
+						  		ee)
                (t e)))
-        (t (simplifya (cons (list (caar e)) (mapcar #'keep-float (cdr e))) t))))
+        (t (simplifya (cons (list (caar e)) (mapcar #'keep-float (cdr e))) t)))))
 
 ;;; In expression e, convert all labeled boxes that contain floats but to float form.
 (defun unkeep-float (e) "Convert numbers in labeled float boxes back to float numbers."
