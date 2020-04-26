@@ -573,20 +573,28 @@
 							(and (not (among x (second e))) (among x (third e)))
 							(alike1 (second e) (third e)))))
 
+(defun kernel-p (e x)
+   (or
+		 (and ;; e = F(X), where F has a known inverse and X depends on x.
+			 (consp e)
+	  	 (consp (car e))
+			 (gethash (caar e) $solve_inverse_package)
+			 (among x e))
+
+			(and
+				 (mexptp e) ;; e = a^X, e=X^b, or e=X^X, where X depends on x.
+	 	      	(or
+	 							(and (among x (second e)) (not (among x (third e))))
+	 							(and (not (among x (second e))) (among x (third e)))
+	 							(alike1 (second e) (third e))))))
+
 (defun kernelize (e x &optional (subs nil))
   ;(mtell "Top of kernelize; e = ~M ~%" e)
-	(let ((g (gensym)) (kn nil) (xop) (xk) (eargs) (is-a-kernel))
-	   (setq is-a-kernel (and
-			                   (consp e)
-												 (consp (car e))
-												 (or
-													  (gethash (caar e) $solve_inverse_package)
-														(invertible-mexptp e x))
-												 (among x e)))
+	(let ((g (gensym)) (kn nil) (xop) (xk) (eargs))
 		 (cond
 			 (($mapatom e) (list e subs))
 
-			  (is-a-kernel
+			  ((kernel-p e x)
 			   (setq kn (assoc e subs :test #'alike1)) ;is it a known kernel?
 			   (cond (kn
 					       (list (cdr kn) subs)) ; it's a known kernel--use the value from the association list subs
@@ -603,7 +611,7 @@
 				  (setq subs (second xk)))
 			  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
 
-
+#|
 (defun kernelize-new (e x &optional (subs nil))
 				  ;(mtell "Top of kernelize; e = ~M ~%" e)
 					(let ((g (gensym)) (kn nil) (xop) (xk) (eargs) (is-a-kernel))
@@ -644,6 +652,7 @@
 								  (push (first xk) eargs)
 								  (setq subs (second xk)))
 							  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
+|#
 
 (defun homogeneous-linear-poly-p (e vars)
 	(setq e ($rat e))
