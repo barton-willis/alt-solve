@@ -563,16 +563,9 @@
 				(simplifya (cons '(mlist) acc) t))
 			 (t nil))))
 
-;; is-a-kernel exception for a^b.  We requre that either a=b or only one of
-;; a or b depends on x. For example, 5^x, or x^5, or x^x are OK as kernels.
-;; But x^sin(x) isn't an OK kernel.
-(defun invertible-mexptp (e x)
-    (and (mexptp e)
-	      	(or
-							(and (among x (second e)) (not (among x (third e))))
-							(and (not (among x (second e))) (among x (third e)))
-							(alike1 (second e) (third e)))))
-
+;; True iff e is a kernel. Either e has the form F(X), where F has a known
+;; inverse and X depends on x, or e has the form a^X, X^b, or X^X, where
+;; X depends on x and a & b do not.
 (defun kernel-p (e x)
    (or
 		 (and ;; e = F(X), where F has a known inverse and X depends on x.
