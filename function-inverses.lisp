@@ -236,11 +236,11 @@
 								 nil)))))
 
      (list '$unit_step #'(lambda (q)
-			   (cond ((my-ask-boolean (mm= q (take '($conjugate) q)))
-				         (if (my-ask-boolean (mm<= q 0))
-							    (list (mul -1 (take '(mexpt) '$%e (my-new-variable '$real))))
-								  (list (take '(mexpt) '$%e (my-new-variable '$real)))))
-							 (t nil))))
+					   (cond ((my-ask-boolean (mm= q 0)) ;; unit_step(X) = 0 --> X = 0 or X < 0
+								        (list 0 (mul -1 (take '(mexpt) '$%e (my-new-variable '$real)))))
+										((my-ask-boolean (mm= q 1)) ;; unit_step(X) = 1 --> X > 1
+						 	 	        (list (take '(mexpt) '$%e (my-new-variable '$real))))
+							      (t nil)))) ;;otherwise no solution
 
 		 ;; not sure about all these....
 		 (list '%asinh #'(lambda (q) (list (take '(%sinh) q))))

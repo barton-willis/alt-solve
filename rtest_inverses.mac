@@ -71,9 +71,9 @@ block([%rnum : 28], solve(abs(x) = abs(x),x));
 [x=%r28]$
 
 ssolve(abs(x) = abs(1-x/2),x);
-[x=2/3,x=-2]$
+[x=-2,x=2/3]$
 
-solve(28*abs(x-1) + abs(x-5) = 10,x);
+ssolve(28*abs(x-1) + abs(x-5) = 10,x);
 [x=23/29,x=11/9]$
 
 block([cntx : newcontext()],
@@ -117,10 +117,10 @@ ssolve(signum(x-42)=-1,x);
 /* unit_step */
 
 ssolve(unit_step(x)=-1,x);
-[x=-%e^%r0]$
+[]$
 
 ssolve(unit_step(x)=0,x);
-[x=-%e^%r0]$
+[x=0,x=-%e^%r0]$
 
 ssolve(unit_step(x)=1,x);
 [x=%e^%r0]$
@@ -128,13 +128,13 @@ ssolve(unit_step(x)=1,x);
 ssolve(unit_step(x)=%i,x);
 []$
 
-block([cntx : newcontext()], unwind_protect((assume(a <=0),
+block([cntx : newcontext()], unwind_protect((assume(a < 0),
     ssolve(unit_step(x)=a,x)), killcontext(cntx)));
-[x=-%e^%r0]$
+[]$
 
-block([cntx : newcontext()], unwind_protect((assume(a  > 0),
+block([cntx : newcontext()], unwind_protect((assume(a  > 1),
     ssolve(unit_step(x)=a,x)), killcontext(cntx)));
-[x=%e^%r0]$
+[]$
 
 /* inverse sine */
 
@@ -148,7 +148,7 @@ ssolve(sin(x)=0,x);
 [x=%pi*%z0]$
 
 ssolve(sin(x)=a,x);
-[x=-asin(a)+2*%pi*%z0+%pi,x=asin(a)+2*%pi*%z1]$
+[x=-asin(a)+2*%pi*%z1+%pi,x=asin(a)+2*%pi*%z0]$
 
 ssolve(sin(x)=sin(a),x);
 [x=-a+2*%pi*%z0-%pi,x=a+2*%pi*%z1]$

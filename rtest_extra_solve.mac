@@ -1,4 +1,8 @@
-(load("unwind_protect"),0);
+/* These are some tests that came form the to_poly testsuite.  Initially, I didn't
+think that I would attempt to solve these equations, so I put these tests in another
+file. But I append support for these equations into the solve alt code. */  
+
+(load("unwind_protect"), 0);
 0$
 
 ssolve(abs(x) = -1,[x]);
@@ -28,7 +32,7 @@ ssolve(unit_step(x)=1,x);
 [x=%e^%r0]$
 
 ssolve(unit_step(x)=0,x);
-[x=-%e^%r0,x=0]$
+[x=0,x=-%e^%r0]$
 
 ssolve(unit_step(x)=sqrt(2),x);
 []$
