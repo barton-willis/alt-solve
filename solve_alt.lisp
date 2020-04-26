@@ -577,9 +577,11 @@
 			(and
 				 (mexptp e) ;; e = a^X, e=X^b, or e=X^X, where X depends on x.
 	 	      	(or
-	 							(and (among x (second e)) (not (among x (third e))))
-	 							(and (not (among x (second e))) (among x (third e)))
-	 							(alike1 (second e) (third e))))))
+	 							;(and (among x (second e)) (not (among x (third e))))
+								(and (kernel-p (second e) x) (not (among x (third e))))
+	 							;(and (not (among x (second e))) (among x (third e)))
+								(and (not (among x (second e))) (kernel-p (third e) x))
+	 							(and (kernel-p (second e) x) (alike1 (second e) (third e)))))))
 
 (defun kernelize (e x &optional (subs nil))
   ;(mtell "Top of kernelize; e = ~M ~%" e)
