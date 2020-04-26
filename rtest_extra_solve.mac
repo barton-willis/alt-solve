@@ -1,37 +1,34 @@
-solve(abs(x) = -1,[x]);
+(load("unwind_protect"),0);
+0$
+
+ssolve(abs(x) = -1,[x]);
 []$
 
-solve(abs(x) = 0,[x]);
+ssolve(abs(x) = 0,[x]);
 [x=0]$
 
-solve(abs(x) = 1,[x]);
+ssolve(abs(x) = 1,[x]);
 [x=-1, x=1]$
 
-solve(abs(x) + abs(1-x) = 6,x);
+ssolve(abs(x) + abs(1-x) = 6,x);
 [x=-5/2,x=7/2]$
 
-solve(abs(x  - abs(1-x)) = 1/2,x);
+ssolve(abs(x  - abs(1-x)) = 1/2,x);
 [x=1/4,x=3/4]$
 
 block([cntx : supcontext()],
-   unwind_protect((activate(cntx), assume(a > 0),  solve(abs(x)=abs(a),x)), killcontext(cntx)));
-[x=a,x=-a]$
+   unwind_protect((activate(cntx), assume(a > 0),  ssolve(abs(x)=abs(a),x)), killcontext(cntx)));
+[x=-a,x=a]$
 
 block([cntx : supcontext()],
-   unwind_protect((activate(cntx), assume(a < 0),  solve(abs(x)=a,x)), killcontext(cntx)));
+   unwind_protect((activate(cntx), assume(a < 0),  ssolve(abs(x)=a,x)), killcontext(cntx)));
 []$
 
-/* not ready for such equations
-nicedummies(solve(unit_step(x)=1,x));
+ssolve(unit_step(x)=1,x);
+[x=%e^%r0]$
 
-%union(cond(%r0 > 0,[x=%r0],%union()))$
+ssolve(unit_step(x)=0,x);
+[x=-%e^%r0,x=0]$
 
-nicedummies(solve(unit_step(x)=0,x));
-%union(cond(%r0<=0,[x=%r0],%union()))$
-
-nicedummies(solve(unit_step(x)=sqrt(2),x));
+ssolve(unit_step(x)=sqrt(2),x);
 []$
-
-nicedummies(solve(unit_step(x)=unit_step(a),x));
-[x=a]$
-*/

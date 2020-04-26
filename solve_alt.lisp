@@ -408,8 +408,8 @@
 (defmvar $the_unsolved '(($set)));this is purely for debugging
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
-(when $solveverbose
-	  (mtell "top of solve-single-equation ~M ~M ~M ~M ~%" e x m use-trigsolve))
+(when (or $solveverbose)
+	  (mtell "top of solve-single-equation e = ~M x = ~M m = ~M use = ~M ~%" e x m use-trigsolve))
 
 	(let ((cnd)) ; did have ($assume_pos nil), but why?
 	   (setq cnd (or (not $ask_mode) (in-domain e (list x))))
@@ -431,7 +431,7 @@
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
-			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
+		 ((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
@@ -574,6 +574,7 @@
 							(alike1 (second e) (third e)))))
 
 (defun kernelize (e x &optional (subs nil))
+  ;(mtell "Top of kernelize; e = ~M ~%" e)
 	(let ((g (gensym)) (kn nil) (xop) (xk) (eargs) (is-a-kernel))
 	   (setq is-a-kernel (and
 			                   (consp e)
@@ -602,6 +603,48 @@
 				  (setq subs (second xk)))
 			  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
 
+
+(defun kernelize-new (e x &optional (subs nil))
+				  ;(mtell "Top of kernelize; e = ~M ~%" e)
+					(let ((g (gensym)) (kn nil) (xop) (xk) (eargs) (is-a-kernel))
+					   (setq is-a-kernel (and
+							                   (consp e)
+																 (consp (car e))
+																 (or
+																	  (gethash (caar e) $solve_inverse_package)
+																		(invertible-mexptp e x))
+																 (among x e)))
+						 (cond
+							  (($mapatom e) (list e subs))
+
+								((and (mexptp e) (integerp (third e)))
+								  (print "caught")
+									(setq kn (assoc (second e) subs :test #'alike1)) ;is it a known kernel?
+								  (print `(kn = ,kn))
+									(cond (kn
+											 (list (cdr kn) subs)) ; it's a known kernel--use the value from the association list subs
+										 (t
+											(list (take '(mexpt) g (third e)) (acons e g subs))))) ; it's unknown--append a new key/value to subs
+
+							  (is-a-kernel
+							   (setq kn (assoc e subs :test #'alike1)) ;is it a known kernel?
+							   (cond (kn
+									       (list (cdr kn) subs)) ; it's a known kernel--use the value from the association list subs
+								   	   (t
+								   	    (list g (acons e g subs))))) ; it's unknown--append a new key/value to subs
+
+
+
+							 (t ; map kernelize onto the argument list and build up the association list subs
+							  (setq xop (list (caar e)))
+							  (setq e (cdr e))
+								(setq eargs nil)
+							  (dolist (xk e)
+								  (setq xk (kernelize xk x subs))
+								  (push (first xk) eargs)
+								  (setq subs (second xk)))
+							  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
+
 (defun homogeneous-linear-poly-p (e vars)
 	(setq e ($rat e))
 	(dolist (x vars)
@@ -615,7 +658,7 @@
 
 (defun solve-mexpt-equation (e x m use-trigsolve)
 	(let ((kernels) (ker) (ee) (g (gensym)) (zz) (xx) (finv nil) (sol))
-    (when (or t $solveverbose)
+    (when (or $solveverbose)
 			(mtell "Top of solve-mexpt-equation  e = ~M x = ~M ~%" e x))
 		;;gather all terms in e of the form X^Y into a list of the form [[X1,Y1], ... [Xn,Yn]]
 	  (setq kernels	(cdr ($gatherargs e 'mexpt))) ;remove '(mlist)
