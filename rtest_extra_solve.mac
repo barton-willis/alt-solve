@@ -1,6 +1,6 @@
 /* These are some tests that came form the to_poly testsuite.  Initially, I didn't
 think that I would attempt to solve these equations, so I put these tests in another
-file. But I append support for these equations into the solve alt code. */  
+file. But I append support for these equations into the solve alt code. */
 
 (load("unwind_protect"), 0);
 0$
@@ -36,3 +36,81 @@ ssolve(unit_step(x)=0,x);
 
 ssolve(unit_step(x)=sqrt(2),x);
 []$
+
+/*And now some new tests that exercise experimental parts of kernelize,=.*/
+
+(checked_sol(e,x) := block([sol],
+  sol : ssolve(e,x),
+  [sol, map(lambda([q], trigrat(subst(q,e))), sol)]),0);
+  0$
+checked_sol(sin(x) + sin(x)^2=0,x);
+[[x=%pi*%z0,x=(4*%pi*%z1-%pi)/2,x=(4*%pi*%z2+3*%pi)/2],[0=0,0=0,0=0]]$
+
+checked_sol(cos(x) + cos(x)^2=0,x);
+[[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi,x=(4*%pi*%z2+%pi)/2,x=(4*%pi*%z3-%pi)/2],[0=0,0=0,0=0,0=0]]$
+
+checked_sol(tan(x) = -1,x);
+[[x=(4*%pi*%z0-%pi)/4],[-1=-1]]$
+
+checked_sol(tan(x) = 0,x);
+[[x=%pi*%z0],[0=0]]$
+
+checked_sol(tan(x)+tan(x)^2=0,x);
+[[x=%pi*%z0,x=(4*%pi*%z1-%pi)/4],[0=0,0=0]]$
+
+checked_sol(tan(x)^2 + 2*tan(x) + 1 = 0,x);
+[[x=(4*%pi*%z0-%pi)/4],[0=0]]$
+
+checked_sol(csc(x)^2 + 2*csc(x) + 1 = 0,x);
+[[x=(4*%pi*%z0-%pi)/2,x=(4*%pi*%z1+3*%pi)/2],[0=0,0=0]]$
+
+checked_sol(sin(x)^2 + 2*sin(x) + 1 = 0,x);
+[[x=(4*%pi*%z0-%pi)/2,x=(4*%pi*%z1+3*%pi)/2],[0=0,0=0]]$
+
+checked_sol(sin(x/3)^2 + 2*sin(x/3) + 1 = 0,x);
+[[x=(12*%pi*%z0-3*%pi)/2,x=(12*%pi*%z1+9*%pi)/2],[0=0,0=0]]$
+
+checked_sol(sin(x/2)^2 + 2*sin(x/2) + 1 = 0,x);
+[[x=4*%pi*%z0-%pi,x=4*%pi*%z1+3*%pi],[0=0,0=0]]$
+
+checked_sol(exp(2*x) - exp(x) = 0,x);
+[[x=-2*%i*%pi*%z0],[0=0]]$
+
+checked_sol(exp(2*x) - 2*exp(x) + 1= 0,x);
+[[x=2*%i*%pi*%z0],[0=0]]$
+
+block([cntx : newcontext()],
+  unwind_protect((assume(a>0), checked_sol(log(x)  + log(x)^2 = a,x)), killcontext(cntx)));
+[[x=%e^(-sqrt(4*a+1)/2-1/2),x=%e^(sqrt(4*a+1)/2-1/2)],[a=a,a=a]]$
+
+block([cntx : newcontext() ],
+  unwind_protect((assume(a>-1/4), checked_sol(log(x) + log(x)^2 = a,x)), killcontext(cntx)));
+[[x=%e^(-sqrt(4*a+1)/2-1/2),x=%e^(sqrt(4*a+1)/2-1/2)],[a=a,a=a]]$
+
+block([cntx : newcontext() ],
+  unwind_protect((assume(a>-1/4), checked_sol(log(x)  + log(x)^2 = -1/4,x)), killcontext(cntx)));
+[[x=1/sqrt(%e)],[-1/4=-1/4]]$
+
+checked_sol(sin(x) + 6/sin(x) = sqrt(24),x);
+[[x=2*%pi*%z0+asin(sqrt(6)),x=2*%pi*%z1-asin(sqrt(6))+%pi],
+    [2*sqrt(6)=2*sqrt(6),2*sqrt(6)=2*sqrt(6)]]$
+
+checked_sol(sin(x/2) + 6/sin(x/2) = sqrt(24),x);
+[[x=4*%pi*%z0+2*asin(sqrt(6)),x=4*%pi*%z1-2*asin(sqrt(6))+2*%pi],
+   [2*sqrt(6)=2*sqrt(6),2*sqrt(6)=2*sqrt(6)]]$
+
+ssolve(log(x/2) + 6/log(x/2) = sqrt(24),x);
+[x=2*%e^sqrt(6)]$
+
+ssolve(5^x=5,x);
+[x=(2*%i*%pi*%z0+log(5))/log(5)]$
+
+ssolve(5^x + 6/5^x = sqrt(24),x);
+[x=(4*%i*%pi*%z0+log(6))/(2*log(5))]$
+
+ssolve(5^x=10^x,x);
+[x=(2*%i*%pi*%z0)/log(5)]$
+
+checked_sol(-5*cos(x)^2+cos(x)+1=1);
+[[x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1\-%pi)/2,x=2*%pi*%z2+acos(1/5),
+x=2*%pi*%z3\-acos(1/5)],[1=1,1=1,1=1,1=1]]$

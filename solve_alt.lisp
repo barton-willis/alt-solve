@@ -425,13 +425,16 @@
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (filter-solution-x (polynomial-solve e x m) cnd))
 
+			((mtimesp e)
+			  (product-solver e x m use-trigsolve cnd))
+
 			((filter-solution-x (solve-mexpt-equation e x m nil) cnd))
 
       ((filter-solution-x (one-to-one-solve e x m nil) cnd))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
-		 ((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
+		  ((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
@@ -481,14 +484,12 @@
 											(second ker)))
 
 							 	 ((among x (second ker)) ;looking at x^a = b
-									      (print "case 2")
 									  (setq fn (gethash 'power-inverse $solve_inverse_package))
 										(list
 											#'(lambda (q) (funcall fn q (third ker)))
 											(second ker)))
 
 								 ((among x (third ker)) ;looking at a^x = b
-									   (print "case 3")
 										 (setq fn (gethash 'exponential-inverse $solve_inverse_package))
 										 (list
 											 #'(lambda (q) (funcall fn q (second ker)))
@@ -510,8 +511,9 @@
 ;;; power function separately.
 
 (defun solve-by-kernelize (e x m)
-  (when $solveverbose
-		(mtell "Top of solve-by-kernelize e = ~M x = ~M ~%" e x))
+  (when (or $solveverbose)
+		(mtell "Top of solve-by-kernelize e = ~M x = ~M ~%" e x)
+		($read ))
 
 	(let (($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
 		  (mult-acc nil) (xxx) (mult-save))
@@ -577,17 +579,25 @@
 			(and
 				 (mexptp e) ;; e = a^X, e=X^b, or e=X^X, where X depends on x.
 	 	      	(or
-	 							;(and (among x (second e)) (not (among x (third e))))
-								(and (kernel-p (second e) x) (not (among x (third e))))
-	 							;(and (not (among x (second e))) (among x (third e)))
-								(and (not (among x (second e))) (kernel-p (third e) x))
-	 							(and (kernel-p (second e) x) (alike1 (second e) (third e)))))))
+							  (and (not (among x (second e))) (among x (third e))) ;; a^X
+								(and (among x (second e)) (not (among x (third e)))) ;; X^a
+	 							(and (among x (second e)) (alike1 (second e) (third e))))))) ;X^X
 
 (defun kernelize (e x &optional (subs nil))
-  ;(mtell "Top of kernelize; e = ~M ~%" e)
+;;  (mtell "top of kernelize ~M ~M ~%" e x)
 	(let ((g (gensym)) (kn nil) (xop) (xk) (eargs))
 		 (cond
 			 (($mapatom e) (list e subs))
+
+			 ((and (mexptp e) (among x (second e)) (integerp (third e)))
+					(print "caught")
+					(mtell "e = ~M x = ~M ~%" e x)
+					(setq kn (assoc (second e) subs :test #'alike1)) ;is it a known kernel?
+					(print `(kn = ,kn))
+					(cond (kn
+							 (list (power (cdr kn) (third e)) subs)) ; it's a known kernel--use the value from the association list subs
+						 (t
+							(list (take '(mexpt) g (third e)) (acons (second e) g subs))))) ; it's unknown--append a new key/value to subs
 
 			  ((kernel-p e x)
 			   (setq kn (assoc e subs :test #'alike1)) ;is it a known kernel?
