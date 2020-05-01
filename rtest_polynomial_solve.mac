@@ -436,7 +436,7 @@ numerically_checked_sol(x^4-23*x^3 + 107*x^2 + x+1,x,10,4);
 numerically_checked_sol(x^4-23*x^3 + 107*x^2 + x+1,x,20,4);
 [true,true,true,true]$
 
-numerically_checked_sol(x^4-23*x^3 + 107*x^2 + x+1,x,40,4);
+block([domain : complex], numerically_checked_sol(x^4-23*x^3+107*x^2+x+1,x,40,5));
 [true,true,true,true]$
 
 /* Quasi-palindromic equation */
