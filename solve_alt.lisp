@@ -445,7 +445,7 @@
 
 			($solveexplicit ; give up & return the empty set
 			  (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning the empty list.~%") e x)
-			  ;(setq $the_unsolved ($adjoin (list '(mlist) e x) $the_unsolved))
+			  (setq $the_unsolved ($adjoin (list '(mlist) e x) $the_unsolved))
 			  (setq $multiplicities (take '(mlist) m))
 			  (take '(mlist)))
 
