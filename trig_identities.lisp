@@ -78,13 +78,8 @@
 								(setq e ($ratsubst ($rhs id) ($lhs id) e))))) id-table) ;was ratsubst....
 	e)
 
-
 (defun my-size (e)
-	(cond ((or (mtimesp e) (mplusp e))
-		   (reduce #'+ (mapcar #'my-size (cdr e))))
-		  ((mexptp e)
-		   (my-size (cadr e)))
-		  (t 1)))
+  (if ($mapatom e) 1 (reduce #'+ (mapcar #'my-size (cdr e)))))
 
 (defun conditional-ratsubst (new old e)
 	(let ((ee ($ratsubst old new e)))
