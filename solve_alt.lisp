@@ -590,10 +590,10 @@
 			 (($mapatom e) (list e subs))
 
 			 ((and (mexptp e) (among x (second e)) (integerp (third e)))
-					(print "caught")
-					(mtell "e = ~M x = ~M ~%" e x)
+					;(print "caught")
+					;(mtell "e = ~M x = ~M ~%" e x)
 					(setq kn (assoc (second e) subs :test #'alike1)) ;is it a known kernel?
-					(print `(kn = ,kn))
+				;	(print `(kn = ,kn))
 					(cond (kn
 							 (list (power (cdr kn) (third e)) subs)) ; it's a known kernel--use the value from the association list subs
 						 (t
