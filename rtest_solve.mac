@@ -322,10 +322,10 @@ multiplicities;
 [1]$
 
 block([triginverses : all,ask_mode : false], ssolve(tan(x)=tan(a),x));
-[x=a+%pi*%z0]$
+[x=a-%pi*%z0]$
 
 block([triginverses : false,ask_mode : false], ssolve(tan(x)=tan(a),x));
-[x=a+%pi*%z0]$
+[x=a-%pi*%z0]$
 
 block([triginverses : all,ask_mode : false], ssolve(2*tan(x)=tan(a),x));
 [x=atan(tan(a)/2)+%pi*%z0]$
@@ -1410,7 +1410,7 @@ ssolve(cos(x+a)=cos(x),a);
 [a=-2*%pi*%z1,a=2*%pi*%z0-2*x]$
 
 block([ask_mode : false], ssolve(tan(x+a)=tan(x),a));
-[a=%pi*%z0]$
+[a=-%pi*%z0]$
 
 ssolve(cosh(x+a)=cosh(x),a);
 [a=-acosh(cosh(x))-x+2*%i*%pi*%z1,a=acosh(cosh(x))-x+2*%i*%pi*%z0]$
@@ -1902,14 +1902,14 @@ ssolve(abs(x+7)*sin(x)*cos(x),x);
 [x=-7,x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2,x=%pi*%z2]$
 
 block([ask_mode : false], ssolve(tan(x)=tan(zzz),x));
-[x=zzz-%pi*%z0]$
+[x=zzz+%pi*%z0]$
 
 block([ask_mode : false], ssolve(tan(x)=tan(%pi/4),x));
 [x=(4*%pi*%z0+%pi)/4]$
 
 /* this could be better--so it goes */
 block([ask_mode : false], ssolve(tan(x)=tan(%pi/5),x));
-[x=(5*%pi*%z0+%pi)/5]$
+[x=-((5*%pi*%z0-%pi)/5)]$
 
 /* conjugate(atanh(x)) doesn't simplify to atanh(x), by the way.*/
 ssolve(conjugate(atanh(x)),x);

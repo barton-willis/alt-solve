@@ -22,6 +22,6 @@ push(["rtest_wester_equations", [14, 15, 31, 32, 55, 58, 60, 65]], testsuite_fil
 
 push(["rtest_inverses",[19]],testsuite_files)$
 
-push(["rtest_extra_solve", [17,18,33]], testsuite_files)$
+push(["rtest_extra_solve", [19,33]], testsuite_files)$
 
 run_testsuite(share_tests = true);
