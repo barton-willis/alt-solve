@@ -9,12 +9,21 @@
 ;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
 ;;; cuts (don't use radcan, for example). We first apply the functions in the &rest parameter
 ;;; fns and finish with a final call to sratsimp. Possible members of fns include
-;;; #'sqrtdenest, #'fullratsimp, and #'apply-identities-xxx.
+;;; #'sqrtdenest, #'fullratsimp, and #'apply-identities-conditionally.
 (defun try-to-crunch-to-zero (e &rest fns) "Ratsimp with algebraic = true and domain = complex."
 		(let (($algebraic t) ($domain '$complex))
 		  (dolist (fk fns)
 			   (setq e (funcall fk e)))
 		(sratsimp e)))
+
+;;; This function is used to choose the solution of the cubic resolvent that is used to
+;;; solve the quartic. Any nonzero solution is OK, so this function is purely a guess at
+;;; which solution  will give the simpliest solutions to the cubic. If you enjoy playing,
+;;; experiment with this function.
+(defun my-expr-size (e)
+  (cond ((among '$%i e)
+	         (if ($mapatom e) 1 (reduce #'max (mapcar #'my-expr-size (cdr e)))))
+			  (t 0)))
 
 ;;; Solve a*x + b = 0 for x. Return both a CL list of the solution (x= -b/a) and a CL list of the
 ;;; multiplicities. This code assumes that a =/= 0.
@@ -124,8 +133,10 @@
 			  (setq m (polynomial-solve ($gfactor m) g)) ;was ($solve m g)
 			  (setq $multiplicities nil)
 			  (setq m (mapcar #'third (cdr m))) ;remove '(mlist) and extract $rhs
-			  ;; remove members that are explicitly zero and sort according to my-size.
-			  (setq m (sort (remove-if #'zerop1 m) #'(lambda(a b) (< (my-size a) (my-size b)))))
+			  ;;  simplify members of m, remove vanishing members, and sort according to my-expr-size.
+        (setq m (mapcar #'(lambda (q) (try-to-crunch-to-zero q #'sqrtdenest #'fullratsimp)) m))
+				(setq m (remove-if #'zerop1 m))
+				(setq m (sort m #'(lambda(a b) (< (my-expr-size a) (my-expr-size b)))))
 			  (setq m (car m)) ;set m to the "simplest" member of m
 			  (setq x m)
 			  (setq mm (simpnrt (mul 2 m) 2))
@@ -260,7 +271,8 @@
 ;;; using gfactor allows Maxima to solve this equation.
 
 (defun polynomial-solve (e x &optional (mx 1)) "Solve e=0 for x, where e is a polynomial in x and mx is a multiplicity."
-	(let ((ee e) (n) (m) (sol) (k 0) (cfs) (xsol) ($domain '$complex) ($algebraic t) (p-multiplicities nil))
+	(let ((ee e) (n) (m) (sol) (k 0) (cfs) (xsol) ($domain '$complex)
+		    ($algebraic t) (p-multiplicities nil))
 	   ;; Build up the multiplicities in the CL list p-multiplicities.
 		 ;; Factoring isn't a universal win; for example x^105-1=0. So before we factor, look for equations of the
 		 ;; form ax^n+b with n > 4. We could allow n to be any positive integer, but this causes more testsuite

@@ -259,7 +259,7 @@
 		 (when $solveradcan
 				(setq e ($radcan e)))
 		 (setq e ($num (sratsimp e)))
-		 (setq e (apply-identities-xxx e *pythagorean-identities*)) ; was (apply-identities e *pythagorean-identities*))
+		 (setq e (apply-identities-unconditionally e *pythagorean-identities*))
 		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
 
@@ -769,8 +769,8 @@
 	(let ((pterms) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
         (when use-trigsolve
 	      	(setq e ($exponentialize e))
-	      	(setq e (apply-identities e *pythagorean-identities*))
-      		(setq e (apply-identities-xxx e *to-cos/sin-identities*))
+	      	(setq e (apply-identities-conditionally e *pythagorean-identities*))
+      		(setq e (apply-identities-unconditionally e *to-cos/sin-identities*))
 					(setq do-rectform t))
 
      (setq pterms (gather-expt-terms e x))
@@ -892,7 +892,7 @@
 
 (defun triangularize-eqs (e x)
    (let ((xx x))
-	    (setq e (apply-identities e *pythagorean-identities*))
+	    (setq e (apply-identities-conditionally e *pythagorean-identities*))
 	    (setq e (if ($listp e) ($setify e) e))
 	    (setq x (if ($listp x) ($setify x) x))
       (setq e ($equiv_classes e #'(lambda (a b) ($setequalp
@@ -923,7 +923,7 @@
 
 	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars))
             (setq eqs (mapcar #'(lambda (q) (try-to-crunch-to-zero q
-							       #'apply-identities-xxx  #'sqrtdenest #'fullratsimp)) eqs))
+							       #'apply-identities-unconditionally  #'sqrtdenest #'fullratsimp)) eqs))
 
 				    (cond
 							((null eqs)
@@ -1005,7 +1005,7 @@
         (setq e (cons '(mlist) e))  ; return e to a Maxima list
         (setq e ($poly_reduced_grobner e x)) ;triangularize equations
         (setq e ($expand e 0 0)) ;I think poly_reduced_grobner returns unsimplified expressions
-        (setq e (apply-identities-xxx e))))
+        (setq e (apply-identities-unconditionally e))))
 
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
@@ -1098,7 +1098,7 @@
 				 ;; we need to set $domain to $real. All this is a bit scary. Finally extracting
 				 ;; the numerator allows for some spurious solutions to sneak through.
 			   (let (($domain '$real))
-			 		  (setq e (apply-identities-xxx e))
+			 		  (setq e (apply-identities-unconditionally e))
 				    (setq e (let (($logsimp t) ($logconcoeffp '$ratnump)) ($logcontract e)))
 						(setq e ($num e)))
 
@@ -1156,7 +1156,7 @@
 		 (mtell "new trigsolve ~%")
 		;;(displa `((mequal) e ,e))
 		 (setq e (apply-identities e *pythagorean-identities*))
-		 (setq e (apply-identities-xxx e *to-cos/sin-identities*))
+		 (setq e (apply-identities-unconditionally e *to-cos/sin-identities*))
 		  ;;(displa `((mequal) e2 ,e))
 		 (setq sine-args (mapcar #'second (cdr ($gatherargs e '%sin))))
 		 (setq cosine-args (mapcar #'second (cdr ($gatherargs e '%cos))))

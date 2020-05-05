@@ -362,11 +362,11 @@ multiplicities;
 
 (extra_simp(e) :=
   block([algebraic : true, domain : complex],
-     expand(rootscontract(ratsimp(?sqrtdenest(e))))),0);
+     radcan(expand(rootscontract(ratsimp(?sqrtdenest(e)))))),0);
 0$
 
 block([domain : real], ratsimp(extra_simp(rectform(block([algebraic : true, domain : complex],
-   subst([a=1,b=0,c=0, d=0,e=1], sol))))));
+   subst([a=1,b=0,c=0,d=0,e=1], sol))))));
 [x=-((sqrt(2)*%i+sqrt(2))/2),
  x=-((sqrt(2)*%i-sqrt(2))/2),
  x=(sqrt(2)*%i-sqrt(2))/2,
@@ -379,10 +379,10 @@ subst([a=-1,b=0,c=2, d=0,e=-1], sol);
 0$
 
 extra_simp(sort(subst([a=1,b=0,c=0,d=27/256],sol)));
-[x=-3/4,x=-3/4,x=1/4-%i/2^(3/2),x=%i/2^(3/2)+1/4]$
+[x=-(3/4),x=-(3/4),x=-((sqrt(2)*%i-1)/4),x=(sqrt(2)*%i+1)/4]$
 
 extra_simp(sort(subst([a=-2,b=0,c=0,d=27/16],sol)));
-[x=3/2,x=3/2,x=%i/sqrt(2)-1/2,x=-%i/sqrt(2)-1/2]$
+[x=3/2,x=3/2,x=(sqrt(2)*%i-1)/2,x=-((sqrt(2)*%i+1)/2)]$
 
 extra_simp(subst([a=0, c=0,d=b^2/4,b=-25],sol));
 [x=-(5/sqrt(2)),x=-(5/sqrt(2)),x=5/sqrt(2),x=5/sqrt(2)]$
@@ -569,3 +569,11 @@ trigrat(checked_sol(5*x^6-5*x^3+5,x));
 
 multiplicities;
 [1,1,1,1,1,1]$
+
+/* standard solve gives messy answer & misses the fact that one root has multiplicity 2*/
+
+ssolve(x^4+x+(81/768)^(1/3),x);
+[x=-(1/4^(1/3)),x=-((2^(11/6)*%i-4^(2/3))/4),x=(2^(11/6)*%i+4^(2/3))/4]$
+
+multiplicities;
+[2,1,1]$

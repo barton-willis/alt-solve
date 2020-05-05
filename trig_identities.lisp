@@ -5,7 +5,6 @@
 
 (in-package :maxima)
 
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
 	($load "opsubst")
 	(defvar *pythagorean-identities* (make-hash-table))
@@ -69,26 +68,39 @@
 	 (list '%cosh #'(lambda (q)
 		 (take '(mequal) (power (take '(%cosh) q) 2) (div (add (take '(%cosh) (mul 2 q)) 1) 2))))))
 
-(defun apply-identities-xxx (e &optional (id-table *pythagorean-identities*))
+;; Apply the identities described by the hashtable id-table to the expression e. Make the
+;; substitution even when the result has a larger expression size.
+(defun apply-identities-unconditionally (e &optional (id-table *pythagorean-identities*))
 	(setq e ($ratdisrep e))
 	(maphash #'(lambda (key val)
 					   (let ((q (cdr ($setify ($gatherargs e key)))) (id))
 							(dolist (z q)
 								(setq id (apply val (cdr z)))
-								(setq e ($ratsubst ($rhs id) ($lhs id) e))))) id-table) ;was ratsubst....
+								(setq e ($ratsubst ($rhs id) ($lhs id) e))))) id-table)
 	e)
 
+;; A simple-minded metric for the expression size. Using max instead of addition favors
+;; more balanced trees. Running all the tests using max instead of plus results in slightly
+;; less run time, but about 12% reduction in memory use. But max causes some tests in
+;; rtest_polynoimal solve to fail--these are tests that depend on the exact form of the
+;; solution to quartics. They aren't, I think, mathematical errors.
 (defun my-size (e)
-  (if ($mapatom e) 1 (reduce #'+ (mapcar #'my-size (cdr e)))))
+  (if ($mapatom e) 1 (reduce #'max (mapcar #'my-size (cdr e)))))
 
+;; When ratsubst(new, old, e) has a smaller expression size than does e, do the
+;; substitution; otherwise don't do the substition.
 (defun conditional-ratsubst (new old e)
-	(let ((ee ($ratsubst old new e)))
+	(let ((ee ($ratsubst new old e)))
 	    	(if (< (my-size ee) (my-size e)) ee e)))
 
-(defun apply-identities (e id-table)
+;; Apply the identities described by the hashtable id-table to the expression e. Make the
+;; substitution only when the result has a smaller expression size as determined by
+;; my-size.
+(defun apply-identities-conditionally (e id-table)
+	(setq e ($ratdisrep e))
 	(maphash #'(lambda (key val)
 					   (let ((q (cdr ($setify ($gatherargs e key)))) (id))
 							(dolist (z q)
 								(setq id (apply val (cdr z)))
-								(setq e (conditional-ratsubst ($lhs id) ($rhs id) e))))) id-table)
+								(setq e (conditional-ratsubst ($rhs id) ($lhs id) e))))) id-table)
 	e)
