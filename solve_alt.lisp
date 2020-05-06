@@ -527,7 +527,7 @@
 				(setq sol ($solve e z))
 				(when (not ($listp $multiplicities))
 				   (mtell "using fake multiplicities ~%")
-					 (setq $multiplicities (mapcar #'(lambda (s) 1) sol)))
+					 (setq $multiplicities (mapcar #'(lambda (s) (declare (ignore s)) 1) sol)))
 				(setq mult-save (mapcar #'(lambda (q) (mult m q)) (cdr $multiplicities)))
 				(setq sol (mapcar #'third (cdr sol)))  ;third = $rhs
 
@@ -550,7 +550,7 @@
 					(setq q ($solve sx x))
 					(when (not ($listp $multiplicities))
 						 (mtell "using fake multiplicities ~%")
-						 (setq $multiplicities (mapcar #'(lambda (s) 1) sol)))
+						 (setq $multiplicities (mapcar #'(lambda (s) (declare (ignore s)) 1) sol)))
 
 					(push (cdr q) acc)
 					(setq xxx (pop mult-save))
@@ -585,7 +585,7 @@
 
 (defun kernelize (e x &optional (subs nil))
 ;;  (mtell "top of kernelize ~M ~M ~%" e x)
-	(let ((g (gensym)) (kn nil) (xop) (xk) (eargs))
+	(let ((g (gensym)) (kn nil) (xop) (eargs))
 		 (cond
 			 (($mapatom e) (list e subs))
 
@@ -671,7 +671,7 @@
 ;; is free of x.
 
 (defun solve-mexpt-equation (e x m use-trigsolve)
-	(let ((kernels) (ker) (ee) (g (gensym)) (zz) (xx) (finv nil) (sol))
+	(let ((kernels) (ker) (ee) (g (gensym)) (zz) (xx) (finv nil) (ssol) (sol))
     (when (or $solveverbose)
 			(mtell "Top of solve-mexpt-equation  e = ~M x = ~M ~%" e x))
 		;;gather all terms in e of the form X^Y into a list of the form [[X1,Y1], ... [Xn,Yn]]
@@ -881,7 +881,7 @@
 	    ;; kinds of solutions too.
 			(t
          (let ((sol ($setify ($solve (pop eqs) x)))) ;solve first equation & setify solution
-            (dolist (ex eqs)
+            (while eqs
 				       (when ($emptyp sol) ;early bailout when intersection is empty
 					   	   (setq eqs nil))
 				       (setq sol ($intersection sol ($nicedummies ($setify ($solve (pop eqs) x))))))
@@ -921,7 +921,7 @@
 	   	(mtell "Top of solve-triangular-system eqs = ~M vars = ~M ~%"
 				  (cons '(mlist) eqs) (cons '(mlist) vars)))
 
-	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (x) (ssol nil) (eqvars))
+	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (ssol nil) (eqvars))
             (setq eqs (mapcar #'(lambda (q) (try-to-crunch-to-zero q
 							       #'apply-identities-unconditionally  #'sqrtdenest #'fullratsimp)) eqs))
 
@@ -988,13 +988,13 @@
 
 ;;; We replace solvex with a call to $solve -- I need to look up the meanings of ind and flag.
 (defun solvex (eql varl ind flag)
-	;(mtell "Top of solvex ind = ~M flag = ~M ~%" ind flag)
+	(mtell "Top of solvex ind = ~M flag = ~M ~%" ind flag)
 	(setq eql (simplifya (cons '(mlist) eql) t))
 	(setq varl (simplifya (cons '(mlist) varl) t))
    ($solve eql varl))
 
 (defun dispatch-grobner (e x)
-     (let ((cnd))
+     (let ((cnds))
         (setq e (mapcar #'meqhk (cdr e))) ; remove '(mlist) and convert a=b to a-b.
         (setq e (mapcar #'try-to-crunch-to-zero e)) ;ratsimp
         (setq e (remove-if #'zerop1 e)) ; remove vanishing
