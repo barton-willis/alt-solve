@@ -1863,7 +1863,7 @@ solve(log(x-sqrt(x-1)) = log(2009),x);
 /* From Sage developer Karl-Dieter Crisman (changed floats to rationals) */
 ssolve(23040 *(4*%e^-(1200*t)-%e^-(300*t))^2-720000*(16*%e^-(1200*t)-%e^-(300*t))*
 ((4/125)*%e^-(300*t)-(4/125)*%e^-(1200*t)),t);
-[t = (2*%i*%pi*%z0+log(25/4-3*sqrt(41)/4))/900,t = (2*%i*%pi*%z1+log(3*sqrt(41)/4+25/4))/900]$
+[t=(2*%i*%pi*%z0+log(-((3*sqrt(41)-25)/4)))/900,t=(2*%i*%pi*%z1+log((3*sqrt(41)+25)/4))/900]$
 
 /* From 19 Aug 2010 Sage-support mailing list (reported by R. Hankin, 19 August, 2010) */
 

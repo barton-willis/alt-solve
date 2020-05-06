@@ -216,7 +216,7 @@ solve(2*sqrt(x) + 3*x^(1/4) - 2 = 0, x);
 
 /* x = {sqrt[(sqrt(5) - 1)/2], -i sqrt[(sqrt(5) + 1)/2]} */
 mysolve(x = 1/sqrt(1 + x^2), x);
-[x=sqrt((sqrt(5)-1)/2),x=-sqrt(-(sqrt(5)+1)/2)]$
+[x=sqrt((sqrt(5)-1)/2),x=-sqrt(-((sqrt(5)+1)/2))]$
 
 /* This problem is from a computational biology talk => 1 - log_2[m (m - 1)] */
 (eq : binomial(m, 2)*2^k = 1, sol : solve(eq, k),0);
@@ -226,8 +226,8 @@ rectform(radcan(subst(sol, eq)));
 1=1$
 
 /* x = log(c/a) / log(b/d) for a, b, c, d != 0 and b, d != 1   [Bill Pletsch] */
-solve(a*b^x = c*d^x, x);
-[x = log(c/a) / log(b/d) ]$
+logcontract(ssolve(a*b^x = c*d^x, x));
+[x=(log(c/a)+2*%i*%pi*%z0)/log(b/d)]$
 
 /* x = {1, e^4} */
 sort(solve(sqrt(log(x)) = log(sqrt(x)), x));

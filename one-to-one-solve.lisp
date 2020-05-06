@@ -202,6 +202,36 @@
 
 (setf (gethash (list 'mabs 'mabs) *one-to-one-reduce*) #'abs-abs-solve)
 
+;; attempt to solve c0*exp(kn0) + c1*exp(kn1) + b = 0 for x
+(defun mexpt-mexpt-solve  (x c0 kn0 c1 kn1 b &optional (ml 1) (use-trigsolve nil))
+  (let ((sol) (mx))
+  	(mtell "c0 = ~M  kn0 = ~M c1 = ~M  kn1 = ~M b= ~M ~%" c0 kn0 c1 kn1 b)
+  	(cond ((and (zerop1 b) ($freeof x (second kn0)) ($freeof x (second kn1)))
+		        (cond ((zerop1 (add c0 c1)) ;looking at a^X = b^Y
+						        (setq eq (add
+											   (mul (third kn0) (take '(%log) (second kn0)))
+												 (mul -1 (third kn1) (take '(%log) (second kn1)))
+												 (mul 2 '$%pi '$%i (my-new-variable '$integer)))))
+								  (t	;looking at c0 a^X + c1 b^Y	= 0
+	                   (setq eq (add
+					              (take '(%log) (div (mul -1 c0) c1))
+					              (mul  (third kn0) (take '(%log) (second kn0)))
+			 		              (mul  -1 (third kn1) (take '(%log) (second kn1)))
+									    	(mul 2 '$%pi '$%i (my-new-variable '$integer))))))
+				            	(mtell "eq = ~M ~%" eq)
+		      	  	(setq sol (solve-single-equation eq x ml use-trigsolve)))
+           ((and (zerop1 b) ($freeof x (third kn0)) ($freeof x (third kn1))
+				        (alike1 (third kn0) (third kn1)) (zerop1 (add c0 c1)))
+					  	(setq eq (sub
+							         (second kn1)
+											 (mul (second kn0)
+												 ($polarform (take '(mexpt) '$%e
+												    (div (mul 2 '$%pi '$%i (my-new-variable '$integer)) (third kn0)))))))
+						(setq sol (solve-single-equation eq x ml use-trigsolve)))
+
+				(t nil))))
+
+(setf (gethash (list 'mexpt 'mexpt) *one-to-one-reduce*) #'mexpt-mexpt-solve)
 (defun kernelize-fn (e fn &optional (subs nil))
 		(let ((g (gensym)) (kn nil) (xop) (xk) (eargs nil))
 					(cond (($mapatom e) (list e subs))

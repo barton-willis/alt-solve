@@ -108,8 +108,8 @@ ssolve(5^x=5,x);
 ssolve(5^x + 6/5^x = sqrt(24),x);
 [x=(4*%i*%pi*%z0+log(6))/(2*log(5))]$
 
-ssolve(5^x=10^x,x);
-[x=(2*%i*%pi*%z0)/log(5)]$
+logcontract(ssolve(5^x=10^x,x));
+[x=-(2*%i*%pi*%z0)/log(2)]$
 
 checked_sol(-5*cos(x)^2+cos(x)+1=1,x);
 [[x=(4*%pi*%z0-%pi)/2,x=(4*%pi*%z1+%pi)/2,x=2*%pi*%z2+atan(2*sqrt(6)),
