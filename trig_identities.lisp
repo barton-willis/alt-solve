@@ -79,16 +79,13 @@
 								(setq e ($ratsubst ($rhs id) ($lhs id) e))))) id-table)
 	e)
 
-;; A simple-minded metric for the expression size. Using max instead of addition favors
-;; more balanced trees. Running all the tests using max instead of plus results in slightly
-;; less run time, but about 12% reduction in memory use. But max causes some tests in
-;; rtest_polynoimal solve to fail--these are tests that depend on the exact form of the
-;; solution to quartics. They aren't, I think, mathematical errors.
+;; A simple-minded metric for the expression size. The testsuite is fairly immune to
+;; changes to this function (say replace + with max). 
 (defun my-size (e)
-  (if ($mapatom e) 1 (reduce #'max (mapcar #'my-size (cdr e)))))
+  (if ($mapatom e) 1 (reduce #'+ (mapcar #'my-size (cdr e)))))
 
 ;; When ratsubst(new, old, e) has a smaller expression size than does e, do the
-;; substitution; otherwise don't do the substition.
+;; substitution; otherwise don't do the substitution.
 (defun conditional-ratsubst (new old e)
 	(let ((ee ($ratsubst new old e)))
 	    	(if (< (my-size ee) (my-size e)) ee e)))

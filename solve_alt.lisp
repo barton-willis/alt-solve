@@ -57,8 +57,8 @@
 #+(or sbcl) (setq sb-ext:*evaluator-mode* :INTERPRET)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-	($load "to_poly.lisp")
-	($load "to_poly_solve_extra.lisp")
+	($load "to_poly")
+	($load "to_poly_solve_extra")
 	($load "function-inverses.lisp")
 	($load "trig_identities.lisp")
 	($load "polynomial-solve.lisp")

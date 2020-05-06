@@ -17,9 +17,11 @@
 		(sratsimp e)))
 
 ;;; This function is used to choose the solution of the cubic resolvent that is used to
-;;; solve the quartic. Any nonzero solution is OK, so this function is purely a guess at
-;;; which solution  will give the simpliest solutions to the cubic. If you enjoy playing,
-;;; experiment with this function.
+;;; solve the quartic. Any nonzero solution of the cubic is OK, so this function is purely
+;;; a guess at which solution will give the simpliest solutions to the quartic. If you enjoy
+;;; playing, experiment with this function. You will find that altering it can
+;;; result in wide variations with the solution of quartics and with the memory used.
+
 (defun my-expr-size (e)
   (cond ((among '$%i e)
 	         (if ($mapatom e) 1 (reduce #'max (mapcar #'my-expr-size (cdr e)))))
