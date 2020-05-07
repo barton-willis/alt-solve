@@ -205,7 +205,6 @@
 ;; attempt to solve c0*exp(kn0) + c1*exp(kn1) + b = 0 for x
 (defun mexpt-mexpt-solve  (x c0 kn0 c1 kn1 b &optional (ml 1) (use-trigsolve nil))
   (let ((sol) (mx))
-  	(mtell "c0 = ~M  kn0 = ~M c1 = ~M  kn1 = ~M b= ~M ~%" c0 kn0 c1 kn1 b)
   	(cond ((and (zerop1 b) ($freeof x (second kn0)) ($freeof x (second kn1)))
 		        (cond ((zerop1 (add c0 c1)) ;looking at a^X = b^Y
 						        (setq eq (add
@@ -218,7 +217,6 @@
 					              (mul  (third kn0) (take '(%log) (second kn0)))
 			 		              (mul  -1 (third kn1) (take '(%log) (second kn1)))
 									    	(mul 2 '$%pi '$%i (my-new-variable '$integer))))))
-				            	(mtell "eq = ~M ~%" eq)
 		      	  	(setq sol (solve-single-equation eq x ml use-trigsolve)))
            ((and (zerop1 b) ($freeof x (third kn0)) ($freeof x (third kn1))
 				        (alike1 (third kn0) (third kn1)) (zerop1 (add c0 c1)))
@@ -232,6 +230,15 @@
 				(t nil))))
 
 (setf (gethash (list 'mexpt 'mexpt) *one-to-one-reduce*) #'mexpt-mexpt-solve)
+
+;; attempt to solve c0*exp(kn0) + c1*exp(kn1) + b = 0 for x
+(defun log-log-solve (x c0 kn0 c1 kn1 b &optional (ml 1) (use-trigsolve nil))
+	(let ((eq))
+	   (setq eq (sub (mul (power kn0 c0) (power kn1 c1))  (power '$%e b)))
+     (solve-single-equation eq x ml use-trigsolve)))
+
+(setf (gethash (list '%log '%log) *one-to-one-reduce*) #'log-log-solve)
+
 (defun kernelize-fn (e fn &optional (subs nil))
 		(let ((g (gensym)) (kn nil) (xop) (xk) (eargs nil))
 					(cond (($mapatom e) (list e subs))
