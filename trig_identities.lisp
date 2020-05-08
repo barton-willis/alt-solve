@@ -79,8 +79,9 @@
 								(setq e ($ratsubst ($rhs id) ($lhs id) e))))) id-table)
 	e)
 
-;; A simple-minded metric for the expression size. The testsuite is fairly immune to
-;; changes to this function (say replace + with max). 
+;; A simple-minded metric for the expression size. The testsuite is fairly immunezy to
+;; changes to this function (say replace + with max).
+
 (defun my-size (e)
   (if ($mapatom e) 1 (reduce #'+ (mapcar #'my-size (cdr e)))))
 

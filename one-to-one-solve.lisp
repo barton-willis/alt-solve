@@ -6,6 +6,11 @@
 
 (in-package :maxima)
 
+;;; Merge two or more solution sets. The input looks like CL list of solutions,
+;;; CL list of multiplicities, Maxima expression for condition (repeat). This
+;;; function removes redundant solutions and it removes solutions that do not
+;;; satisfy the conjunction of the conditions. It, of course, does this and
+;;; maintains the correct ordering for the multiplicities.
 (defun merge-solutions (&rest xxx)
    (let ((sx) (mx) (cx) (sol nil) (cnd t))
       (while xxx
@@ -56,7 +61,7 @@
 
 (setf (gethash (list '%sin '%sin) *one-to-one-reduce*) #'sin-sin-solve)
 
-;; attempt to solve equation c0*sin(kn0) + c1*sin(kn1) + b = 0 for x
+;; attempt to solve equation c0*cos(kn0) + c1*cos(kn1) + b = 0 for x
 (defun cos-cos-solve (x c0 kn0 c1 kn1 b &optional (ml 1) (use-trigsolve nil))
    (let ((sol0) (sol1) (sol2) (mx0) (mx1) (mx2))
       (cond ((and (zerop1 b) (alike1 c0 c1)) ;c0*cos(kn0) + c0*cos(kn1) = 0
@@ -91,19 +96,23 @@
 
 (setf (gethash (list '%cos '%cos) *one-to-one-reduce*) #'cos-cos-solve)
 
-;; attempt to solve equation c0*sin(kn0) + c1*sin(kn1) + b = 0 for x
+;;; Attempt to solve equation c0*sin(kn0) + c1*cos(kn1) + b = 0 for x. When c0 and
+;;; are both real and kn0 = kn1, solve sqrt(c0^2+c1^2)*cos(kn0 - atan2(c0 c1)) + b.
+
+;;; When either c0 or c1 isn't real, give up. We'll do an ask-boolean to determine
+;;; if c0 & c1 are real. I suppose we could handle the case where c0 = c*p & c1 = c*q,
+;;; where c is complex and both p & q are real.
 (defun sin-cos-solve (x c0 kn0 c1 kn1 b &optional (ml 1) (use-trigsolve nil))
-   (let ((r) (ph))
-	    (setq r (take '(mexpt) (add (mul c0 c0) (mul c1 c1)) (div 1 2)))
-      (cond ((zerop1 r)
-			        (take '(mlist)))
-			    	((and ($freeof x c0) ($freeof x c1) (alike1 kn0 kn1))
-               (setq ph (take '($atan2) c0 c1))
-				       (solve-single-equation
-								 (add kn0 ph (mul -1 (take '(%asin) (div b r)))
-									 (mul '$%pi (my-new-variable '$integer))) x ml use-trigsolve))
-			    	(t
-			    		nil))))
+   (let ((r) (ph) (eq))
+			(cond ((and
+				 		   (alike1 kn0 kn1)
+				       (my-ask-boolean (mm= c0 (take '($conjugate) c0))) ;is c0 real?
+               (my-ask-boolean (mm= c1 (take '($conjugate) c1)))) ;is c1 real?
+	         (setq r (simpnrt (add (mul c0 c0) (mul c1 c1)) 2))
+           (setq ph (take '($atan2) c0 c1))
+			  	 (setq eq (add (mul r (take '(%cos) (sub kn0 ph))) b))
+			  	 (solve-single-equation eq x ml use-trigsolve))
+			(t nil))))
 
 (setf (gethash (list '%sin '%cos) *one-to-one-reduce*) #'sin-cos-solve)
 
@@ -231,10 +240,12 @@
 
 (setf (gethash (list 'mexpt 'mexpt) *one-to-one-reduce*) #'mexpt-mexpt-solve)
 
-;; attempt to solve c0*exp(kn0) + c1*exp(kn1) + b = 0 for x
+;;; Attempt to solve c0*log(kn0) + c1*log(kn1) + b = 0 for x. We convert this equation
+;;; into  kn0^c0 * kn1^c1 - exp(-b) = 0.
 (defun log-log-solve (x c0 kn0 c1 kn1 b &optional (ml 1) (use-trigsolve nil))
+  ;(mtell "c0 =  ~M kn0 = ~M,  c1 = ~M, kn1 = ~M, b = ~M  ~%" c0 kn0 c1 kn1 b)
 	(let ((eq))
-	   (setq eq (sub (mul (power kn0 c0) (power kn1 c1))  (power '$%e b)))
+	   (setq eq (sub (mul (power kn0 c0) (power kn1 c1))  (power '$%e (mul -1 b))))
      (solve-single-equation eq x ml use-trigsolve)))
 
 (setf (gethash (list '%log '%log) *one-to-one-reduce*) #'log-log-solve)
@@ -301,7 +312,11 @@
 	      ;; subtract out: any terms of degree > 1?
 	      (equal 0 (ratdisrep (sub num truncnum)))))))))
 
-
+;;; Attempt to solve an equation of the form c0 F(kn0) + c1 G(kn1) + b, where c0, c1,
+;;; and b are free of the unknown x, and at least one of the kernels kn0 & kn1 depends on
+;;; x. The pair of functions (F,G) must be listed in the hashtable *one-to-one-reduce*.
+;;; Once we find c0,c1,b, kn0, and kn1, all that is left is to dispatch the appropriate
+;;; function from the hashtable.
 (defun one-to-one-solve (e x m zzz)
  (when $solveverbose
 	 (mtell "top of one-one-solve e = ~M  x = ~M ~%" e x))
@@ -315,14 +330,54 @@
 		     	  (setq ee (kernelize-fn e #'is-a-kernel))
 		    		(setq subs (second ee))
 						(setq gvars (mapcar #'cdr subs)) ;CL
+            (setq ee (first ee))
 						(setq subs (mapcar #'car subs)) ;CL list of kernels
-	          (setq ee (first ee))
 						(cond ((and
-							        t
 							        (eql 2 (length gvars))
 											($myaffine_p ee (cons '(mlist) gvars)))
 
 									(setq fn (gethash (mapcar #'caar subs) *one-to-one-reduce*))
+									(mtell "fn = ~M ~%" fn)
+									(when fn
+				    					(setq c0 ($ratcoef ee (first gvars)))
+					    				(setq c1 ($ratcoef ee (second gvars)))
+							    		(setq b ($substitute 0 (first gvars) ($substitute 0 (second gvars) ee)))
+									   	(setq kn0 (if (mexptp (first subs)) (first subs)  (second (first subs))))
+										  (setq kn1 (if (mexptp (second subs)) (second subs)  (second (second subs))))
+							   	  	(funcall fn x c0 kn0 c1 kn1 b m zzz)))
+							   (t (one-to-one-solve-alt e x m zzz))))))
+
+ ;;; Attempt to solve an equation of the form c0 F(kn0) + c1 G(kn1) + b, where c0, c1,
+ ;;; and b are free of the unknown x, and and both kernels kn0 & kn1 depend on
+ ;;; x. The pair of functions (F,G) must be listed in the hashtable *one-to-one-reduce*.
+ ;;; Once we find c0,c1,b, kn0, and kn1, all that is left is to dispatch the appropriate
+ ;;; function from the hashtable.
+
+ ;;; likely one-to-one-solve and one-to-one-solve-alt should be merged. For the equation
+ ;;; the log(x) + log(1-x) = log(42), one-to-one-solve finds three log kernels, then it fails.
+ ;;; But this function is able to solve the equation.
+(defun one-to-one-solve-alt (e x m zzz)
+ (when $solveverbose
+	 (mtell "top of one-one-solve-alt e = ~M  x = ~M ~%" e x))
+
+  (let ((ee) (subs nil) (gvars nil) (fn nil) (c0 nil) (c1 nil) (b nil))
+     (flet ((is-a-kernel (e)
+	           (and
+						  	(consp e)
+						  	(consp (car e))
+						  	(member (caar e) (list '%sin '%cos '%tan '%log 'mexpt '%atan '%asin '%acos 'mabs) :test #'eql)
+								(among x e))))
+		     	  (setq ee (kernelize-fn e #'is-a-kernel))
+		    		(setq subs (second ee))
+						(setq gvars (mapcar #'cdr subs)) ;CL
+            (setq ee (first ee))
+						(setq subs (mapcar #'car subs)) ;CL list of kernels
+						(cond ((and
+							        (eql 2 (length gvars))
+											($myaffine_p ee (cons '(mlist) gvars)))
+
+									(setq fn (gethash (mapcar #'caar subs) *one-to-one-reduce*))
+									(mtell "fn = ~M ~%" fn)
 									(when fn
 				    					(setq c0 ($ratcoef ee (first gvars)))
 					    				(setq c1 ($ratcoef ee (second gvars)))

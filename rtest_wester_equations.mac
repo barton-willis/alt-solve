@@ -153,10 +153,10 @@ map(lambda([sx], trigreduce(ratsimp(subst(sx,eq)))), sol);
 0$
 
 multiplicities;
-[1]$
+[1,1]$
 
-ratsimp(trigrat(subst(sol, rhs(eq)-lhs(eq))));
-0$
+map(lambda([q], trigrat(subst(q, eq))), sol);
+[1/sqrt(2)=1/sqrt(2),-1/sqrt(2)=-1/sqrt(2)]$
 
 (eq : tan(x)=1, sol : solve(eq,x),0);
 0$
@@ -216,7 +216,7 @@ solve(2*sqrt(x) + 3*x^(1/4) - 2 = 0, x);
 
 /* x = {sqrt[(sqrt(5) - 1)/2], -i sqrt[(sqrt(5) + 1)/2]} */
 mysolve(x = 1/sqrt(1 + x^2), x);
-[x=sqrt((sqrt(5)-1)/2),x=-sqrt(-((sqrt(5)+1)/2))]$
+[x=sqrt((sqrt(5)-1)/2),x=-(sqrt(-((sqrt(5)+1)/2)))]$
 
 /* This problem is from a computational biology talk => 1 - log_2[m (m - 1)] */
 (eq : binomial(m, 2)*2^k = 1, sol : solve(eq, k),0);

@@ -838,7 +838,7 @@ ssolve(cos(x)=1/2,x);
 [x=(6*%pi*%z0+%pi)/3,x=(6*%pi*%z1-%pi)/3]$
 
 ssolve(sin(x) = cos(x), x);
-[x=-((4*%pi*%z0+3*%pi)/4)]$
+[x=(8*%pi*%z0+5*%pi)/4,x=(8*%pi*%z1+%pi)/4]$
 
 block([ask_mode : false], ssolve(tan(x) = 1, x));
 [x=(4*%pi*%z0+%pi)/4]$
@@ -1067,10 +1067,14 @@ ssolve(sinh(x) + cosh(x) = 1,x);
 /* miscellaneous */
 
 ssolve(sin(x) = cos(x), x);
-[x=-((4*%pi*%z0+3*%pi)/4)]$
+[x=(8*%pi*%z0+5*%pi)/4,x=(8*%pi*%z1+%pi)/4]$
 
-ssolve(42*cos(x)+sin(x)=42*cos(%pi/4)+sin(%pi/4),x);
-[x=2*%pi*%z0-atan(1679/1847),x=(8*%pi*%z1+%pi)/4]$
+block([eq : 42*cos(x)+sin(x)=42*cos(%pi/4)+sin(%pi/4),sol],
+   sol : ssolve(42*cos(x)+sin(x)=42*cos(%pi/4)+sin(%pi/4),x),
+   [sol, map(lambda([q], ratsimp(trigexpand(subst(q, eq)))),sol)]);
+[[x=2*%pi*%z0+acos(43/(sqrt(2)*sqrt(1765)))+atan(1/42),
+  x=2*%pi*%z1-acos(43/(sqrt(2)*sqrt(1765)))+atan(1/42)],
+  [43/sqrt(2)=43/sqrt(2),43/sqrt(2)=43/sqrt(2)]]$
 
 ssolve(sin(x)*cos(x) = 1/2, x);
 [x=(8*%pi*%z0+%pi)/4,x=(8*%pi*%z1-3*%pi)/4]$
@@ -1090,7 +1094,7 @@ x=%i*log((sqrt(13)-sqrt(2)*sqrt(sqrt(13)-1)+1)/4)-2*%pi*%z4,
 x=%i*log((sqrt(13)+sqrt(2)*sqrt(sqrt(13)-1)+1)/4)-2*%pi*%z5]$
 
 ssolve(sin(2*x) + cos(2*x) = 1,x);
-[x=-((2*%pi*%z0+%pi)/4)]$
+[x=(4*%pi*%z0+%pi)/4,x=%pi*%z1]$
 
 ssolve(sin(x) * (x + 1), x);
 [x=-1, x=%pi*%z0]$
@@ -1296,7 +1300,7 @@ solve(x - 2 * sqrt (x) = 10,x);
 
 /* Wed Sep 20 11:41:42 CDT 2006 */
 ssolve(sin(x)+cos(x)=0,x);
-[x=-((4*%pi*%z0+%pi)/4)]$
+[x=(8*%pi*%z0+3*%pi)/4,x=(8*%pi*%z1-%pi)/4]$
 
 /* Fri Feb 1 05:31:56 CST 2008 changed 0.05 to 5/100) */
 ssolve(x*exp(-x)-5/100 = 0,x);
@@ -1390,15 +1394,14 @@ solve(sqrt(x)+x^(3/2)=1,x);
 ssolve(a*x=b, x);
 [x=b/a]$
 
-block([%rnum : 0], ssolve(x^2 + a^2, [x,a]));
+ssolve(x^2 + a^2, [x,a]);
 [[a=%r1,x=%i*%r1],[a=%r2,x=-%i*%r2]]$
 
-block([%rnum : 0], ssolve(x^4 + a^4, [x,a]));
+ssolve(x^4 + a^4, [x,a]);
 [[a=%r1,x=((sqrt(2)*%i+sqrt(2))*%r1)/2],
 [a=%r2,x=((sqrt(2)*%i-sqrt(2))*%r2)/2],
 [a=%r0,x=-(((sqrt(2)*%i+sqrt(2))*%r0)/2)],
 [a=%r1,x=-(((sqrt(2)*%i-sqrt(2))*%r1)/2)]]$
-
 
 ssolve((x-1)/(x+1) = 1, [x]);
 []$
@@ -1840,7 +1843,7 @@ block([ask_mode : false], ssolve(sin(x) = sin(x - p[0]),x));
 [x = (2*%pi*%z0+p[0]-%pi)/2]$
 
 ssolve(sin(x) = cos(x),x);
-[x=-((4*%pi*%z0+3*%pi)/4)]$
+[x=(8*%pi*%z0+5*%pi)/4,x=(8*%pi*%z1+%pi)/4]$
 
 ssolve(sin(x-5) - sin(5-x),x);
 [x=%pi*%z0+5]$
