@@ -184,7 +184,7 @@
 
 	 ;(setq eqlist (remove-if #'zerop1 eqlist))
 	 ;;Eliminate duplicate equations.
-	 ;;(setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
+	 (setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
 
 	 ;; stuff for solving for nonatoms. Should check for problems such as solve([xxx,yyy],[f(x),x])
 	 (dolist (xxx varl)
@@ -259,6 +259,7 @@
 		 (when $solveradcan
 				(setq e ($radcan e)))
 		 (setq e ($num (sratsimp e)))
+		 ;(setq e (apply-identities-conditionally e *trig-power-reduce*))
 		 (setq e (apply-identities-unconditionally e *pythagorean-identities*))
 		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
@@ -864,7 +865,7 @@
 ;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt
 ;;; to set the multiplicities to anything reasonable--it resets  multiplicities to the default.
 (defun redundant-equation-solve (eqs x)
-	;;(mtell "top of redundant solve eqs = ~M x = ~M ~%" eqs x)
+	(mtell "top of redundant solve eqs = ~M x = ~M ~%" eqs x)
 	(setq eqs (if (or ($listp eqs) ($setp eqs)) (cdr eqs) eqs))
 	(setq eqs (mapcar #'meqhk eqs)) ;convert a=b to a-b. This is important!
 	(setq eqs (mapcar #'try-to-crunch-to-zero eqs)) ;simplify eqs

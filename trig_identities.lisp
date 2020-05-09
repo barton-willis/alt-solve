@@ -79,9 +79,11 @@
 								(setq e ($ratsubst ($rhs id) ($lhs id) e))))) id-table)
 	e)
 
-;; A simple-minded metric for the expression size. The testsuite is fairly immunezy to
-;; changes to this function (say replace + with max).
-
+;; A metric for the expression size. When equation-simplify uses
+;; apply-identities-conditionally, changing this metric, for example, using max instead
+;; of plus, can result in changes to the testsuite--some good, some less good. But when
+;; we use apply-identities-unconditionally, the testsuite results don't matter so
+;; much with variations in this function.
 (defun my-size (e)
   (if ($mapatom e) 1 (reduce #'+ (mapcar #'my-size (cdr e)))))
 

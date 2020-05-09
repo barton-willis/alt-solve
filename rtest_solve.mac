@@ -1763,7 +1763,7 @@ ssolve([x+y=p1-p2, x+3*y=p2-p3, 3*x-y=p1+p2+p3], [x,y]);
 solve(log(x + sqrt(x^2-1))=1,x);
 [x=(%e^(-1)*(%e^2+1))/2]$
 
-solve(log(x+1)+log(x) = log(6)+log(5),x);
+ssolve(log(x+1)+log(x) = log(6)+log(5),x);
 [x = -6,x = 5]$
 
 /* From RJF, Maxima mailing list, Tuesday, September 01, 2009 12:54PM */
