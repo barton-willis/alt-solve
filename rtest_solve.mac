@@ -438,10 +438,10 @@ algsys([v^2-2*v+u^2+10*u+1,v^2-10*v+u^2+2*u+1],[v,u]);
 [[v=-((sqrt(34)-6)/2),u=(sqrt(34)-6)/2],[v=(sqrt(34)+6)/2,u=-((sqrt(34)+6)/2)]]$
 
 ssolve(4^x + 2^x + 1/4=0,x);
-[x=(2*%i*%pi*%z0-log(2)+%i*%pi)/log(2)]$
+[x=(2*%i*%pi*%z0-2*log(2)+log(-2))/log(2)]$
 
 ssolve(exp(4*x) = exp(4),x);
-[x=(%i*%pi*%z0+2)/2]$
+[x=-((%i*%pi*%z0-2)/2)]$
 
 ssolve(exp(4*x) = exp(-4),x);
 [x=(%i*%pi*%z0-2)/2]$
@@ -465,7 +465,7 @@ multiplicities;
 [4,4]$
 
 ssolve(exp(2*x) + exp(4*x)=0,x);
-[x=(2*%i*%pi*%z0+log(-1))/2]$
+[x=-((2*%i*%pi*%z0+log(-1))/2)]$
 
 /* bugs from, or inspired by, the  testsuite */
 nusum(n*n!,n,0,n);
@@ -556,7 +556,7 @@ ssolve(exp(x)/(5+exp(x)) = 2,x);
 [x=2*%i*%pi*%z0+log(-10)]$
 
 ssolve(%e^x/(%e^x+5)=%e^107/(%e^107+5),x);
-[x=2*%i*%pi*%z0+107]$
+[x=107-(2*%i*%pi)*%z0]$
 
 ssolve(exp(x) + exp(2*x) = 2,x);
 [x=2*%i*%pi*%z0,x=2*%i*%pi*%z1+log(-2)]$
@@ -1100,7 +1100,7 @@ ssolve(sin(x) * (x + 1), x);
 [x=-1, x=%pi*%z0]$
 
 ssolve(5^x = 5^%e, x);
-[x = ((2 * %i * %pi * %z0 + %e * log(5))/(log(5)))]$
+[x=-((2*%i*%pi*%z0-%e*log(5))/log(5))]$
 
 ssolve(sqrt(x^2+1) = 2 - x,x);
 [x=3/4]$
@@ -1580,7 +1580,7 @@ block([ask_mode : false], solve(log(x)=log(a),x));
 [x=a]$
 
 ssolve(exp(x)=exp(a),x);
-[x=a+2*%i*%pi*%z0]$
+[x=a-2*%i*%pi*%z0]$
 
 ssolve(exp(x*(x-1))=exp(a*(a-1)),x);
 [x=-((sqrt(4*a^2-4*a-8*%i*%pi*%z0+1)-1)/2),x=(sqrt(4*a^2-4*a-8*%i*%pi*%z0+1)+1)/2]$
@@ -1598,7 +1598,7 @@ block([algebraic : true], rectform(ssolve(x^(3/2) = (-1 - %i) / sqrt(2),x)));
 [x=-%i,x=%i/2+sqrt(3)/2]$
 
 block([algebraic : true], solve(x^(3/2) = - 1,x));
-[x=(sqrt(3)*%i-1)/2,x=-((sqrt(3)*%i+1)/2)]$
+[x=-((sqrt(3)*%i+1)/2),x=(sqrt(3)*%i-1)/2]$
 
 block([algebraic : true], solve(x^(3/2) = 1,x));
 [x=1]$
@@ -1852,10 +1852,10 @@ ssolve(cos(x-5) - cos(5-x),x);
 [x = %r0]$
 
 ssolve(cos(x^2-1)=0,x);
-[x=-(sqrt(4*%pi*%z0+%pi+2)/sqrt(2)),
-x=sqrt(4*%pi*%z0+%pi+2)/sqrt(2),
-x=-(sqrt(4*%pi*%z1-%pi+2)/sqrt(2)),
-x=sqrt(4*%pi*%z1-%pi+2)/sqrt(2)]$
+[x=-(sqrt(8*%pi*%z0+2*%pi+4)/2),
+x=sqrt(8*%pi*%z0+2*%pi+4)/2,
+x=-(sqrt(8*%pi*%z1-2*%pi+4)/2),
+x=sqrt(8*%pi*%z1-2*%pi+4)/2]$
 
 solve(log(x-sqrt(x-1)) = 0,x);
 [x=1,x=2]$
@@ -1866,7 +1866,8 @@ solve(log(x-sqrt(x-1)) = log(2009),x);
 /* From Sage developer Karl-Dieter Crisman (changed floats to rationals) */
 ssolve(23040 *(4*%e^-(1200*t)-%e^-(300*t))^2-720000*(16*%e^-(1200*t)-%e^-(300*t))*
 ((4/125)*%e^-(300*t)-(4/125)*%e^-(1200*t)),t);
-[t=(2*%i*%pi*%z0+log(-((3*sqrt(41)-25)/4)))/900,t=(2*%i*%pi*%z1+log((3*sqrt(41)+25)/4))/900]$
+[t=(2*%i*%pi*%z0+log((3*sqrt(41)+25)/4))/900,
+t=(2*%i*%pi*%z1+log(-((3*sqrt(41)-25)/4)))/900]$
 
 /* From 19 Aug 2010 Sage-support mailing list (reported by R. Hankin, 19 August, 2010) */
 

@@ -429,13 +429,15 @@
 			((mtimesp e)
 			  (product-solver e x m use-trigsolve cnd))
 
-			((filter-solution-x (solve-mexpt-equation e x m nil) cnd))
+			;((filter-solution-x (solve-mexpt-equation e x m nil) cnd))
 
       ((filter-solution-x (one-to-one-solve e x m nil) cnd))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
-		  ((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
+		  ((filter-solution-x (solve-mexpt-equation-extra e x m nil) cnd))
+
+			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
@@ -767,12 +769,12 @@
   (when $solveverbose
      (mtell "Top of solve-mexpt-equation-extra; e = ~M x = ~M ~%" e x))
 
-	(let ((pterms) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
+ 	(let ((pterms) (g (gensym)) (subs) (sol nil) (submin nil) (sol-all nil) (do-rectform nil))
         (when use-trigsolve
-	      	(setq e ($exponentialize e))
-	      	(setq e (apply-identities-conditionally e *pythagorean-identities*))
-      		(setq e (apply-identities-unconditionally e *to-cos/sin-identities*))
-					(setq do-rectform t))
+					(setq do-rectform t)
+	      	(setq e ($exponentialize e)))
+	      ;	(setq e (apply-identities-conditionally e *pythagorean-identities*))
+      	;	(setq e (apply-identities-unconditionally e *to-cos/sin-identities*)))
 
      (setq pterms (gather-expt-terms e x))
 

@@ -30,7 +30,7 @@ map(lambda([s], radcan(rectform(subst(s, 2^x+4^x=6)))), sol);
 [6=6,6=6]$
 
 sol : ssolve(%e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2),yx);
-[yx=4*%i*%pi*%z0+2*log(2)+2*%i*%pi,yx=4*%i*%pi*%z1+2*log(2)]$
+[yx=4*%i*%pi*%z0+2*log(-2),yx=4*%i*%pi*%z1+2*log(2)]$
 
 /* and let's check these solutions!*/
 trigsimp(rectform(subst(first(sol), %e^((3*yx)/2)+sqrt(%e^yx-4)*%e^yx-4*%e^(yx/2))));
@@ -161,7 +161,7 @@ ssolve([%e^x = 7,y^2=1],[x,y]);
 [[x=2*%i*%pi*%z0+log(7),y=-1],[x=2*%i*%pi*%z0+log(7),y=1]]$
 
 ssolve([%e^x = %e^107,y^2=1],[x,y]);
-[[x=2*%i*%pi*%z0+107,y=-1],[x=2*%i*%pi*%z0+107,y=1]]$
+[[x=107-2*%i*%pi*%z0,y=-1],[x=107-2*%i*%pi*%z0,y=1]]$
 
 block([solveexplicit : true], solve([x*cos(y)=9, x+y=12],[x,y]));
 []$

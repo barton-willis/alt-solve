@@ -74,7 +74,7 @@ checked_sol(sin(x/2)^2 + 2*sin(x/2) + 1 = 0,x);
 [[x=4*%pi*%z0-%pi,x=4*%pi*%z1+3*%pi],[0=0,0=0]]$
 
 checked_sol(exp(2*x) - exp(x) = 0,x);
-[[x=2*%i*%pi*%z0],[0=0]]$
+[[x=-2*%i*%pi*%z0],[0=0]]$
 
 checked_sol(exp(2*x) - 2*exp(x) + 1= 0,x);
 [[x=2*%i*%pi*%z0],[0=0]]$

@@ -143,7 +143,7 @@ solve(x^x = x, x);
 0$
 
 multiplicities;
-[1,1,1,1,1,1,1,1,1,1]$
+[3,3,1,2,2,2,2,2,2,2];
 
 map(lambda([sx], trigreduce(ratsimp(subst(sx,eq)))), sol);
 [0=0,0=0,0=0,0=0,0=0,0=0,0=0,0=0,0=0,0=0]$
