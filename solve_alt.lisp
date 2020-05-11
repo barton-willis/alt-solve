@@ -763,14 +763,14 @@
 (defun new-to-poly-solve (e x cnd)
 
   (when $solveverbose
-		(mtell "doing to poly solve e = ~M x = ~M  ~%" e x))
+		(mtell "doing to poly solve e = ~M x = ~M cnd = ~M  ~%" e x cnd))
 
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
 		 (setq q (let ((errcatch t) ($errormsg nil)) (ignore-errors ($to_poly e (list '(mlist) x)))))
 		 (when (and q (< ($length ($third q)) 2))
 			 (setq checked-sol (list '(mlist)))
 			 (setq eq ($first q))
-			 (setq cnd (take '(%and) cnd (simplifya (cons '(%and) (cdr ($second q))) t)))
+			   (setq cnd (take '(mand) cnd (simplifya (cons '(mand) (cdr ($second q))) t)))
 			 (setq nonalg-sub ($third q))
 
 			 (setq nvars ($subset (set-of-vars eq) #'(lambda (q) (and (symbolp q) (get q 'general-gentemp)))))
@@ -779,6 +779,8 @@
 
 
 			 (setq sol (let (($algexact t)) (cdr ($algsys eq ($listify nvars)))))
+
+
 			 (cond ((and sol ($emptyp nonalg-sub))
 					;;(mtell "branch 1 ~%")
 					(dolist (sk sol)
@@ -809,6 +811,7 @@
 			 (when checked-sol
 				 (mtell "used the to poly solver ~%")))
 
+     (mtell "checked = ~M ~%" checked-sol)
 		 checked-sol))
 
 (defun equation-complexity-guess (a b) (< (my-size a) (my-size b))) ; my-size defined in trig_identities

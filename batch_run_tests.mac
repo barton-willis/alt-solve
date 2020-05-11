@@ -20,7 +20,7 @@ push("rtest_polynomial_solve",testsuite_files)$
 
 push(["rtest_wester_equations", [14, 15, 31, 32, 34, 55, 60, 65]], testsuite_files)$
 
-push(["rtest_inverses",[19]],testsuite_files)$
+push(["rtest_inverses",[]],testsuite_files)$
 
 push(["rtest_extra_solve", [19]], testsuite_files)$
 
