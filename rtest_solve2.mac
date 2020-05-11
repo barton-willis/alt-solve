@@ -268,5 +268,5 @@ block([cnt : newcontext(),a],
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
-(reset(), ask_mode : false, remvalue(thyme), 0);
+(reset(), remvalue(thyme), 0);
 0$

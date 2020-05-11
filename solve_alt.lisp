@@ -141,7 +141,7 @@
 ;;;   (g) reverts gensym substitutions for nonatom solve
 ;;;   (h) kills the super context
 
-(defun $solve (eqlist &optional (varl nil))
+(defmfun $solve (eqlist &optional (varl nil))
   (mfuncall '$reset '$multiplicities)
   (mfuncall '$reset '$%rnum_list) ;not sure about this?
 

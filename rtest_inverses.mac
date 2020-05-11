@@ -67,8 +67,8 @@ block([cnt : newcontext()],
 	 killcontext(cnt))));
 [x=-abs(a),x=abs(a)]$
 
-block([%rnum : 28], solve(abs(x) = abs(x),x));
-[x=%r28]$
+ssolve(abs(x) = abs(x),x);
+[x=%r0]$
 
 ssolve(abs(x) = abs(1-x/2),x);
 [x=-2,x=2/3]$
