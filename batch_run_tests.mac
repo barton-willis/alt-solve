@@ -24,4 +24,6 @@ push(["rtest_inverses",[]],testsuite_files)$
 
 push(["rtest_extra_solve", [19]], testsuite_files)$
 
+push(["rtest_mcond_solve", [8]], testsuite_files)$
+
 run_testsuite(share_tests = true);

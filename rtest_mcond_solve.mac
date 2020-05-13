@@ -1,0 +1,25 @@
+/* rtest file for solving if-then-else equations. */
+
+ssolve((if x < 0 then -x else x)=107,x);
+[x=-107,x=107]$
+
+ssolve((if x < 0 then -x else x)=0,x);
+[x=0]$
+
+ssolve((if x < 0 then -x else x)=-1,x);
+[]$
+
+ssolve( (if x < 0 then -x else x) + (if x < 0 then -x else x)^2 = 15/4,x);
+[x=-3/2,x=3/2]$
+
+ssolve( (if x < 0 then -x else x) + (if x < 0 then -x else x)^2 = 0,x);
+[x=0]$
+
+ssolve((if x < 0 then -x else x) + (if x < 0 then -x else x)^2 = 6,x);
+[x=-2,x=2]$
+
+ssolve((if x < 0 then x^2-1 else 1-x^2) = 8,x);
+[x=-3]$
+
+solve((if 1/x<0 then -x else x)=0);
+[x=0]$

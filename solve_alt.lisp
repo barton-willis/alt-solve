@@ -68,6 +68,7 @@
 	($load "grobner.lisp")
 	($load "one-to-one-solve.lisp")
 	($load "fourier_elim.lisp")
+	($load "solve-mcond.lisp")
 	($load "myalgsys.lisp"))
 
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
@@ -335,6 +336,13 @@
 								 (mfuncall '$assume cnd)
 								 t))))
 
+
+(defun error-substitute (sub e)
+  (setq e (let (($errormsg nil) (errcatch (cons bindlist loclist)))
+		   (errset ($substitute sub e))))
+	(if e (car e) e))
+
+
 ;;; Remove the members of sol that do not satisfy cnd. The members of the CL list sol have
 ;;; the form solution.multiplicity. The Maxima expression cnd is generally a conjunction
 ;;; of Maxima predicates. For each solution, we substitute sx in to cnd and call my-ask-boolean.
@@ -342,7 +350,7 @@
 (defun filter-solution (sol cnd) "Remove the members of sol that do not satisfy cnd"
 	(let ((checked-sol nil))
 		 (dolist (sx sol)
-			 (when (my-ask-boolean ($substitute (car sx) cnd))
+			 (when (my-ask-boolean (error-substitute (car sx) cnd))
 				 (push sx checked-sol)))
 		 (reverse checked-sol)))
 
@@ -423,17 +431,25 @@
 			  (setq $multiplicities (simplifya (list '(mlist) '$inf) t))
 			  (take '(mlist) (take '(mequal) x ($new_variable (if ($featurep x '$complex) '$complex '$real)))))
 
+
+      ((and nil (not (among x e)))
+			 (cond ((eql (my-ask-boolean (take '($equal) e 0)) t)
+		        	 (filter-solution-x
+								 (take '(mlist) (take '(mequal) x ($new_variable (if ($featurep x '$complex)
+								  '$complex '$real)))) cnd))
+						(t (take '(mlist)))))
+
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (filter-solution-x (polynomial-solve e x m) cnd))
 
 			((mtimesp e)
 			  (product-solver e x m use-trigsolve cnd))
 
-			;((filter-solution-x (solve-mexpt-equation e x m nil) cnd))
-
       ((filter-solution-x (one-to-one-solve e x m nil) cnd))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
+
+      ((filter-solution-x (solve-mcond e x m use-trigsolve) cnd))
 
 		  ((filter-solution-x (solve-mexpt-equation-extra e x m nil) cnd))
 
@@ -463,6 +479,8 @@
 				   (setq ker (if (and (mplusp e) (not ($freeof x (first (last e))))) (first (last e)) x))
 				   (setq $multiplicities (take '(mlist) m))
 				   (take '(mlist) (take '(mequal) ker (sub ker e))))))))
+
+
 
 ;;; For a given function fun, kernel ker, and variable x, return the inverse
 ;;; of fun and the adjusted kernel. Examples:
@@ -498,11 +516,6 @@
 											 #'(lambda (q) (funcall fn q (second ker)))
 											 (third ker)))))
 
-									;	 (list
-										;	 #'(lambda (q)
-                    ;       (if (zerop1 q) nil
-										;		 (list (div (take '(%log) q) (take '(%log) (second ker))))))
-										;	 (third ker)))))
 				 (t	(list
 					      (gethash fun $solve_inverse_package)
 								(second ker))))))
@@ -527,6 +540,7 @@
 				(setq z (cdar ker))
 				(setq ker (caar ker))
 				(setq fun (caar ker))
+				(mtell "eeee = ~M  ker = ~M z = ~M ~%" e ker z)
 				(setq sol ($solve e z))
 				(when (not ($listp $multiplicities))
 				   (mtell "using fake multiplicities ~%")
@@ -619,48 +633,6 @@
 				  (setq subs (second xk)))
 			  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
 
-#|
-(defun kernelize-new (e x &optional (subs nil))
-				  ;(mtell "Top of kernelize; e = ~M ~%" e)
-					(let ((g (gensym)) (kn nil) (xop) (xk) (eargs) (is-a-kernel))
-					   (setq is-a-kernel (and
-							                   (consp e)
-																 (consp (car e))
-																 (or
-																	  (gethash (caar e) $solve_inverse_package)
-																		(invertible-mexptp e x))
-																 (among x e)))
-						 (cond
-							  (($mapatom e) (list e subs))
-
-								((and (mexptp e) (integerp (third e)))
-								  (print "caught")
-									(setq kn (assoc (second e) subs :test #'alike1)) ;is it a known kernel?
-								  (print `(kn = ,kn))
-									(cond (kn
-											 (list (cdr kn) subs)) ; it's a known kernel--use the value from the association list subs
-										 (t
-											(list (take '(mexpt) g (third e)) (acons e g subs))))) ; it's unknown--append a new key/value to subs
-
-							  (is-a-kernel
-							   (setq kn (assoc e subs :test #'alike1)) ;is it a known kernel?
-							   (cond (kn
-									       (list (cdr kn) subs)) ; it's a known kernel--use the value from the association list subs
-								   	   (t
-								   	    (list g (acons e g subs))))) ; it's unknown--append a new key/value to subs
-
-
-
-							 (t ; map kernelize onto the argument list and build up the association list subs
-							  (setq xop (list (caar e)))
-							  (setq e (cdr e))
-								(setq eargs nil)
-							  (dolist (xk e)
-								  (setq xk (kernelize xk x subs))
-								  (push (first xk) eargs)
-								  (setq subs (second xk)))
-							  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
-|#
 
 (defun homogeneous-linear-poly-p (e vars)
 	(setq e ($rat e))

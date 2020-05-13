@@ -55,7 +55,7 @@
 									        		 (take '(mor) (not-zerop a) (take '(mgreaterp) b 0)))))))))
 
 
-(defun $indomain(e x)
+(defun $indomain (e x)
 	(in-domain e (cdr x)))
 
 ;;; Return a Maxima predicate (Boolean valued expression) that is true on the
