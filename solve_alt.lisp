@@ -431,14 +431,6 @@
 			  (setq $multiplicities (simplifya (list '(mlist) '$inf) t))
 			  (take '(mlist) (take '(mequal) x ($new_variable (if ($featurep x '$complex) '$complex '$real)))))
 
-
-      ((and nil (not (among x e)))
-			 (cond ((eql (my-ask-boolean (take '($equal) e 0)) t)
-		        	 (filter-solution-x
-								 (take '(mlist) (take '(mequal) x ($new_variable (if ($featurep x '$complex)
-								  '$complex '$real)))) cnd))
-						(t (take '(mlist)))))
-
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (filter-solution-x (polynomial-solve e x m) cnd))
 
@@ -541,7 +533,6 @@
 				(setq z (cdar ker))
 				(setq ker (caar ker))
 				(setq fun (caar ker))
-				 (print "at 2")
 				(setq sol ($solve e z))
 				(when (not ($listp $multiplicities))
 				   (mtell "using fake multiplicities ~%")
