@@ -534,13 +534,14 @@
 	(let (($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
 		  (mult-acc nil) (xxx) (mult-save))
 		 (setq e (kernelize e x))
+
 		 (cond ((and (null (cdr (second e))) ($freeof x (first e)))
 				(setq ker (second e))
 				(setq e (first e))
 				(setq z (cdar ker))
 				(setq ker (caar ker))
 				(setq fun (caar ker))
-			;;;	(mtell "eeee = ~M  ker = ~M z = ~M ~%" e ker z)
+				 (print "at 2")
 				(setq sol ($solve e z))
 				(when (not ($listp $multiplicities))
 				   (mtell "using fake multiplicities ~%")
@@ -592,12 +593,12 @@
 	  	 (consp (car e))
 			 (gethash (caar e) $solve_inverse_package)
 			 (not ($freeof x e)))
-
 			(and
 				 (mexptp e) ;; e = a^X, e=X^b, or e=X^X, where X depends on x.
 	 	      	(or
 							  (and ($freeof x (second e)) (not ($freeof x (third e)))) ;; a^X
-								(and (not ($freeof x (second e))) ($freeof x (third e))) ;; X^a
+								(and (not ($freeof x (second e)))
+									(and ($freeof x (third e)) (not (integerp (third e))))) ;; X^a
 	 							(and (not ($freeof x (second e))) (alike1 (second e) (third e))))))) ;X^X
 
 (defun kernelize (e x &optional (subs nil))
@@ -605,16 +606,6 @@
 	(let ((g (gensym)) (kn nil) (xop) (eargs))
 		 (cond
 			 (($mapatom e) (list e subs))
-
-			 ((and (mexptp e) (not ($freeof x (second e))) (integerp (third e)))
-					;(print "caught")
-					;(mtell "e = ~M x = ~M ~%" e x)
-					(setq kn (assoc (second e) subs :test #'alike1)) ;is it a known kernel?
-				;	(print `(kn = ,kn))
-					(cond (kn
-							 (list (power (cdr kn) (third e)) subs)) ; it's a known kernel--use the value from the association list subs
-						 (t
-							(list (take '(mexpt) g (third e)) (acons (second e) g subs))))) ; it's unknown--append a new key/value to subs
 
 			  ((kernel-p e x)
 			   (setq kn (assoc e subs :test #'alike1)) ;is it a known kernel?

@@ -265,6 +265,15 @@ block([cnt : newcontext(),a],
 	        (assume(a < -%pi/2), solve(atan(x)=a,x)), killcontext(cnt)));
 []$
 
+block([ask_mode : false], ssolve(max(1,x^2)-1,x));
+[x=1,x=-1,x=%r1]$
+
+block([ask_mode : false], ssolve(max(1,x^2)^2-1,x));
+[x=-1,x=1,x=%r1]$
+
+block([ask_mode : false], ssolve(max(1,x^2)^2+1,x));
+[]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
