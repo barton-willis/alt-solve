@@ -427,10 +427,6 @@
 		 (setq e (first e))
 		 (cond
 
-			 ((or (zerop1 e) (and (consp e) (consp (car e)) (eql 'mlabox (caar e)) (zerop1 (unkeep-float e))))
-			  (setq $multiplicities (simplifya (list '(mlist) '$inf) t))
-			  (take '(mlist) (take '(mequal) x ($new_variable (if ($featurep x '$complex) '$complex '$real)))))
-
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (filter-solution-x (polynomial-solve e x m) cnd))
 

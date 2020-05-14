@@ -27,6 +27,18 @@
 	         (if ($mapatom e) 1 (reduce #'max (mapcar #'my-expr-size (cdr e)))))
 			  (t 0)))
 
+(defun mlabox-p (e)
+  (and (consp e) (consp (car e)) (eql 'mlabox (caar e))))
+
+;;; Solve a = 0 for x
+(defun my-solve-zeroth (x a)
+   (cond ((or (zerop1 a) (and (mlabox-p a) (zerop1 (second a))))
+	           (values
+							    (list
+				           (take '(mequal) x (my-new-variable (if ($featurep x '$complex) '$complex '$real))))
+					     		(list '$inf)))
+					(t (values nil nil))))
+
 ;;; Solve a*x + b = 0 for x. Return both a CL list of the solution (x= -b/a) and a CL list of the
 ;;; multiplicities. This code assumes that a =/= 0.
 (defun my-solve-linear (x a b) "Return solution and multiplicity of ax+b=0."
@@ -307,7 +319,8 @@
 				(multiple-value-bind (zzz mss)
 					(cond
 						((eql n 0)
-						 (values nil nil))
+						   (print "caught zeroth")
+							 (apply 'my-solve-zeroth cfs)); was (values nil nil))
 						((eql n 1)
 						 (apply 'my-solve-linear cfs))
 						((eql n 2)
