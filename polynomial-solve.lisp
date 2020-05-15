@@ -36,7 +36,7 @@
 	           (values
 							    (list
 				           (take '(mequal) x (my-new-variable (if ($featurep x '$complex) '$complex '$real))))
-					     		(list '$inf)))
+					     	 	(list '$inf)))
 					(t (values nil nil))))
 
 ;;; Solve a*x + b = 0 for x. Return both a CL list of the solution (x= -b/a) and a CL list of the

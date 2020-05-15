@@ -430,7 +430,7 @@
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (filter-solution-x (polynomial-solve e x m) cnd))
 
-			((mtimesp e)
+			((mtimesp e) ;for equations that are explicitly products, use product-solver
 			  (product-solver e x m use-trigsolve cnd))
 
       ((filter-solution-x (one-to-one-solve e x m nil) cnd))
