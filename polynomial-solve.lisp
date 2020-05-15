@@ -27,15 +27,17 @@
 	         (if ($mapatom e) 1 (reduce #'max (mapcar #'my-expr-size (cdr e)))))
 			  (t 0)))
 
-(defun mlabox-p (e)
-  (and (consp e) (consp (car e)) (eql 'mlabox (caar e))))
+(defun float-box-p (e) "True iff e is box for a float or bigfloat"
+  (and (consp e) (consp (car e)) (eql 'mlabox (caar e))
+	     (or (eql (third e) *float-box-label*)
+			     (eql (third e) *big-float-box-label*))))
 
 ;;; Solve a = 0 for x
-(defun my-solve-zeroth (x a)
-   (cond ((or (zerop1 a) (and (mlabox-p a) (zerop1 (second a))))
+(defun my-solve-zeroth (x a) "Solve a=0 for x"
+   (setq a (try-to-crunch-to-zero a))
+   (cond ((or (zerop1 a) (and (float-box-p a) (zerop1 (second a))))
 	           (values
-							    (list
-				           (take '(mequal) x (my-new-variable (if ($featurep x '$complex) '$complex '$real))))
+							    (list (take '(mequal) x (my-new-variable $solve_domain)))
 					     	 	(list '$inf)))
 					(t (values nil nil))))
 
@@ -319,7 +321,6 @@
 				(multiple-value-bind (zzz mss)
 					(cond
 						((eql n 0)
-						   (print "caught zeroth")
 							 (apply 'my-solve-zeroth cfs)); was (values nil nil))
 						((eql n 1)
 						 (apply 'my-solve-linear cfs))

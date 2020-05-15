@@ -10,6 +10,14 @@
 ;;; for general use.
 (defmvar $solveverbose nil)
 
+(defmvar $solve_domain '$complex)
+
+(defun solve-domain-assign (a b)
+  (when (not (or (eql b '$real) (eql b '$complex)))
+	    (merror "The value of ~M must be either 'complex' or 'real' ~%" a)))
+
+(setf (get '$solve_domain 'assign) #'solve-domain-assign)
+
 ;;; The need for setting *evaluator-mode* is a mystery to me. And I'm not entirely sure
 ;;; about the need for loading solve.lisp.
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -416,11 +424,16 @@
 
 (defmvar $the_unsolved '(($set)));this is purely for debugging
 
+(defun real-or-complex-mapatom (e)
+     (cond (($subvarp e) (real-or-complex-mapatom (caar e)))
+					 ((kindp e '$complex) '$complex)
+					 (t '$real)))
+
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
 (when (or $solveverbose)
 	  (mtell "top of solve-single-equation e = ~M x = ~M m = ~M use = ~M ~%" e x m use-trigsolve))
 
-	(let ((cnd)) ; did have ($assume_pos nil), but why?
+	(let ((cnd) ($solve_domain (real-or-complex-mapatom x)))
 	   (setq cnd (or (not $ask_mode) (in-domain e (list x))))
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
