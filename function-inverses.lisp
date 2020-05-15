@@ -133,42 +133,18 @@
 									(list (add (mul '$%pi (my-new-variable '$integer)) (take '(%acot) q)))))))
 
 		 (list '%asin #'(lambda (q)
-   	 	  (let ((qr (my-real q)) (qi (my-imag q)) (cnd))
-					;;require -pi/2 <= Re(q) <= pi/2 or Re(q)=-pi/2 & Im(q) >=  0 or Re(q) = pi/2 & Im(q) <= 0
-					(setq cnd
-						 (my-ask-boolean
-							 (take '(mor)
-									 (take '(mand)
-											 (mm< (div '$%pi -2) qr)
-										   (mm< qr (div '$%pi 2)))
-									 (take '(mand)
-											 (mm= qr (div '$%pi -2))
-											 (mm<= 0 qi))
-									 (take '(mand)
-											 (mm= qr (div '$%pi 2))
-											 (mm<= qi 0)))))
-				 (cond ((eql cnd t) (list (take '(%sin) q)))
-							 (t nil)))))
+   	 	  (let ((cnd))
+					;; could require -pi/2 <= Re(q) <= pi/2 or Re(q)=-pi/2 & Im(q) >=  0
+					;; or Re(q) = pi/2 & Im(q) <= 0, but we can't assume or expressions. Plus
+					;; this is much easier. The option variable triginverses controls the
+					;; sin(asin(x)) simplification.
+					(setq cnd (my-ask-boolean (take '($equal) q (take '(%sin) (take '(%asin) q)))))
+					(if cnd (list (take '(%sin) q)) nil))))
 
-		 (list '%acos #'(lambda (q) (let ((qr (my-real q)) (qi (my-imag q)) (cnd))
-				 ;;require 0 < Re(q) < pi or Re(q)=0 & Im(q) >= 0 or Re(q)=pi & Im(q) <= 0
-				 (setq cnd
-						(my-ask-boolean
-							(take '(mor)
-									(take '(mand)
-										 (take '(mlessp) 0 qr)
-										 (take '(mlessp) qr '$%pi))
-
-									(take '(mand)
-											(take '(mequal) qr 0)
-											(take '(mgeqp) qi 0))
-
-									(take '(mand)
-											(take '(mequal) qr '$%pi)
-											(take '(mgreqp) 0 qi)))))
-
-				(cond ((eql cnd t) (list (take '(%cos) q)))
-							(t nil)))))
+		 (list '%acos #'(lambda (q) (let ((cnd))
+				 ;;could require 0 < Re(q) < pi or Re(q)=0 & Im(q) >= 0 or Re(q)=pi & Im(q) <= 0
+				 (setq cnd (my-ask-boolean (take '($equal) q (take '(%cos) (take '(%acos) q)))))
+ 				 (if cnd (list (take '(%cos) q)) nil))))
 
 		 (list '%acot #'(lambda (q)
 								(cond ((zerop1 q) (list))
