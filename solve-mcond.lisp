@@ -7,7 +7,6 @@
 
 (in-package :maxima)
 
-
 (defun mcond-p (e) "True iff e the operator of e is mcond."
   (and (consp e) (consp (car e)) (eql 'mcond (caar e))))
 

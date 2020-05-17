@@ -269,7 +269,7 @@
 				(setq e ($radcan e)))
 		 (setq e ($num (sratsimp e)))
 		 ;(setq e (apply-identities-conditionally e *trig-power-reduce*))
-		 (setq e (apply-identities-unconditionally e *pythagorean-identities*))
+		 (setq e (apply-identities-conditionally e *pythagorean-identities*))
 		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
 
@@ -739,11 +739,7 @@
 			 (setq nvars ($subset (set-of-vars eq) #'(lambda (q) (and (symbolp q) (get q 'general-gentemp)))))
 			 (setq nvars ($adjoin x nvars))
 			 (setq nvars ($listify nvars))
-
-
 			 (setq sol (let (($algexact t)) (cdr ($algsys eq ($listify nvars)))))
-
-
 			 (cond ((and sol ($emptyp nonalg-sub))
 					;;(mtell "branch 1 ~%")
 					(dolist (sk sol)
@@ -1051,7 +1047,7 @@
 		(cond (($freeof x cnst) ; match with x*exp(x) = cnst
 			       (setq $multiplicities (take '(mlist) m))
 			       (setq sol (cond ((eql $solve_inverse_package $multivalued_inverse)
-		   	         		(take '(%generalized_lambert_w) ($new_variable '$integer) cnst))
+		   	         		(take '(%generalized_lambert_w) (my-new-variable'$integer) cnst))
 							    	(t (take '(%lambert_w) cnst))))
 						(opcons 'mlist (take '(mequal) x sol)))
 		    	(t nil))))

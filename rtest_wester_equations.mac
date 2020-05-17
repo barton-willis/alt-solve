@@ -139,14 +139,14 @@ solve(x^x = x, x);
 
 /* This equation is already factored and so *should* be easy to solve:
    x = {-1, 2*{+-arcsinh(1) i + n pi}, 3*{pi/6 + n pi/3}} */
-(eq : (x + 1) * (sin(x)^2 + 1)^2 * cos(3*x)^3 = 0, sol : solve(eq,x),0)$
+(eq : (x + 1) * (sin(x)^2 + 1)^2 * cos(3*x)^3 = 0, sol : ssolve(eq,x),0)$
 0$
 
 multiplicities;
-[3,3,1,2,2,2,2,2,2,2];
+[1,2,2,2,2,3,3]$
 
 map(lambda([sx], trigreduce(ratsimp(subst(sx,eq)))), sol);
-[0=0,0=0,0=0,0=0,0=0,0=0,0=0,0=0,0=0,0=0]$
+[0=0,0=0,0=0,0=0,0=0,0=0,0=0]$
 
 /* x = pi/4 [+ n pi] */
 (eq : sin(x) = cos(x), sol : solve(eq,x),0);

@@ -47,7 +47,7 @@ checked_sol(sin(x) + sin(x)^2=0,x);
 [[x=%pi*%z0,x=(4*%pi*%z1-%pi)/2,x=(4*%pi*%z2+3*%pi)/2],[0=0,0=0,0=0]]$
 
 checked_sol(cos(x) + cos(x)^2=0,x);
-[[x=(4*%pi*%z0+%pi)/2,x=2*%pi*%z1+%pi,x=(4*%pi*%z2-%pi)/2],[0=0,0=0,0=0]]$
+[[x=2*%pi*%z0+%pi,x=2*%pi*%z1-%pi,x=(4*%pi*%z2+%pi)/2,x=(4*%pi*%z3-%pi)/2],[0=0,0=0,0=0,0=0]]$
 
 checked_sol(tan(x) = -1,x);
 [[x=(4*%pi*%z0-%pi)/4],[-1=-1]]$
@@ -112,5 +112,4 @@ logcontract(ssolve(5^x=10^x,x));
 [x=-(2*%i*%pi*%z0)/log(2)]$
 
 checked_sol(-5*cos(x)^2+cos(x)+1=1,x);
-[[x=(4*%pi*%z0-%pi)/2,x=(4*%pi*%z1+%pi)/2,x=2*%pi*%z2+atan(2*sqrt(6)),
-x=2*%pi*%z3-atan(2*sqrt(6))],[1=1,1=1,1=1,1=1]]$
+[[x=(4*%pi*%z0+%pi)/2,x=(4*%pi*%z1-%pi)/2,x=2*%pi*%z2+acos(1/5),x=2*%pi*%z3-acos(1/5)],[1=1,1=1,1=1,1=1]]$

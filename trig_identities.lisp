@@ -84,8 +84,17 @@
 ;; of plus, can result in changes to the testsuite--some good, some less good. But when
 ;; we use apply-identities-unconditionally, the testsuite results don't matter so
 ;; much with variations in this function.
-(defun my-size (e)
-  (if ($mapatom e) 1 (reduce #'+ (mapcar #'my-size (cdr e)))))
+(defun trigfun-p (e)
+   (and (consp e) (consp (car e))
+	   (memq (caar e) (list '%cos '%sin '%tan '%sec '%csc '%cot
+                          '%cosh '%sinh '%tanh '%sech '%csch '%coth))))
+
+	(defun my-size (e)
+	  (cond (($mapatom e) 0)
+		      ((trigfun-p e) (+ 1 (my-size (cadr e))))
+					(t (reduce #'+ (mapcar #'my-size (cdr e))))))
+
+
 
 ;; When ratsubst(new, old, e) has a smaller expression size than does e, do the
 ;; substitution; otherwise don't do the substitution.

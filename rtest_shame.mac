@@ -1,0 +1,39 @@
+/* Collection of bugs that I want to focus on fixing.  Many (most) of these
+are in other test files. */
+
+ssolve(csc(x)^2 + 2*csc(x) + 1 = 0,x);
+[x=(4*%pi*%z0-%pi)/2,x=(4*%pi*%z1+3*%pi)/2]$
+
+ssolve(sqrt(log(x)) = log(sqrt(x)),x);
+[x=1, x=%e^4]$
+
+ssolve(x^(3/2) = a^(3/2),x);
+[x=a]$
+
+ssolve([x+3*y=5, sqrt(x+y)-1=y],[x,y]);
+[]$
+
+ssolve(sqrt(x) + x^(3/2)=1,x);
+[x=-((2^(4/3)/((3*sqrt(93)-29)^(1/3)*(sqrt(3)*%i-1))+((3*sqrt(93)-29)^(1/3)*(sqrt(3)*%i-1))/2^(4/3)+2)/3)]$
+
+
+ssolve([sqrt(x-y)=2, sqrt(x+y)=5],[x,y]);
+[]$
+
+ssolve(x *cot(x)=0,x);
+[x=%pi * (%z0 -1/2)]$
+
+ssolve(exp(-0.2 *x) + exp(0.2*x) = 1,x);
+[]$
+
+ssolve(x^(1/3)=-1,x);
+[]$
+
+ssolve([sin(x)=0, x= %pi],x);
+[x=%pi]$
+
+ssolve([exp(x)=y, 0=0],[x,y]);
+[]$
+
+block([ask_mode : false], ssolve(max(1,x^2)=1,x));
+[]$
