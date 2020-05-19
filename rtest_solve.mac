@@ -1231,7 +1231,7 @@ block(
         assume(a < 0),
         solve(a+x-sqrt(x),x)),
   killcontext(cntx)));
-  [x=(-2*a+sqrt(1-4*a)+1)/2]$
+  [x=-((2*a-sqrt(1-4*a)-1)/2)]$
 
 /* Thu, 24 Apr 2003 15:50:25 +0300 */
 ssolve(x - 2 * sqrt (x) = 10,x);
@@ -1263,7 +1263,7 @@ block(
         assume(a < 0),
         solve(x - sqrt(x) + a,x)),
   killcontext(cntx)));
-  [x=(-2*a+sqrt(1-4*a)+1)/2]$
+  [x=-((2*a-sqrt(1-4*a)-1)/2)]$
 
 /* Tue Apr 3 10:18:12 CDT 2007 */
 solve([x=2, y=3], [x]);
@@ -1388,8 +1388,9 @@ ssolve(x^4=1,x);
 ssolve(x^8=1,x);
 [x=-1,x=1,x=-%i,x=%i,x=-%i/sqrt(2)-1/sqrt(2),x=1/sqrt(2)-%i/sqrt(2),x=%i/sqrt(2)-1/sqrt(2),x=%i/sqrt(2)+1/sqrt(2)]$
 
-solve(sqrt(x)+x^(3/2)=1,x);
-[]$
+/* Testing the symbolic solution seems to fail--give up and test float.*/
+block([algebraic : true], float(rectform(solve(sqrt(x)+x^(3/2)=1,x))));
+[x=0.4655712318767671]$
 
 ssolve(a*x=b, x);
 [x=b/a]$
@@ -1400,8 +1401,8 @@ ssolve(x^2 + a^2, [x,a]);
 ssolve(x^4 + a^4, [x,a]);
 [[a=%r1,x=((sqrt(2)*%i+sqrt(2))*%r1)/2],
 [a=%r2,x=((sqrt(2)*%i-sqrt(2))*%r2)/2],
-[a=%r0,x=-(((sqrt(2)*%i+sqrt(2))*%r0)/2)],
-[a=%r1,x=-(((sqrt(2)*%i-sqrt(2))*%r1)/2)]]$
+[a=%r3,x=-(((sqrt(2)*%i+sqrt(2))*%r3)/2)],
+[a=%r4,x=-(((sqrt(2)*%i-sqrt(2))*%r4)/2)]]$
 
 ssolve((x-1)/(x+1) = 1, [x]);
 []$
@@ -1753,7 +1754,7 @@ solve([sqrt(x-y) = 2, sqrt(x+y) = 5],[x,y]);
 /* problem from sage mailing list circa 2009-05-18 */
 
 solve (Q*sqrt(Q^2 + 2) - 1, Q);
-[Q=(sqrt(2)-1)*sqrt(sqrt(2)+1),Q=(-sqrt(2)-1)*sqrt(1-sqrt(2))]$
+[Q=-sqrt(-sqrt(2)-1),Q=sqrt(sqrt(2)-1)]$
 
 /* source code comment in /solver/linsolve.mac */
 
@@ -1857,7 +1858,7 @@ x=sqrt(8*%pi*%z0+2*%pi+4)/2,
 x=-(sqrt(8*%pi*%z1-2*%pi+4)/2),
 x=sqrt(8*%pi*%z1-2*%pi+4)/2]$
 
-solve(log(x-sqrt(x-1)) = 0,x);
+ssolve(log(x-sqrt(x-1)) = 0,x);
 [x=1,x=2]$
 
 solve(log(x-sqrt(x-1)) = log(2009),x);
@@ -1960,7 +1961,7 @@ multiplicities;
 
 /* #3276 regression in to_poly_solve */
 solve(Q*sqrt(Q^2 + 2)=1,Q);
-[Q=(sqrt(2)-1)*sqrt(sqrt(2)+1),Q=(-sqrt(2)-1)*sqrt(1-sqrt(2))]$
+[Q=-sqrt(-sqrt(2)-1),Q=sqrt(sqrt(2)-1)]$
 
 /* #3234 solve with list of vars */
 
@@ -2089,10 +2090,10 @@ solve(sqrt(x^2+a^2)=x+2,x);
 
 /*  #3540 Solver doesn't solve simple equation */
 
-block([use_to_poly : true, solve_inverse_package : multivalued_inverse], solve(y=sqrt(y),y));
+block([use_to_poly : true, solve_inverse_package : multivalued_inverse], ssolve(y=sqrt(y),y));
 [y=0,y=1]$
 
-block([use_to_poly : true, solve_inverse_package : single_valued_inverse], solve(y=sqrt(y),y));
+block([use_to_poly : true, solve_inverse_package : single_valued_inverse], ssolve(y=sqrt(y),y));
 [y=0,y=1]$
 
 /* #3538 solver doesn't solve simple alg/ system */

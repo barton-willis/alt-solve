@@ -18,12 +18,14 @@ push("rtest_linsolve", testsuite_files)$
 
 push("rtest_polynomial_solve",testsuite_files)$
 
-push(["rtest_wester_equations", [14, 15, 31, 32, 55, 60, 65]], testsuite_files)$
+push(["rtest_wester_equations", [13, 14, 30, 31, 64, 69]], testsuite_files)$
 
 push(["rtest_inverses",[]],testsuite_files)$
 
 push(["rtest_extra_solve", []], testsuite_files)$
 
 push(["rtest_mcond_solve", [8]], testsuite_files)$
+
+push(["rtest_algebraic_solve", []], testsuite_files)$
 
 run_testsuite(share_tests = false, display_known_bugs = true, time=true);

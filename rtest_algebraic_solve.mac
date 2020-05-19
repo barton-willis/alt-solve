@@ -1,0 +1,23 @@
+ssolve(8*x+x^(2/3)+1=69,x);
+[x=8]$
+
+ssolve(8*x+x^(1/3)+1=67,x);
+[x=8]$
+
+solve(x^(1/3)-1/x^(1/3)+1=5/2,x);
+[x=8]$
+
+solve(x+sqrt(x)-1/sqrt(x)=4/sqrt(5)+5,x);
+[x=5]$
+
+solve(sqrt(2-sqrt(3-x))=sqrt(2-sqrt(2)*%i),x);
+[x=5]$
+
+ssolve(sqrt(1-sqrt(x^2+1))=sqrt(1-sqrt(65)),x);
+[x=-8,x=8]$
+
+ssolve(sqrt(1-x) + sqrt(1+x) = 107,x);
+[x=-((107*sqrt(11445)*%i)/2),x=(107*sqrt(11445)*%i)/2]$
+
+ssolve(sqrt(1+x) - sqrt(1-x) = 1/2,x);
+[x=sqrt(15)/8]$

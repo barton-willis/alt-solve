@@ -344,12 +344,10 @@
 								 (mfuncall '$assume cnd)
 								 t))))
 
-
 (defun error-substitute (sub e)
   (setq e (let (($errormsg nil) (errcatch (cons bindlist loclist)))
 		   (errset ($substitute sub e))))
 	(if e (car e) e))
-
 
 ;;; Remove the members of sol that do not satisfy cnd. The members of the CL list sol have
 ;;; the form solution.multiplicity. The Maxima expression cnd is generally a conjunction
@@ -438,6 +436,7 @@
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
 		 (setq e (first e))
+
 		 (cond
 
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
@@ -455,6 +454,9 @@
 		  ((filter-solution-x (solve-mexpt-equation-extra e x m nil) cnd))
 
 			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
+
+			((and ($mapatom x) (algebraic-p e x) ;why the mapatom filter?
+				 (filter-solution-x (solve-algebraic-equation e x) cnd)))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
@@ -723,9 +725,70 @@
 						(setq sol (sratsimp ($rectform sol)))))
 		sol))
 
+
+(defun algebraic-p (e x) "True iff expression e is an algebraic expression in x."
+   (or
+     ($numberp e)
+		 ($mapatom e)
+		 (and (mexptp e) (algebraic-p (second e) x) ($ratnump (third e)))
+		 (or
+			  ($freeof x e)
+		    (and
+					 (or (mplusp e) (mtimesp e))
+           (every #'(lambda (s) (algebraic-p s x)) (cdr e))))))
+
+;; Return a Maxima list of solutions to the algebraic equation e.
+(defun solve-algebraic-equation (e x)
+    (let ((q) (eq) (nonalg-sub) (cnds) (nvars) (sol) (ssol nil) ($errormsg nil) ($algexact t))
+        (setq eqs ($to_poly e (list '(mlist) x))) ;convert to polynomial system
+        (setq nonalg-sub (fourth eqs)) ;should be a Maxima empty list
+				(cond (($emptyp nonalg-sub)
+                (setq cnds (third eqs)) ;Maxima list of constraints on variables
+			        	(setq cnds (simplifya (cons '(mand) (cdr cnds)) t)) ;cnds is a Maxima boolean
+                (setq eq (second eqs))  ;the polynomial system
+		        		;; gather the gensym variables generated in the process of converting to
+		    	    	;; a polynomial system.
+		    	    	(setq nvars ($subset (set-of-vars eq) #'(lambda (q) (and (symbolp q) (get q 'general-gentemp)))))
+ 			          (setq nvars ($adjoin x nvars))
+ 		    	      (setq nvars ($listify nvars))
+				        (setq sol (cdr ($myalgsys eq nvars))) ;sol is a CL list of Maxima lists of solutions
+                ;; Check that the putative solution satisfies the constraints; and
+			         	;; remove solutions for the gensym variables & gather solutions into ssol.
+			        	(dolist (sx sol)
+								   (when (my-ask-boolean (error-substitute sx cnds))
+				              (setq sx (remove-if #'(lambda (s) (not (eql ($lhs s) x))) (cdr sx)))
+					            (setq ssol (append ssol sx))))
+
+								 (mtell "solve-algebraic-equation!!! ~%")
+								 (setq ssol (remove-duplicates ssol :test #'alike1 :from-end t))
+				         (simplifya (cons '(mlist) ssol) t))
+						 (t nil))))
+
+#|
+(defun ok-p (e)
+			(and (consp e) (consp (car e)) (gethash (caar e) $solve_inverse_package)))
+
+(defun $experimental_solve (e x &optional (m 1) (cnd t))
+  (let ((q (kernelize-fn e #'(lambda (s) (and (not ($freeof x s)) (ok-p s)))))
+	      ($solveexplicit t) (eqs) (sol nil) (ssol nil))
+    	(cond ((and (null (cdr (second q))) ($freeof q (first q)))
+    		 (setq ker (second q))
+    		 (setq e (first q))
+    		 (setq z (cdar ker))
+    		 (setq ker (caar ker))
+				 (mtell "e = ~M z = ~M ker = ~M ~%" e z ker)
+         (when (algebraic-p e z)
+				    (setq sol (cdr (solve-algebraic-equation e z))) ;; CL list of solutions
+						(dolist (sx sol)
+						    (mtell "ker = ~M sx = ~M ~%" ker sx)
+						    (setq ssol (append ssol (cdr (solve-single-equation (sub ker ($rhs sx)) x)))))
+						(cons '(mlist) ssol))))))
+
+|#
+
 (defun new-to-poly-solve (e x cnd)
 
-  (when $solveverbose
+  (when (or t $solveverbose)
 		(mtell "doing to poly solve e = ~M x = ~M cnd = ~M  ~%" e x cnd))
 
 	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
@@ -941,7 +1004,7 @@
   	(cond  ((every #'(lambda (q) ($polynomialp q x
 			    	#'(lambda (s) ($lfreeof x s))
 	   			  #'(lambda (s) (and (integerp s) (>= s 0))))) (cdr e))
-						;(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
+						(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
 						(setq e ($setify e)) ;convert both e and x to sets & expunge redundant eqs
 			      (setq x ($setify x))
 						(setq e ($listify e)) ;convert both e and x to sets & expunge redundant eqs
