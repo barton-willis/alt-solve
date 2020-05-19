@@ -70,8 +70,9 @@ ssolve([x+3*y=5,sqrt(x+y)-1=y],[x,y]);
 ssolve([abs(x*y-1)=a,a^2-x*y],[x*y,a]);
 [[x*y=-(sqrt(5)-3)/2,a=(sqrt(5)-1)/2],[x*y=(sqrt(5)+3)/2,a=(sqrt(5)+1)/2]]$
 
-block([keepfloat:true],solve(%e^(0.0057195*x)+%e^((-0.0057195)*x)=1,x));
-[x=174.8404580820002*log((sqrt(3)*%i+1)/2),x=174.8404580820002*log((-(sqrt(3)*%i-1))/2)]$
+ssolve(%e^(0.0057195*x)+%e^((-0.0057195)*x)=1,x);
+[x=174.8404580820002*(2*%i*%pi*%z0+log((sqrt(3)*%i+1)/2)),
+    x=174.8404580820002*(2*%i*%pi*%z1+log(-((sqrt(3)*%i-1)/2)))]$
 
 block([solve_inverse_package:single_valued_inverse],solve([x/(x+y),x/(x+y)+log(x+y)],[x,y]));
 [[x=0,y=1]]$

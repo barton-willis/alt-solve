@@ -661,7 +661,7 @@ solve(abs(x) = -1,x);
 ssolve(abs(x) = 1,x);
 [x=-1, x = 1]$
 
-block([keepfloat : true], ssolve(abs(x) = 42.1,x));
+ssolve(abs(x) = 42.1,x);
 [x= -42.1, x = 42.1]$
 
 ssolve(abs(x) = -42.1,x);
@@ -2014,7 +2014,7 @@ solve((x^2-1)/(x-1)=2);
 
 /* #2546 solve with repeated equations gives a wrong answer */
 ssolve([sin(x)=cos(x), sin(x)=cos(x)],x);
-[x=%pi/4,x=-(3*%pi)/4]$
+[x=(8*%pi*%z0+5*%pi)/4,x=(8*%pi*%z1+%pi)/4]$
 
 /* #2518 solve takes infinite time and memory --- oops
 solve([z/(z-1) = (z-x)/y, (z-x)/y = y/(z-y), y/(z-y) = (z-y)/(y-1)], [x,y,z]); */
@@ -2035,8 +2035,9 @@ x=(16*%pi*%z4-7*%pi)/8,
 x=(16*%pi*%z5+%pi)/8]$
 
  /* #2397 Solve returns [] when solutions exists */
-block([keepfloat : true], solve(%e^(0.0057195*x)+%e^(-0.0057195*x)=1,x));
-[x=174.8404580820002*log((sqrt(3)*%i+1)/2),x=174.8404580820002*log(-(sqrt(3)*%i-1)/2)]$
+ ssolve(%e^(0.0057195*x)+%e^((-0.0057195)*x)=1,x);
+[x=174.8404580820002*(2*%i*%pi*%z0+log((sqrt(3)*%i+1)/2)),
+  x=174.8404580820002*(2*%i*%pi*%z1+log(-((sqrt(3)*%i-1)/2)))]$
 
 /* #2254 to_poly_solve missing solution */
 solve(log(x)/log(2)=x-1,x);
