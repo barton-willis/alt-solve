@@ -764,8 +764,8 @@
 							  (setq nvars ($subset (set-of-vars eq) #'(lambda (q) (and (symbolp q) (get q 'general-gentemp)))))
 								(setq nvars ($union ($setify x) nvars))
 								(setq nvars ($listify nvars))
-								(setq eq (unkeep-float eq))
-							  (setq sol (cdr ($algsys eq nvars))) ;sol is a CL list of Maxima lists of solutions
+								;(setq eq (unkeep-float eq))
+							  (setq sol (cdr ($myalgsys eq nvars))) ;sol is a CL list of Maxima lists of solutions
 								;; Check that the putative solution satisfies the constraints; and
 						  	;; remove solutions for the gensym variables & gather solutions into ssol.
 							  (dolist (sx sol)
@@ -1041,12 +1041,12 @@
 
 		(push '(mlist) e) ;convert e and x to Maxima lists.
 		(push '(mlist) x)
+
   	(cond  ((every #'(lambda (q) ($polynomialp q x
 			    	#'(lambda (s) ($lfreeof x s))
 	   			  #'(lambda (s) (and (integerp s) (>= s 0))))) (cdr e))
-					  	(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
-						(setq e (unkeep-float e))
-							(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
+						(setq e (cons '(mlist) (mapcar #'unkeep-float (cdr e))))
+						(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
 						(setq e ($setify e)) ;convert both e and x to sets & expunge redundant eqs
 			      (setq x ($setify x))
 						(setq e ($listify e)) ;convert both e and x to sets & expunge redundant eqs
@@ -1054,11 +1054,13 @@
 						(setq e (dispatch-grobner e x))
 						(setq sol ($algsys e x))
 						(unkeep-float sol))
-
-				;	((every #'(lambda (q) (algebraic-p q (cdr x))) (cdr e))
-				;	  (mtell "going for algebraic system e = ~M x = ~M ~%" e x)
-						;;;;;;($read )
-				;	  (solve-algebraic-equation-system e x))
+          ;; The check (< (length x) 4) is silly. But the rtest_lsquares test generates
+					;; some huge equations that have no chance at a symbolic solution. For these
+					;; cases, algsys runs for a long time and consumes huge amounts of memory. I'm
+					;; not sure if these tests even finsh.
+					((and (every #'(lambda (q) (algebraic-p q (cdr x))) (cdr e)) (< (length x) 4))
+					  (mtell "going for algebraic system e = ~M x = ~M ~%" e x)
+					  (solve-algebraic-equation-system e x))
 		 		(t
 					 (setq ee e)
 	  			 (setq e ($setify e))
