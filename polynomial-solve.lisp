@@ -22,9 +22,9 @@
 ;;; playing, experiment with this function. You will find that altering it can
 ;;; result in wide variations with the solution of quartics and with the memory used.
 
-(defun my-expr-size (e)
+(defun solve-expr-size (e)
   (cond ((among '$%i e)
-	         (if ($mapatom e) 1 (reduce #'max (mapcar #'my-expr-size (cdr e)))))
+	         (if ($mapatom e) 1 (reduce #'max (mapcar #'solve-expr-size (cdr e)))))
 			  (t 0)))
 
 (defun float-box-p (e) "True iff e is box for a float or bigfloat"
@@ -149,10 +149,10 @@
 			  (setq m (polynomial-solve ($gfactor m) g)) ;was ($solve m g)
 			  (setq $multiplicities nil)
 			  (setq m (mapcar #'third (cdr m))) ;remove '(mlist) and extract $rhs
-			  ;;  simplify members of m, remove vanishing members, and sort according to my-expr-size.
+			  ;;  simplify members of m, remove vanishing members, and sort according to solve-expr-size.
         (setq m (mapcar #'(lambda (q) (try-to-crunch-to-zero q #'sqrtdenest #'fullratsimp)) m))
 				(setq m (remove-if #'zerop1 m))
-				(setq m (sort m #'(lambda(a b) (< (my-expr-size a) (my-expr-size b)))))
+				(setq m (sort m #'(lambda(a b) (< (solve-expr-size a) (solve-expr-size b)))))
 			  (setq m (car m)) ;set m to the "simplest" member of m
 			  (setq x m)
 			  (setq mm (simpnrt (mul 2 m) 2))
