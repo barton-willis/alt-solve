@@ -139,9 +139,12 @@
               (t e)))
         (t (simplifya (cons (list (caar e)) (mapcar #'unkeep-float (cdr e))) t))))
 
-;;; Solve, apply nicedummies, simplify in current context, and sort solutions.
-;;; This is especially useful for rtest files. The function sort-solutions (defined
-;;; in solve_alt_top.lisp) sorts solutions and the multiplicities.
+;;; Solve, apply nicedummies, simplify in current context, and sort solutions (keeping
+;;; correct order of solutions and multiplicities). Using ssort instead of sort is
+;;; especially useful for rtest files. The function sort-solutions (defined
+;;; in solve_alt_top.lisp) sorts solutions and the multiplicities. The function
+;;; nicedummies re-indexes %rXXX, %cXXX, and %zXXX variables to start with zero.
+;;; The call to $expand(XXX,0,0) does the simplifcation in the current context.
 (defun $ssolve (e x)
 		(let (($%rnum 0)) (sort-solutions ($expand ($nicedummies ($solve e x)) 0 0) nil)))
 
@@ -200,6 +203,7 @@
 
 	 ;(setq eqlist (remove-if #'zerop1 eqlist))
 	 ;;Eliminate duplicate equations.
+	 ;(setq eqlist (delete-duplicates eqlist :test #'alike1 :from-end t))
 	 (setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
 
 	 ;; stuff for solving for nonatoms. Should check for problems such as solve([xxx,yyy],[f(x),x])
@@ -444,6 +448,9 @@
 		 (setq m (second e))
 		 (setq e (first e))
 
+		 (when (not ($mapatom x))
+		    (mtell "Looks like a non maptom e = ~M x = ~M ~%" e x))
+
 		 (cond
 
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
@@ -462,7 +469,7 @@
 
 			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
 
-			((and ($mapatom x) (algebraic-p e x) ;why the mapatom filter?
+			((and ($mapatom x) (algebraic-p e (list x)) ;why the mapatom filter?
 				 (filter-solution-x (solve-algebraic-equation e x) cnd)))
 
 			((mtimesp ($factor e))
@@ -739,10 +746,36 @@
 		 ($mapatom e)
 		 (and (mexptp e) (algebraic-p (second e) x) ($ratnump (third e)))
 		 (or
-			  ($freeof x e)
+			  ($lfreeof (cons '(mlist) x) e)
 		    (and
 					 (or (mplusp e) (mtimesp e))
            (every #'(lambda (s) (algebraic-p s x)) (cdr e))))))
+
+(defun solve-algebraic-equation-system (e x)
+		(let ((q) (eq) (nonalg-sub) (cnds) (nvars) (sol) (ssol nil) ($errormsg nil) ($algexact t))
+				(setq eqs ($to_poly e x)) ;convert to polynomial system
+				(setq nonalg-sub (fourth eqs)) ;should be a Maxima empty list
+		 	  (cond (($emptyp nonalg-sub)
+								(setq cnds (third eqs)) ;Maxima list of constraints on variables
+							  (setq cnds (simplifya (cons '(mand) (cdr cnds)) t)) ;cnds is a Maxima boolean
+								(setq eq (second eqs))  ;the polynomial system
+							  ;; gather the gensym variables generated in the process of converting to
+							  ;; a polynomial system.
+							  (setq nvars ($subset (set-of-vars eq) #'(lambda (q) (and (symbolp q) (get q 'general-gentemp)))))
+								(setq nvars ($union ($setify x) nvars))
+								(setq nvars ($listify nvars))
+								(setq eq (unkeep-float eq))
+							  (setq sol (cdr ($algsys eq nvars))) ;sol is a CL list of Maxima lists of solutions
+								;; Check that the putative solution satisfies the constraints; and
+						  	;; remove solutions for the gensym variables & gather solutions into ssol.
+							  (dolist (sx sol)
+									(when (my-ask-boolean (error-substitute sx cnds))
+										 (setq sx (remove-if #'(lambda (s) (not (memq ($lhs s) (cdr x)))) (cdr sx)))
+										 (setq sx (simplifya (cons '(mlist) sx) t))
+										 (push sx ssol)))
+								(setq ssol (remove-duplicates ssol :test #'alike1 :from-end t))
+								(simplifya (cons '(mlist) ssol) t))
+						(t nil))))
 
 ;; Return a Maxima list of solutions to the algebraic equation e.
 (defun solve-algebraic-equation (e x)
@@ -1011,7 +1044,9 @@
   	(cond  ((every #'(lambda (q) ($polynomialp q x
 			    	#'(lambda (s) ($lfreeof x s))
 	   			  #'(lambda (s) (and (integerp s) (>= s 0))))) (cdr e))
-						(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
+					  	(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
+						(setq e (unkeep-float e))
+							(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
 						(setq e ($setify e)) ;convert both e and x to sets & expunge redundant eqs
 			      (setq x ($setify x))
 						(setq e ($listify e)) ;convert both e and x to sets & expunge redundant eqs
@@ -1019,6 +1054,11 @@
 						(setq e (dispatch-grobner e x))
 						(setq sol ($algsys e x))
 						(unkeep-float sol))
+
+				;	((every #'(lambda (q) (algebraic-p q (cdr x))) (cdr e))
+				;	  (mtell "going for algebraic system e = ~M x = ~M ~%" e x)
+						;;;;;;($read )
+				;	  (solve-algebraic-equation-system e x))
 		 		(t
 					 (setq ee e)
 	  			 (setq e ($setify e))

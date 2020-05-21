@@ -1352,7 +1352,7 @@ solve(0=1,x);
 
 /* Mon Jan 29 08:57:41 CST 2007 */
 ssolve([x+3*y=5,sqrt(x+y)-1=y],[x,y]);
-[[x=11-6*sqrt(2),y=2*sqrt(2)-2]]$
+[[y=2^(3/2)-2,x=11-3*2^(3/2)]]$
 
 /* more miscellaneous */
 
@@ -1749,7 +1749,7 @@ ssolve([sqrt(x) = min(x,35)],[x]);
 [x = 1225, x = 0, x = 1]$
 
 solve([sqrt(x-y) = 2, sqrt(x+y) = 5],[x,y]);
-[x = 29/2,y = 21/2]$
+[[x=29/2,y=21/2]]$
 
 /* problem from sage mailing list circa 2009-05-18 */
 

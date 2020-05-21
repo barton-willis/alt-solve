@@ -6,11 +6,11 @@ file_search_tests : append(file_search_maxima, file_search_tests)$
 
 testsuite_files : []$
 
-push(["rtest_solve2", [14, 15, 16, 18, 19, 22, 30, 46, 66, 69]], testsuite_files)$
+push(["rtest_solve2", [14, 15, 16, 19, 22, 30, 46, 66, 69]], testsuite_files)$
 
 push(["rtest_solve",[214, 260, 287, 295, 326, 327, 340, 342, 343,
-     351, 376, 395, 396, 397, 398,
-     400, 455, 470, 472, 485,
+     376, 395, 396, 397, 398,
+     400, 470, 472, 485,
      500, 512, 514, 525, 538, 544, 553, 558, 574, 575, 581, 582, 583,
      584, 585]],testsuite_files)$
 

@@ -65,7 +65,7 @@ ssolve([x2=x*cos(phi)-y*sin(phi),y2=x*sin(phi)+y*cos(phi)],[x,y])$
 [[x=sin(phi)*y2+cos(phi)*x2,y=cos(phi)*y2-sin(phi)*x2]]$
 
 ssolve([x+3*y=5,sqrt(x+y)-1=y],[x,y]);
-[[x=11-6*sqrt(2),y=2*sqrt(2)-2]]$
+[[y=2^(3/2)-2,x=11-3*2^(3/2)]]$
 
 ssolve([abs(x*y-1)=a,a^2-x*y],[x*y,a]);
 [[x*y=-(sqrt(5)-3)/2,a=(sqrt(5)-1)/2],[x*y=(sqrt(5)+3)/2,a=(sqrt(5)+1)/2]]$
