@@ -5,10 +5,10 @@
 ;; stopme command, only for sbcl
 
 (in-package :maxima)
-(defmspec $stopme(args)    ;; usage:  stopme (do x:x+1, 2) ; stops
-infinite loop after 2 sec
+
+(defmspec $stopme(args)    ;; usage:  stopme (do x:x+1, 2) ; stops infinite loop after 2 sec
    (let* ((evalme(cadr args))          ;  not evaluated !
-      (timelimit (meval (caddr args))) ; evaluate the time limit
+          (timelimit (meval (caddr args))) ; evaluate the time limit
 
       (v (sb-ext::make-timer ;; the timer program
           (lambda()
@@ -16,6 +16,6 @@ infinite loop after 2 sec
             (throw 'stopme `((mtext) "timed out on " ,evalme))))))
      (catch 'stopme
        (progn
-     (sb-ext::schedule-timer v timelimit)
-     (prog1 (meval evalme)
-       (sb-ext::unschedule-timer v))    ))))
+         (sb-ext::schedule-timer v timelimit)
+         (prog1 (meval evalme)
+           (sb-ext::unschedule-timer v))))))

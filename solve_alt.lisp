@@ -1033,20 +1033,18 @@
 	 (mfuncall '$reset '$multiplicities)
 	 (setq e (mapcar #'keep-float e)) ; protect floats in boxes.
 	 ;; collect the domain conditions in cnd.
-	 (setq cnd (reduce #'(lambda (a b) (take '(mand) a b))
-		    (mapcar #'(lambda (q) (in-domain q x)) e)))
+	 (setq cnd (reduce #'(lambda (a b) (take '(mand) a b)) (mapcar #'(lambda (q) (in-domain q x)) e)))
 	 ;; The second member of equation-simplify holds multiplicity data--thus extract just the first
 	 ;; member returned by equation-simplify.
  	 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
 
-		(push '(mlist) e) ;convert e and x to Maxima lists.
-		(push '(mlist) x)
+	 (push '(mlist) e) ;convert e and x to Maxima lists.
+	 (push '(mlist) x)
 
   	(cond  ((every #'(lambda (q) ($polynomialp q x
 			    	#'(lambda (s) ($lfreeof x s))
 	   			  #'(lambda (s) (and (integerp s) (>= s 0))))) (cdr e))
 						(setq e (cons '(mlist) (mapcar #'unkeep-float (cdr e))))
-						(mtell "solve-multiple-equations is dispatching algsys; ~M ~%" e)
 						(setq e ($setify e)) ;convert both e and x to sets & expunge redundant eqs
 			      (setq x ($setify x))
 						(setq e ($listify e)) ;convert both e and x to sets & expunge redundant eqs
@@ -1059,7 +1057,7 @@
 					;; cases, algsys runs for a long time and consumes huge amounts of memory. I'm
 					;; not sure if these tests even finsh.
 					((and (every #'(lambda (q) (algebraic-p q (cdr x))) (cdr e)) (< (length x) 4))
-					  (mtell "going for algebraic system e = ~M x = ~M ~%" e x)
+					  (mtell "Solving algebraic system e = ~M x = ~M ~%" e x)
 					  (solve-algebraic-equation-system e x))
 		 		(t
 					 (setq ee e)
@@ -1073,6 +1071,7 @@
 					 			    (simplifya (list '(mlist)) t))
 
                  ((and (not $solveexplicit) (null sol))
+								    (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning an implicit solutoin.~%") e x)
 								    (simplifya (cons '(mlist) (mapcar #'(lambda (q) (take '(mequal) 0 q)) (cdr ee))) t))
 
 							   (t
