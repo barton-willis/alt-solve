@@ -89,10 +89,10 @@
 	   (memq (caar e) (list '%cos '%sin '%tan '%sec '%csc '%cot
                           '%cosh '%sinh '%tanh '%sech '%csch '%coth))))
 
-	(defun my-size (e)
+	(defun trig-fun-count (e)
 	  (cond (($mapatom e) 0)
-		      ((trigfun-p e) (+ 1 (my-size (cadr e))))
-					(t (reduce #'+ (mapcar #'my-size (cdr e))))))
+		      ((trigfun-p e) (+ 1 (trig-fun-count (cadr e))))
+					(t (reduce #'+ (mapcar #'trig-fun-count (cdr e))))))
 
 
 
@@ -100,11 +100,11 @@
 ;; substitution; otherwise don't do the substitution.
 (defun conditional-ratsubst (new old e)
 	(let ((ee ($ratsubst new old e)))
-	    	(if (< (my-size ee) (my-size e)) ee e)))
+	    	(if (< (trig-fun-count ee) (trig-fun-count e)) ee e)))
 
 ;; Apply the identities described by the hashtable id-table to the expression e. Make the
 ;; substitution only when the result has a smaller expression size as determined by
-;; my-size.
+;; trig-fun-count.
 (defun apply-identities-conditionally (e id-table)
 	(setq e ($ratdisrep e))
 	(maphash #'(lambda (key val)

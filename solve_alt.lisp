@@ -876,7 +876,7 @@
      (mtell "checked = ~M ~%" checked-sol)
 		 checked-sol))
 
-(defun equation-complexity-guess (a b) (< (my-size a) (my-size b))) ; my-size defined in trig_identities
+(defun equation-complexity-guess (a b) (< (trig-fun-count a) (trig-fun-count b))) ; trig-fun-count defined in trig_identities
 
 ;;; Solve the Maxima list of expressions eqs for the symbol x. This function doesn't attempt
 ;;; to set the multiplicities to anything reasonable--it resets  multiplicities to the default.
