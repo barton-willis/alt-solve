@@ -187,7 +187,7 @@ block([ask_mode : true], solve(1 = sqrt(x),x));
 /* And for fun: problems from ``A College Algebra,''  Henry Burchard Fine (1904)  */
 
 ssolve([h*a^2 = 27, h^2/4 + 2*(a/2)^2 = 27/4],[a,h]);
-[[a= -(3*%i)/sqrt(2),h= -6],[a=(3*%i)/sqrt(2),h= -6],[a=3,h=3],[a= -3,h=3]]$
+[[a=-3,h=3],[a=3,h=3],[a=-((3*%i)/sqrt(2)),h=-6],[a=(3*%i)/sqrt(2),h=-6]]$
 
 (sol : ssolve(2*x^8-9*x^7+18*x^6-30*x^5 + 32*x^4-30*x^3+18*x^2-9*x+2,x),0);
 0$
@@ -267,7 +267,7 @@ block([cnt : newcontext(),a],
 []$
 
 block([ask_mode : false], ssolve(max(1,x^2)-1,x));
-[x=1,x=-1,x=%r1]$
+[x=-1,x=1,x=%r1]$
 
 block([ask_mode : false], ssolve(max(1,x^2)^2-1,x));
 [x=-1,x=1,x=%r1]$

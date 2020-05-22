@@ -730,7 +730,7 @@ block(
 [x=a]$
 
 ssolve(max(2 - x^2, x) = max(-x, x^3/9), x);
-[x = 3, x = - 1]$
+[x=-1,x=3]$
 
 /*This problem is tricky--Maxima must recognize that a cubic has a real root.*/
 ssolve(max(2 - x^2, x) = x^3/9, x);
@@ -1429,13 +1429,13 @@ ssolve(x^2+2*x+sqrt(5),x);
 /* nonsymbol solve */
 
 ssolve([x^2 + y^2 + x*y = 1, x^2 * y^2 = 2],[x^2 + y^2, x*y]);
-[[y^2+x^2=(x^4+2)/x^2,x*y=-((x^4-x^2+2)/x^2)]]$
+[[x*y=-((x^4-x^2+2)/x^2),y^2+x^2=(x^4+2)/x^2]]$
 
 ssolve([x + x*y = a, x*y = 8],[x,x*y]);
 [[x=a-8,x*y=8]]$
 
 ssolve([x + x*y = a, x*y = 8 + z, x-z+78],[x,x*y,z]);
-[[x=(a-86)/2,z=(a+70)/2,x*y=(a+86)/2]]$
+[[x=(a-86)/2,x*y=(a+86)/2,z=(a+70)/2]]$
 
 ssolve([abs(x*y-1) = a, a^2 - x*y],[x*y,a]);
 [[x*y=-((sqrt(5)-3)/2),a=(sqrt(5)-1)/2],[x*y=(sqrt(5)+3)/2,a=(sqrt(5)+1)/2]]$
@@ -1746,7 +1746,7 @@ solve([sqrt(x) = 10 - sqrt(x-1)],[x]);
 [x = 10201/400]$
 
 ssolve([sqrt(x) = min(x,35)],[x]);
-[x = 1225, x = 0, x = 1]$
+[x=0,x=1,x=1225]$
 
 solve([sqrt(x-y) = 2, sqrt(x+y) = 5],[x,y]);
 [[x=29/2,y=21/2]]$
@@ -2064,8 +2064,8 @@ block(
 
 /* #2038 Elementary Algsys/Solve bug */
 ssolve([y^2+x^2-1,y^2+(1-sqrt(3))*y+x^2+2],[y,x]);
-[[x=((sqrt(3)+2)*sqrt(2*sqrt(3)-8))/2,y=(3^(3/2)+3)/2],
-[x=-(((sqrt(3)+2)*sqrt(2*sqrt(3)-8))/2),y=(3^(3/2)+3)/2]]$
+[[x=-(((sqrt(3)+2)*sqrt(2*sqrt(3)-8))/2),y=(3^(3/2)+3)/2],
+[x=((sqrt(3)+2)*sqrt(2*sqrt(3)-8))/2,y=(3^(3/2)+3)/2]]$
 
 /* #1988 solve returns nonlinear solution to linear equations */
 block([%rnum : 0], solve([-(y*A)/sqrt(2*A^2+1)-(x*A)/sqrt(2*A^2+1)+A/sqrt(2*A^2+1)+z/sqrt(2*A^2+1),x],[x,y,z]));

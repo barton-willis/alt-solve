@@ -8,7 +8,10 @@
 
 ;;; sort solutions using orderlessp & maintain correct ordering of multiplicities.
 (defun sort-solutions (sol &optional (ignore-multiplicities nil))
-  (cond ((and ($listp sol) ($listp $multiplicities) (eql (length sol) (length $multiplicities)))
+  ;; Is the length check needed? Of course, if it fails, it's a bug. For the equation
+  ;; solve([y*sin(x)=0,cos(x)=0],[x,y]), multiplicities is incorrectly set to [1]. Untill
+  ;; this bug is fixed, we need the length check.
+  (cond ((and ($listp sol) (not ignore-multiplicities) ($listp $multiplicities) (eql (length sol) (length $multiplicities)))
          (setq sol (mapcar #'(lambda (a b) (cons a b)) (cdr sol) (cdr $multiplicities)))
          (setq sol (sort sol #'$orderlessp :key #'car))
          (setq $multiplicities (mapcar #'cdr sol))
@@ -16,13 +19,16 @@
          (setq $multiplicities (simplifya (cons '(mlist) $multiplicities) t))
          (simplifya (cons '(mlist) sol) t))
 
-      ((and ($listp sol) ignore-multiplicities)
-         (mfuncall '$reset '$multiplicities)
-         (setq sol (mapcar #'(lambda (q) (sort-solutions q nil)) (cdr sol)))
+      (($listp sol)
+         ;; might be a list of lists, so apply sort-solutions to each list member
+         (setq sol (mapcar #'(lambda (q) (sort-solutions q t)) (cdr sol)))
+         ;; now sort the list of solutions
          (setq sol (sort sol #'$orderlessp))
          (simplifya (cons '(mlist) sol) t))
 
-     (t sol)))
+     (t
+        ;; solution isn't a list, so just return
+        sol)))
 
 ;;; Attempt to verify that sol is a solution to the equations eqs. When sol is a solution, return
 ;;; 'ok; when the solution is definitely spurious, return 'spurious; otherwise, return 'maybe.
