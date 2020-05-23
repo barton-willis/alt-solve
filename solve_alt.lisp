@@ -268,17 +268,27 @@
 ;;; Additionally, we could remove factors from e that don't depend on the solve variable(s). But
 ;;; to do that, the solve variables would need to be an argument.
 
+;;; equation-simplify could do more; for example abs(X) --> X and constant * X --> X
+;;; (well maybe we'd need to give equation-symplify a way to know when a term is
+;;; constant. But such methods adds complexity and possible inconsistentancy to the code.
+
 (defun equation-simplify (e &optional (m 1))
 	(setq e ($ratdisrep (meqhk e))) ;do a=b -->a-b & convert to general form
 	(cond
+
+		;; Without this, solve((x+1)^(3/2),x) has the wrong multiplicity. This
+		;; is a bug in the way solve-by-kernelize handles multiplicities--so
+		;; this is a workaround for a bug somewhere else.
 		((and (mexptp e) (mnump (third e)) (mgrp (third e) 0)) ; do z^n --> z when n is a positive mnump
-		 (equation-simplify (second e) (mul m (third e))))
+	 	 (equation-simplify (second e) (mul m (third e))))
+
 		(t
 	   ;;unsure when is the best time to do radcan, but it's better to do it after
 		 ;; the z^n --> z simplification.
 		 (when $solveradcan
 				(setq e ($radcan e)))
 		 (setq e ($num (sratsimp e)))
+
 		 ;(setq e (apply-identities-conditionally e *trig-power-reduce*))
 		 (setq e (apply-identities-conditionally e *pythagorean-identities*))
 		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
@@ -380,35 +390,27 @@
 ;;; when one of the solutions is all, but there is a condition on the solution--something like
 ;;; solve ((sin(x)^2 + cos(x)^2-1)*(1/x),x). I'm not sure how to fix this.
 
-(defun product-solver (e x m use-trigsolve cnd) "Solve e=e1*e2*...*en for x"
-	;;(mtell "using product solve ~%")
-	;;(displa `((mequal) cnd ,cnd))
+(defun product-solver (e x m use-trigsolve cnd)
+   (let ((alist) (solx) (mx))
+		 (setq e (cdr e)) ;remove '(mtimes)
+     (dolist (ex e)
+		  	(setq solx (solve-single-equation ex x m use-trigsolve)) ;solve ex
+        ;; Unfortunate workaround for bug when multiplicities are not set
+				(when (or (not ($listp $multiplicities))
+				          (not (eql (length $multiplicities) (length solx))))
+							(setq $multiplicities (cons '(mlist)
+							    (mapcar #'(lambda (q) (declare (ignore q)) m) (cdr solx)))))
 
-	(let ((solx) (sol nil) (wmul))
-		 (setq e (cdr e))
-		 (catch 'found-all
-				(dolist (ex e)
-					(setq solx (solve-single-equation ex x m use-trigsolve))
-					(when (eql solx '$all)
-						(setq sol '$all)
-						(throw 'found-all nil))
+		  	(setq alist (append alist (mapcar #'(lambda (a b) (cons a b))
+			     (cdr solx)
+			     (cdr $multiplicities))))) ;build an association list of the form solution.multiplicity
 
-					;; the conditional is a workaround for some other bug, I think.
-					(setq solx (cdr solx))
-					(setq wmul (if ($listp $multiplicities) (cdr $multiplicities)
-								   (mapcar #'(lambda (q) (declare (ignore q)) '$not_yet_set) solx)))
-
-
-					(dolist (sx solx) ; build an association list of the form solution.multiplicity
-						(push (cons sx (pop wmul)) sol))))
-		 (cond
-			 ((eql sol '$all)
-				sol)
-			 (t
-			  (setq sol (remove-duplicates sol :test #'alike1 :key #'car :from-end t))
-			  (setq sol (filter-solution sol cnd))
-			  (setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr sol)) t))
-			  (simplifya (cons '(mlist) (mapcar #'car sol)) t)))))
+		;; remove duplicates, filter spurious solutions, extract multiplicities, and
+		;; extact solution.
+		(setq alist (remove-duplicates alist :test #'alike1 :key #'car :from-end t))
+		(setq alist (filter-solution alist cnd))
+		(setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
+		(simplifya (cons '(mlist) (mapcar #'car alist)) t)))
 
 (defun filter-solution-x (sol cnd)
   (let ((alist nil))
@@ -448,15 +450,12 @@
 		 (setq m (second e))
 		 (setq e (first e))
 
-		 (when (not ($mapatom x))
-		    (mtell "Looks like a non maptom e = ~M x = ~M ~%" e x))
-
 		 (cond
 
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
 			   (filter-solution-x (polynomial-solve e x m) cnd))
 
-			((mtimesp e) ;for equations that are explicitly products, use product-solver
+			((mtimesp e);;for equations that are explicitly products, use product-solver
 			  (product-solver e x m use-trigsolve cnd))
 
       ((filter-solution-x (one-to-one-solve e x m nil) cnd))
@@ -469,7 +468,7 @@
 
 			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
 
-			((and ($mapatom x) (algebraic-p e (list x)) ;why the mapatom filter?
+			((and (algebraic-p e (list x)) 
 				 (filter-solution-x (solve-algebraic-equation e x) cnd)))
 
 			((mtimesp ($factor e))
@@ -891,7 +890,8 @@
 	;; The $flatten call is ugly.
   (cond ((every #'(lambda (q) ($polynomialp q (list '(mlist) x) #'(lambda (s) ($freeof x s))
 				       	#'(lambda (s) (and (integerp s) (>= s 0))))) eqs)
-			    ($flatten (solve-multiple-equations eqs (list x))))
+          (mtell "reduncant-equation-solve polynomial case ~%")
+				  ($flatten (solve-multiple-equations eqs (list x))))
     	;; Solve the eqations one at a time and collect the intersection of the
      	;; solutions. Some problems remain--if x = %c0, for example, we need a
    	  ;; specialized intersection. And there are additional problems with %zXXX
@@ -1027,6 +1027,10 @@
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
 (defun solve-multiple-equations (e x) "Solve the CL list of equations e for the CL list of unknowns x"
+
+  (mtell "top of solve-multiple-equations e  = ~M x = ~M ~%"
+	(cons '(mlist) e) (cons '(mlist) x))
+
  (let ((cnd) (sol) (ee nil))
   ;; We don't attempt to determine the multiplicity for multiple equations. Thus we reset
 	;; $multiplicities to its default.
@@ -1050,6 +1054,7 @@
 						(setq e ($listify e)) ;convert both e and x to sets & expunge redundant eqs
 			      (setq x ($listify x))
 						(setq e (dispatch-grobner e x))
+						;(mtell "calling algsys on e = ~M x = ~M ~%" e x)
 						(setq sol ($algsys e x))
 						(unkeep-float sol))
           ;; The check (< (length x) 4) is silly. But the rtest_lsquares test generates
@@ -1057,7 +1062,7 @@
 					;; cases, algsys runs for a long time and consumes huge amounts of memory. I'm
 					;; not sure if these tests even finsh.
 					((and (every #'(lambda (q) (algebraic-p q (cdr x))) (cdr e)) (< (length x) 4))
-					  (mtell "Solving algebraic system e = ~M x = ~M ~%" e x)
+					 ; (mtell "Solving algebraic system e = ~M x = ~M ~%" e x)
 					  (solve-algebraic-equation-system e x))
 		 		(t
 					 (setq ee e)
@@ -1071,7 +1076,7 @@
 					 			    (simplifya (list '(mlist)) t))
 
                  ((and (not $solveexplicit) (null sol))
-								    (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning an implicit solutoin.~%") e x)
+								    (mtell (intl:gettext "Solve: No method for solving ~M for ~M; returning an implicit solution.~%") e x)
 								    (simplifya (cons '(mlist) (mapcar #'(lambda (q) (take '(mequal) 0 q)) (cdr ee))) t))
 
 							   (t
@@ -1100,7 +1105,7 @@
 (defvar $list_of_equations '(($set)))
 
 (defun solve (e x ms)
-  (when $solveverbose
+  (when (or  $solveverbose)
       (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
 	;(setq $list_of_equations ($adjoin (list '(mlist) e x) $list_of_equations)) ; debugging-like thing
 	(let ((sol) (mss)

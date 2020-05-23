@@ -55,19 +55,19 @@ multiplicities;
 [1]$
 
 /* expunge spurious solution x=0 */
-solve(x*(log(x) - 1)=0,x);
+ssolve(x*(log(x) - 1)=0,x);
 [x=%e]$
 
 /* make sure find both solutions */
-solve(x*(log(x+107) - 1)=0,x);
-[x=%e-107,x=0]$
+ssolve(x*(log(x+107) - 1)=0,x);
+[x=0,x=%e-107]$
 
 
-block([cntx : supcontext()], unwind_protect( (activate(cntx), assume(not equal(a,-107)), print(facts()), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
-[x=%e-107,x=a,x=-8]$
+block([cntx : supcontext()], unwind_protect( (activate(cntx), assume(not equal(a,-107)), print(facts()), ssolve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
+[x=-8,x=%e-107,x=a]$
 
-block([cntx :supcontext()], unwind_protect((activate(cntx), assume(a < -107), solve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
-[x=%e-107,x=a,x=-8]$
+block([cntx :supcontext()], unwind_protect((activate(cntx), assume(a < -107), ssolve((x+8)*(x-a)*(log(x+107) - 1),x)), killcontext(cntx)));
+[x=-8,x=%e-107,x=a]$
 
 /* See Maxima bug #963 linsolve incorrect result */
 (eqs : [A[4]+A[3]+A[2]+A[1] = 1,-A[2]*DY/(2*coeff_y)-A[1]*DY/(2*coeff_y)+A[4]*DY/2+A[3]*DY/2

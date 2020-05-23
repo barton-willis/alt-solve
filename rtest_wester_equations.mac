@@ -146,14 +146,14 @@ map(lambda([sx], trigreduce(ratsimp(subst(sx,eq)))), sol);
 [0=0,0=0,0=0,0=0,0=0,0=0,0=0]$
 
 /* x = pi/4 [+ n pi] */
-(eq : sin(x) = cos(x), sol : solve(eq,x),0);
+(eq : sin(x) = cos(x), sol : ssolve(eq,x),0);
 0$
 
 multiplicities;
 [1,1]$
 
 map(lambda([q], trigrat(subst(q, eq))), sol);
-[1/sqrt(2)=1/sqrt(2),-1/sqrt(2)=-1/sqrt(2)]$
+[-(1/sqrt(2))=-(1/sqrt(2)),1/sqrt(2)=1/sqrt(2)]$
 
 (eq : tan(x)=1, sol : solve(eq,x),0);
 0$
