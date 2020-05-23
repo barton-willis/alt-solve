@@ -145,7 +145,7 @@
 ;;; in solve_alt_top.lisp) sorts solutions and the multiplicities. The function
 ;;; nicedummies re-indexes %rXXX, %cXXX, and %zXXX variables to start with zero.
 ;;; The call to $expand(XXX,0,0) does the simplifcation in the current context.
-(defun $ssolve (e x)
+(defmfun $ssolve (e x)
 		(let (($%rnum 0)) (sort-solutions ($expand ($nicedummies ($solve e x)) 0 0) nil)))
 
 ;;; Flags that I've ignored: $solveexplicit (not entirely), $dispflag, $programmode, and $breakup.
