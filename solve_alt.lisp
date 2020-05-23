@@ -468,7 +468,7 @@
 
 			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
 
-			((and (algebraic-p e (list x)) 
+			((and (algebraic-p e (list x))
 				 (filter-solution-x (solve-algebraic-equation e x) cnd)))
 
 			((mtimesp ($factor e))
@@ -830,7 +830,8 @@
   (when (or t $solveverbose)
 		(mtell "doing to poly solve e = ~M x = ~M cnd = ~M  ~%" e x cnd))
 
-	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil))
+	(let ((q) (eq) (nonalg-sub) (nvars) (sol) (ek) (cx) ($algexact t) (checked-sol nil)
+	      ($use_to_poly nil))
 		 (setq q (let ((errcatch t) ($errormsg nil)) (ignore-errors ($to_poly e (list '(mlist) x)))))
 		 (when (and q (< ($length ($third q)) 2))
 			 (setq checked-sol (list '(mlist)))
