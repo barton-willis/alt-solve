@@ -237,14 +237,19 @@
 			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation and one unknown
 			   (setq eqlist (keep-float (car eqlist)))
 			   (setq sol ($substitute nonatom-subst (solve-single-equation eqlist (car varl))))
+				 ;; Unfortunate fix up for when multiplicities don't get set correctly
+				 (multiplicities-fix-up sol 1)
 		  	 (unkeep-float sol))
 
 			  ((null (cdr varl)) ;one unknown, more than one equation
-			    (redundant-equation-solve (cons '(mlist) eqlist) (car varl)))
+			    (setq sol ($substitute nonatom-subst
+						(redundant-equation-solve (cons '(mlist) eqlist) (car varl))))
+					(multiplicities-fix-up sol 1)
+          (unkeep-float sol))
 
 			  ;; several equations, several unknowns.
 			  (t
-			  	(setq sol (solve-multiple-equations eqlist varl))
+			  	(setq sol (unkeep-float (solve-multiple-equations eqlist varl)))
 			 	  ($substitute nonatom-subst sol))))
 	  ($killcontext cntx))))
 
@@ -287,9 +292,10 @@
 		 ;; the z^n --> z simplification.
 		 (when $solveradcan
 				(setq e ($radcan e)))
-		 (setq e ($num (sratsimp e)))
+		 (setq e ($num (sratsimp e))) ;grab numerator
 
-		 ;(setq e (apply-identities-conditionally e *trig-power-reduce*))
+		; (setq e (apply-identities-conditionally e *trig-power-reduce*))
+		; (setq e (apply-identities-conditionally e *to-cos/sin-identities*))
 		 (setq e (apply-identities-conditionally e *pythagorean-identities*))
 		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
 		 (list e m))))
@@ -381,6 +387,14 @@
 				 (push sx checked-sol)))
 		 (reverse checked-sol)))
 
+(defun multiplicities-fix-up (sol m)
+     (when (or (not ($listp $multiplicities))
+					 (not (eql (length $multiplicities) (length sol))))
+		   (mtell (intl:gettext	"Warning: solve didn't set the multiplicities correctly; setting them to ~M ~%") m)
+			 (setq $multiplicities
+				 (simplifya (cons '(mlist)
+					 (mapcar #'(lambda (q) (declare (ignore q)) m) (cdr sol))) t))))
+
 ;;; Solve the equation e=0 for x, where e is a mtimes expression. Actually, effectively the
 ;;; equation is e^m = 0, so m is the multiplicity so far in the solving process. The list cnd
 ;;; has conditions on the solution.
@@ -396,15 +410,10 @@
      (dolist (ex e)
 		  	(setq solx (solve-single-equation ex x m use-trigsolve)) ;solve ex
         ;; Unfortunate workaround for bug when multiplicities are not set
-				(when (or (not ($listp $multiplicities))
-				          (not (eql (length $multiplicities) (length solx))))
-							(setq $multiplicities (cons '(mlist)
-							    (mapcar #'(lambda (q) (declare (ignore q)) m) (cdr solx)))))
-
+				(multiplicities-fix-up solx m)
 		  	(setq alist (append alist (mapcar #'(lambda (a b) (cons a b))
 			     (cdr solx)
 			     (cdr $multiplicities))))) ;build an association list of the form solution.multiplicity
-
 		;; remove duplicates, filter spurious solutions, extract multiplicities, and
 		;; extact solution.
 		(setq alist (remove-duplicates alist :test #'alike1 :key #'car :from-end t))
@@ -417,12 +426,8 @@
 	  (cond
 			((not ($listp sol)) sol) ;pass through for non listp solution (for example nil or $all)
 			(t
-				 ;; When either $multiplicities hasn't been set or its length doesn't match the solution,
-				 ;; silently change the multiplicities to a list of $not_yet_set.
-			   (when (not (and ($listp $multiplicities) (eql (length sol) (length $multiplicities))))
-				        (mtell "warning: setting multiplicities to 1! ~%")
-					      (setq $multiplicities (mapcar #'(lambda (q) (declare (ignore q)) 1) (cdr sol)))
-						  	(push '(mlist) $multiplicities))
+          ;; Unfortunate workaround for bug when multiplicities are not set
+			  	(multiplicities-fix-up sol 1)
        		;; First build an association list of solution.multiplicity. Second call filter-solution.
 		  		;; And third re-constitute Maxima lists for the solution and the multiplicities. The
 					;; filtering process requires using sign, but the keepfloat mechanism interferes with
@@ -558,9 +563,6 @@
 				(setq ker (caar ker))
 				(setq fun (caar ker))
 				(setq sol ($solve e z))
-				(when (not ($listp $multiplicities))
-				   (mtell "using fake multiplicities ~%")
-					 (setq $multiplicities (mapcar #'(lambda (s) (declare (ignore s)) 1) sol)))
 				(setq mult-save (mapcar #'(lambda (q) (mult m q)) (cdr $multiplicities)))
 				(setq sol (mapcar #'third (cdr sol)))  ;third = $rhs
 
@@ -581,10 +583,6 @@
 
 				(dolist (sx sol)
 					(setq q ($solve sx x))
-					(when (not ($listp $multiplicities))
-						 (mtell "using fake multiplicities ~%")
-						 (setq $multiplicities (mapcar #'(lambda (s) (declare (ignore s)) 1) sol)))
-
 					(push (cdr q) acc)
 					(setq xxx (pop mult-save))
 					(push (mapcar #'(lambda (q) (mult xxx q)) (cdr $multiplicities)) mult-acc))
@@ -1029,8 +1027,8 @@
 ;;; Solve the CL list of equations e for the CL list of variables in x.
 (defun solve-multiple-equations (e x) "Solve the CL list of equations e for the CL list of unknowns x"
 
-  (mtell "top of solve-multiple-equations e  = ~M x = ~M ~%"
-	(cons '(mlist) e) (cons '(mlist) x))
+;  (mtell "top of solve-multiple-equations e  = ~M x = ~M ~%"
+;	(cons '(mlist) e) (cons '(mlist) x))
 
  (let ((cnd) (sol) (ee nil))
   ;; We don't attempt to determine the multiplicity for multiple equations. Thus we reset
