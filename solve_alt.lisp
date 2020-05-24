@@ -247,6 +247,10 @@
 					(multiplicities-fix-up sol 1)
           (unkeep-float sol))
 
+        ((null (cdr eqlist)) ;one equation, several unknowns
+				 (mtell "Yes--one equation, several unknows ~%")
+				 (solve-one-equation-several-unknowns eqlist varl))
+
 			  ;; several equations, several unknowns.
 			  (t
 			  	(setq sol (unkeep-float (solve-multiple-equations eqlist varl)))
@@ -1023,12 +1027,48 @@
         (setq e ($expand e 0 0)) ;I think poly_reduced_grobner returns unsimplified expressions
         (setq e (apply-identities-unconditionally e))))
 
+(defun solve-one-equation-several-unknowns (e x)
+   (let ((freevars nil) (dependvars nil) (sol nil) (mx nil))
+     (setq e (car e))
+	   (dolist (xk x) ;indentify free and nonfree variables
+		    (cond (($freeof xk e)
+				       (setq solx (mm= xk (my-new-variable  (real-or-complex-mapatom xk))))
+							 (push solx sol)
+							 (push '$inf mx)
+							 (setq e ($substitute solx e)))
+						 (t
+							 (push xk dependvars))))
+
+		(cond ((null dependvars) ;no dependent variables
+		       (cond ((zerop1 e) ;zero equation, only free variables
+					         (push '(mlist) mx)
+								   (msetq '$multiplicities (simplifya mx t))
+								   (push '(mlist) sol)
+								   (simplifya sol t))
+								(t ;no dependant variables, but nonvanishing equation
+									 (setq mx (push '(mlist) nil))
+									 (msetq '$multiplicities (simplifya mx t))
+									 (push '(mlist) sol)
+									 (simplifya sol t))))
+					   (t
+							 (setq xx (pop dependvars)) ;choose one variable to solve
+							 (dolist (xk dependvars)
+							     (setq solx (mm= xk (my-new-variable (real-or-complex-mapatom xk))))
+					     		 (push solx sol)
+						       (push '$inf mx)
+							     (setq e ($substitute solx e)))
+							(setq solx ($solve e xx))
+							(setq sol (mapcar #'(lambda (q) (cons '(mlist) (cons q sol))) (cdr solx)))
+							(setq sol (cons '(mlist) sol))
+							(mfuncall '$reset '$multiplicities)
+							($expand sol 0 0)))))
+
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
 (defun solve-multiple-equations (e x) "Solve the CL list of equations e for the CL list of unknowns x"
 
-;  (mtell "top of solve-multiple-equations e  = ~M x = ~M ~%"
-;	(cons '(mlist) e) (cons '(mlist) x))
+  (mtell "top of solve-multiple-equations e  = ~M x = ~M ~%"
+   	(cons '(mlist) e) (cons '(mlist) x))
 
  (let ((cnd) (sol) (ee nil))
   ;; We don't attempt to determine the multiplicity for multiple equations. Thus we reset
@@ -1040,11 +1080,18 @@
 	 ;; The second member of equation-simplify holds multiplicity data--thus extract just the first
 	 ;; member returned by equation-simplify.
  	 (setq e (mapcar #'(lambda (q) (first (equation-simplify q 1))) e))
+	 (setq e (remove-if #'zerop1 e))
 
 	 (push '(mlist) e) ;convert e and x to Maxima lists.
 	 (push '(mlist) x)
 
-  	(cond  ((every #'(lambda (q) ($polynomialp q x
+	 (mtell "e = ~M ~%" e)
+
+  	(cond
+      ((null (cddr e))
+			 (solve-one-equation-several-unknowns (cdr e) (cdr x)))
+
+			((every #'(lambda (q) ($polynomialp q x
 			    	#'(lambda (s) ($lfreeof x s))
 	   			  #'(lambda (s) (and (integerp s) (>= s 0))))) (cdr e))
 						(setq e (cons '(mlist) (mapcar #'unkeep-float (cdr e))))
@@ -1162,7 +1209,7 @@
 		(cond (($freeof x cnst) ; match with x*exp(x) = cnst
 			       (setq $multiplicities (take '(mlist) m))
 			       (setq sol (cond ((eql $solve_inverse_package $multivalued_inverse)
-		   	         		(take '(%generalized_lambert_w) (my-new-variable'$integer) cnst))
+		   	         		(take '(%generalized_lambert_w) (my-new-variable '$integer) cnst))
 							    	(t (take '(%lambert_w) cnst))))
 						(opcons 'mlist (take '(mequal) x sol)))
 		    	(t nil))))
