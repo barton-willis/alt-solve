@@ -1153,8 +1153,6 @@
 (defun solve (e x ms)
   (when (or  $solveverbose)
       (mtell "top of ?solve ~M ~M ~M ~%" e x ms))
-	;(displa (mfuncall '$reset))
-;	(mtell "solvefactors = ~M ~%" $solvefactors)
 	;(setq $list_of_equations ($adjoin (list '(mlist) e x) $list_of_equations)) ; debugging-like thing
 	(let ((sol) (mss)
 				($solve_inverse_package *function-inverses-alt*) ;compatibilty mode
@@ -1164,7 +1162,6 @@
 				($gcd '$subres)
 				($negdistrib t) ;not sure about this--likely needed!
 				($multiplicities nil)
-			;	($solvefactors t)
 				(m))
 		 	(setq x (if x x *var))
 			   ;; clunkly workaround for bug with integrate(sqrt(1+cos(x)),x,-%pi,%pi).
