@@ -1063,6 +1063,10 @@
 							(mfuncall '$reset '$multiplicities)
 							($expand sol 0 0)))))
 
+
+(defun inconsistent-equation-p (eq vars)
+   (and (not (zerop1 eq)) ($lfreeof vars eq)))
+
 ;;; missing need to filter using cnd?
 ;;; Solve the CL list of equations e for the CL list of variables in x.
 (defun solve-multiple-equations (e x) "Solve the CL list of equations e for the CL list of unknowns x"
@@ -1110,7 +1114,12 @@
 					((and (every #'(lambda (q) (algebraic-p q (cdr x))) (cdr e)) (< (length x) 4))
 					 ; (mtell "Solving algebraic system e = ~M x = ~M ~%" e x)
 					  (solve-algebraic-equation-system e x))
-		 		(t
+
+					((some #'(lambda (q) (inconsistent-equation-p q x)) (cdr e))
+					 (mtell "Inconsistent equations--returning empty list ~%")
+					 (simplifya (list '(mlist)) t))
+
+		  		(t
 					 (setq ee e)
 	  			 (setq e ($setify e))
 	  			 (setq x ($setify x))
