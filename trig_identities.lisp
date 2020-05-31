@@ -105,7 +105,7 @@
 ;; Apply the identities described by the hashtable id-table to the expression e. Make the
 ;; substitution only when the result has a smaller expression size as determined by
 ;; trig-fun-count.
-(defun apply-identities-conditionally (e id-table)
+(defun apply-identities-conditionally (e &optional (id-table *pythagorean-identities*))
 	(setq e ($ratdisrep e))
 	(maphash #'(lambda (key val)
 					   (let ((q (cdr ($setify ($gatherargs e key)))) (id))
