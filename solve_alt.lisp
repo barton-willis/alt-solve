@@ -1170,6 +1170,7 @@
 				($algebraic t)
 				($gcd '$subres)
 				($negdistrib t) ;not sure about this--likely needed!
+				;(setq $solvefactors (or  $solvefactors (not (boundp '*defint-assumptions*))))
 				($multiplicities nil)
 				(m))
 		 	(setq x (if x x *var))

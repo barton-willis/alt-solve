@@ -106,7 +106,7 @@
 				(values sol (list 1 1 1))))))
 
 ;;; Solve the biquadratic p4 x^4 + p2 x^2 + p0 = 0. Return both a CL list of the solutions and
-;;; the list of the multiplicities. This code assumes that a =/= 0.
+;;; the list of the multiplicities. This code assumes that p4 =/= 0.
 (defun my-solve-biquadratic (x p4 p2 p0) "Solve the biquadratic p4 x^4 + p2 x^2 + p0 = 0."
 	(multiple-value-bind (sol m) (my-solve-quadratic x p4 p2 p0)
 		(setq sol (mapcar #'third sol)) ; remove x = part of solutions
@@ -127,7 +127,6 @@
 (defun my-solve-quartic (v p4 p3 p2 p1 p0) "Return solutions and multiplicities of p4 v^4+p3 v^3+p2 v^2+ p1 v + p0=0."
 	(let ((pp4) (pp3) (pp2) (pp1) (pp0) (m) (g (gensym)) (x) (mm) (shift))
 		 (cond ((and (zerop1 p3) (zerop1 p1))
-		 	  ;;(mtell "solving biquadratic ~%")
 				(my-solve-biquadratic v p4 p2 p0))
 			 (t
 			  (setq shift (div p3 (mul 4 p4)))
