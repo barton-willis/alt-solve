@@ -1784,8 +1784,8 @@ block([assume_notequal : true,ask_mode : false], ssolve(sin(x)/x,x));
 thread is -3 + cosh(x) - cos(x) = 0. The solve either takes a long time or
 gets stuck on -3 + cosh(x) - cos(x) = 0.*/
 
-block([ask_mode : false],ssolve(-3+cosh(x)-sinh(x)/tanh(x) = 0,x));
-[x=2*%i*%pi*%z0+%i*%pi,x=2*%i*%pi*%z1]$
+ssolve(-3+cosh(x)-sinh(x)/tanh(x) = 0,x);
+[]$
 
 /* From Sage Mailing list 8 Oct 2009, 3:21 a.m */
 

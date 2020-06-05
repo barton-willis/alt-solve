@@ -10,6 +10,9 @@
 ;;; for general use.
 (defmvar $solveverbose nil)
 
+;;; This option varible is a mistake--it doesn't control what it's name likley
+;;; implies: it only controls the default generation of %rXXX or %cXXX variables, it
+;;; does not limit the solution set to the set of reals or complex numbers.
 (defmvar $solve_domain '$complex)
 
 (defun solve-domain-assign (a b)
@@ -261,48 +264,50 @@
 ;;;    (i) convert a=b to a-b
 ;;;    (ii) convert to general form
 ;;;    (iii) when solveradcan is true, apply radcan
-;;;    (iv) when n is a positive integer, convert e^n --> e and modify the multiplicity
+;;;    (iv) when n is a positive mnump, convert e^n --> e and modify the multiplicity
 ;;;    (v) ratsimp and extract the numerator
-;;;    (vi) apply the Pythagorean identities (things like sin(x)^2 + cos(x)^2 --> 1).
+;;;    (vi) conditionally apply the Pythagorean identities (like sin(x)^2 + cos(x)^2 --> 1).
 
-;;; We return a CL list of both the simplified expression and the modified multiplicity.
-
-;;; Extracting the numerator can, of course, introduce spurious solutions.
+;;; We return a CL list (simplified expression, modified multiplicity, removed
+;;; demoninator).  When algebraic is true, after ratsimp, the new denominator can
+;;; vanish where the denominator before ratsimp doesn't vanish.
 
 ;;; Factoring an equation isn't an automatic win--for example, factoring x^107-1 is a loser.
 ;;; The option variable solvefactors controls factoring, but it's uncertain when the factoring
-;;; happens. This function does not factor. It's unclear to me exactly when in the solve
-;;; process that radcan should be applied.
+;;; happens. This function does not factor.
+
+;;; It's unclear to me exactly when in the solve process that radcan should be applied.
 
 ;;; Additionally, we could remove factors from e that don't depend on the solve variable(s). But
 ;;; to do that, the solve variables would need to be an argument.
 
 ;;; equation-simplify could do more; for example abs(X) --> X and constant * X --> X
 ;;; (well maybe we'd need to give equation-symplify a way to know when a term is
-;;; constant. But such methods adds complexity and possible inconsistentancy to the code.
-
+;;; constant.)
 (defun equation-simplify (e &optional (m 1))
-	(setq e ($ratdisrep (meqhk e))) ;do a=b -->a-b & convert to general form
-	(cond
+  (let ((cnd t))
+   	(setq e ($ratdisrep (meqhk e))) ;do a=b -->a-b & convert to general form
+   	(cond
+	   	;; Without this simplifcation, solve((x+1)^(3/2),x) has the wrong multiplicity.
+		  ;; The method solve-by-kernelize sometimes misshandles multiplicities--in part,
+		  ;; this simplifcation is a workaround for a bug somewhere else.
+		  ((and (mexptp e) (mnump (third e)) (mgrp (third e) 0)) ; do z^n --> z when n is a positive mnump
+	 	    (equation-simplify (second e) (mul m (third e))))
 
-		;; Without this, solve((x+1)^(3/2),x) has the wrong multiplicity. This
-		;; is a bug in the way solve-by-kernelize handles multiplicities--so
-		;; this is a workaround for a bug somewhere else.
-		((and (mexptp e) (mnump (third e)) (mgrp (third e) 0)) ; do z^n --> z when n is a positive mnump
-	 	 (equation-simplify (second e) (mul m (third e))))
+	   	(t
+	      ;;unsure when is the best time to do radcan, but it's better to do it after
+		    ;; the z^n --> z simplification, I think.
+		    (when $solveradcan
+				   (setq e ($radcan e)))
+	      (setq e (sratsimp e))
+		    (setq cnd ($denom e))
+	    	(setq e ($num e)) ;grab numerator
 
-		(t
-	   ;;unsure when is the best time to do radcan, but it's better to do it after
-		 ;; the z^n --> z simplification.
-		 (when $solveradcan
-				(setq e ($radcan e)))
-		 (setq e ($num (sratsimp e))) ;grab numerator
-
-		; (setq e (apply-identities-conditionally e *trig-power-reduce*))
-		; (setq e (apply-identities-conditionally e *to-cos/sin-identities*))
-		 (setq e (apply-identities-conditionally e *pythagorean-identities*))
-		 ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
-		 (list e m))))
+	    	; (setq e (apply-identities-conditionally e *trig-power-reduce*))
+		    ; (setq e (apply-identities-conditionally e *to-cos/sin-identities*))
+	    	 (setq e (apply-identities-conditionally e *pythagorean-identities*))
+		     ;(setq e (convert-from-max-min-to-abs e)) ; by itself, this doesn't do all that much.
+		    (list e m cnd)))))
 
 ;;; Convert to-poly style predicates to Maxima predicates. In particular, do
 ;;; $isnonnegative_p -> >, =/= -> $notequal, %and --> mand.
@@ -450,15 +455,17 @@
 					 (t '$real)))
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
-(when (or $solveverbose)
+(when (or  $solveverbose)
 	  (mtell "top of solve-single-equation e = ~M x = ~M m = ~M use = ~M ~%" e x m use-trigsolve))
 
-	(let ((cnd) ($solve_domain (real-or-complex-mapatom x)))
+	(let ((cnd t) ($solve_domain (real-or-complex-mapatom x)) ($algebraic t))
+   	 ;(mtell "before equation-simplify: e = ~M cnd = ~M ~%" e cnd)
 	   (setq cnd (or (not $ask_mode) (in-domain e (list x))))
 		 (setq e (equation-simplify e m))
 		 (setq m (second e))
-		 (setq e (first e))
-
+		 (setq cnd (take '(mand) cnd (in-domain (div 1 (third e)) (list x))))
+	   (setq e (first e))
+    ; (mtell "after equation-simplify: e = ~M cnd = ~M ~%" e cnd)
 		 (cond
 
 			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
@@ -468,6 +475,8 @@
 			  (product-solver e x m use-trigsolve cnd))
 
       ((filter-solution-x (one-to-one-solve e x m nil) cnd))
+
+      ;((filter-solution-x ($floyd e x m t) cnd))
 
 			((filter-solution-x (solve-by-kernelize e x m) cnd))
 
@@ -552,9 +561,8 @@
 ;;; power function separately.
 
 (defun solve-by-kernelize (e x m)
-  (when (or $solveverbose)
-		(mtell "Top of solve-by-kernelize e = ~M x = ~M ~%" e x)
-		($read ))
+  (when (or  $solveverbose)
+		(mtell "Top of solve-by-kernelize e = ~M x = ~M ~%" e x))
 
 	(let (($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
 		  (mult-acc nil) (xxx) (mult-save))
@@ -805,27 +813,63 @@
 				         (simplifya (cons '(mlist) ssol) t))
 						 (t nil))))
 
-#|
-(defun ok-p (e)
-			(and (consp e) (consp (car e)) (gethash (caar e) $solve_inverse_package)))
 
-(defun $experimental_solve (e x &optional (m 1) (cnd t))
-  (let ((q (kernelize-fn e #'(lambda (s) (and (not ($freeof x s)) (ok-p s)))))
-	      ($solveexplicit t) (eqs) (sol nil) (ssol nil))
-    	(cond ((and (null (cdr (second q))) ($freeof q (first q)))
+;; It would be lovely, I think, if all methods returned solutions as association lists of
+;; the form solution.multiplicity. Or maybe return a structure that gives information such
+;; as the reason for an empty solution (inconsistent, unable to solve) and mabye some other
+;; data as well. Something like:
+
+(defstruct solutions
+	 sol
+	 multiplicities
+	 explicit
+	 consistent
+	 method)
+
+;;; solve ker = a for x, where the kernel ker has the form F(X), where Maxima knows
+;;; the inverse of F and X depends on x.
+(defun $jimmy (ker a x)
+   (let ((fun-inverse) (sol) (alist nil))
+  	 (setq fun-inverse (solve-get-inverse (caar ker) ker x))
+  	 (setq ker (second fun-inverse)) ;modified kernel
+  	 (setq fun-inverse (first fun-inverse)) ;inverse of F
+		 (setq sol (mapcan #'(lambda (q) (apply fun-inverse (list q))) a))
+		 ;; solve X = F^(-1)(a) for x
+		 (dolist (sx sol)
+		     (setq solx (solve-single-equation (mm= ker sx) x)) ; solve ker=F^(-1)(sx
+				 (multiplicities-fix-up solx 1) ;if
+				 (setq alist (append alist (mapcar #'cons (cdr solx) (cdr $multiplicities)))))
+		 (setq alist (remove-duplicates alist :test #'alike1 :key #'car :from-end t))
+		 (setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
+		 (simplifya (cons '(mlist) (mapcar #'car alist)) t)))
+
+;; Attempt to find a kernel X such that the expression e is algebraic in X. When sucessful,
+;; first solve for X, then solve each kernel for x.
+(defun $floyd (e x &optional (m 1) (cnd t))
+  (let ((q (kernelize-fn e
+		    #'(lambda (s) (and
+					               (consp s)
+												 (consp (car s)) ; if this fails, s is a bogus expression
+												 (gethash (caar s) $solve_inverse_package)
+												 (not ($freeof x s))))))
+				(ker) (z) (mx) ($solveexplicit t) (sol nil) (ssol nil) (alist nil)
+				(mult-save) (mult-acc) (fun-inverse) (xxx) (acc))
+
+      ;; When there is exactly one kernel and e = algebraic-function(X), we win.
+    	(cond ((and (second q) (null (cdr (second q))) ($freeof q (first q))
+			       (algebraic-p ker (list z)))
     		 (setq ker (second q))
-    		 (setq e (first q))
-    		 (setq z (cdar ker))
-    		 (setq ker (caar ker))
-				 (mtell "e = ~M z = ~M ker = ~M ~%" e z ker)
-         (when (algebraic-p e z)
-				    (setq sol (cdr (solve-algebraic-equation e z))) ;; CL list of solutions
-						(dolist (sx sol)
-						    (mtell "ker = ~M sx = ~M ~%" ker sx)
-						    (setq ssol (append ssol (cdr (solve-single-equation (sub ker ($rhs sx)) x)))))
-						(cons '(mlist) ssol))))))
+    		 (setq e (first q))  ;function of the kernel only
+    		 (setq z (cdar ker)) ;unknown
+    		 (setq ker (caar ker)) ;the kernel
+         (cond ((and ker z (algebraic-p e (list z))) ;second argument of algebraic-p is a CL list!
+                 (mtell "e = ~M ~%" e)
+							   (setq sol (solve-algebraic-equation e z)) ;; sol is a CL list of solutions
+								 (mtell "sol = ~M ~%" sol)
+								 (setq sol (mapcar #'$rhs (cdr sol)))
+								 ($jimmy ker sol x))
+				       (t nil))))))
 
-|#
 
 (defun new-to-poly-solve (e x cnd)
 

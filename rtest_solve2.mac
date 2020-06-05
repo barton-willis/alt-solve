@@ -275,6 +275,31 @@ block([ask_mode : false], ssolve(max(1,x^2)^2-1,x));
 block([ask_mode : false], ssolve(max(1,x^2)^2+1,x));
 []$
 
+ssolve(sin(1/x) + sqrt(sin(1/x)) - 5 - sqrt(5),x);
+[x=1/(2*%pi*%z21+asin(5)),x=1/(2*%pi*%z22-asin(5)+%pi)]$
+
+ssolve(sin(x) + 6/(1 + sqrt(sin(x))) - sin(%pi/4) - 6/(1 + sqrt(sin(%pi/4))),x);
+[]$
+
+/*
+ssolve(sin(x-1/2) + sqrt(sin(x-1/2))  - (sin(%pi/5) + sqrt(sin(%pi/5))),x);
+[x=(20*%pi*%z5-12*%pi+5)/10]$
+
+ssolve(sin(x*(x-1)) + sqrt(sin(x*(x-1))) - (sin(%pi/5) + sqrt(sin(%pi/5))),x);
+[x=-(sqrt(200*%pi*%z0-120*%pi+25)-5)/10,x=(sqrt(200*%pi*%z0-120*%pi+25)+5)/10,x=-(sqrt(200*%pi*%z1+20*%pi+25)-5)/10]$
+
+ssolve(sin(x*(x-1)) + sqrt(sin(x^2-x) - (sin(%pi/5) + sqrt(sin(%pi/5))),x);
+[x=-(sqrt(200*%pi*%z0-120*%pi+25)-5)/10,x=(sqrt(200*%pi*%z0-120*%pi+25)+5)/10,x=-(sqrt(200*%pi*%z1+20*%pi+25)-5)/10]$
+
+*/
+ssolve(z+8/(sqrt(z)+1)-20/3,z);
+[z=4,z=-((3*sqrt(105)-31)/6)]$
+
+ssolve(cos(x)+8/(sqrt(cos(x))+1)-20/3,x);
+[x=2*%pi*%z18+acos(4),x=2*%pi*%z19-acos(4),
+x=2*%pi*%z20-acos((3*sqrt(105)-31)/6)+%pi,
+x=2*%pi*%z21+acos((3*sqrt(105)-31)/6)-%pi]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 
