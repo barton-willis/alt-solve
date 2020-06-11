@@ -455,7 +455,7 @@
 					 (t '$real)))
 
 (defun solve-single-equation (e x &optional (m 1) (use-trigsolve nil))
-(when (or  $solveverbose)
+(when (or $solveverbose)
 	  (mtell "top of solve-single-equation e = ~M x = ~M m = ~M use = ~M ~%" e x m use-trigsolve))
 
 	(let ((cnd t) ($solve_domain (real-or-complex-mapatom x)) ($algebraic t))
@@ -467,27 +467,43 @@
 	   (setq e (first e))
     ; (mtell "after equation-simplify: e = ~M cnd = ~M ~%" e cnd)
 		 (cond
+       ;;For equations that are explicitly products, use product-solver
+			 ((and (mtimesp e)
+ 		 			  (product-solver e x m use-trigsolve cnd)))
 
-			((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
-			   (filter-solution-x (polynomial-solve e x m) cnd))
-
-			((mtimesp e);;for equations that are explicitly products, use product-solver
-			  (product-solver e x m use-trigsolve cnd))
+		   ((and ($mapatom x) ($polynomialp e (list '(mlist) x) #'(lambda (q) ($freeof x q)))) ;solve polynomial equations
+					 (filter-solution-x (polynomial-solve e x m) cnd))
 
       ((filter-solution-x (one-to-one-solve e x m nil) cnd))
 
-      ;((filter-solution-x ($floyd e x m t) cnd))
+      ;; Look for a kernel of the form a^b, where either exactly one of a or
+			;; b depends on x, or a = b and a depends on x.
+			((solve-by-kernelize e x #'(lambda (s)
+	 								(and
+	 								  (mexptp s)
+	 									(or
+											(and ($freeof x (second s)) (not ($freeof x (third s))))
+											(and (not ($freeof x (second s))) ($freeof x (third s)))
+											(and (not ($freeof x (second s))) (alike1 (second s) (third s))))))
+	 									m cnd))
 
-			((filter-solution-x (solve-by-kernelize e x m) cnd))
+      ;; Look for a kernel of the form F(X), where F has an inverse listed in the
+			;; hashtable $solve_inverse_package.
+			((solve-by-kernelize e x #'(lambda (s)
+	 	                  (and
+	 	                    (consp s)
+	 	                    (consp (car s)) ; if this fails, s is a bogus expression
+	                     	(gethash (caar s) $solve_inverse_package)
+	 	                    (not ($freeof x s)))) m cnd))
+
+			((and (algebraic-p e (list x))
+		 			(filter-solution-x (solve-algebraic-equation e x) cnd)))
 
       ((filter-solution-x (solve-mcond e x m use-trigsolve) cnd))
 
 		  ((filter-solution-x (solve-mexpt-equation-extra e x m nil) cnd))
 
 			((filter-solution-x (solve-mexpt-equation-extra e x m t) cnd))
-
-			((and (algebraic-p e (list x))
-				 (filter-solution-x (solve-algebraic-equation e x) cnd)))
 
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
@@ -513,8 +529,6 @@
 				   (setq ker (if (and (mplusp e) (not ($freeof x (first (last e))))) (first (last e)) x))
 				   (setq $multiplicities (take '(mlist) m))
 				   (take '(mlist) (take '(mequal) ker (sub ker e))))))))
-
-
 
 ;;; For a given function fun, kernel ker, and variable x, return the inverse
 ;;; of fun and the adjusted kernel. Examples:
@@ -553,101 +567,6 @@
 				 (t	(list
 					      (gethash fun $solve_inverse_package)
 								(second ker))))))
-
-;;; This function attempts to identify a term F(x) such e is a function of only F(x). And when it is,
-;;; first solve for F(x), and second solve for x. The function F has a known inverse. Unifying the
-;;; cases, for example,  of F(x) = x^a and F(x) = cos(x) is problematic. Maybe these cases can be unified,
-;;; but we'll handle the case when F is a
-;;; power function separately.
-
-(defun solve-by-kernelize (e x m)
-  (when (or  $solveverbose)
-		(mtell "Top of solve-by-kernelize e = ~M x = ~M ~%" e x))
-
-	(let (($solveexplicit t) (z) (sol) (fun-inverse) (ker) (fun) (acc nil) (q)
-		  (mult-acc nil) (xxx) (mult-save))
-		 (setq e (kernelize e x))
-
-		 (cond ((and (null (cdr (second e))) ($freeof x (first e)))
-				(setq ker (second e))
-				(setq e (first e))
-				(setq z (cdar ker))
-				(setq ker (caar ker))
-				(setq fun (caar ker))
-				(setq sol ($solve e z))
-				(setq mult-save (mapcar #'(lambda (q) (mult m q)) (cdr $multiplicities)))
-				(setq sol (mapcar #'third (cdr sol)))  ;third = $rhs
-
-				;; Return the inverse of the function fun and the adjusted kernel. For
-				;; and explanation and examples, see the documentation for solve-get-inverse.
-        (setq fun-inverse (solve-get-inverse fun ker x))
-        (setq ker (second fun-inverse))
-				(setq fun-inverse (first fun-inverse))
-				;; after this, sol is a list of lists
-		    (setq sol (mapcar #'(lambda (q) (apply fun-inverse (list q))) sol))
-
-				(setq mult-save (mapcar #'(lambda (a b)
-											(mapcar #'(lambda (c) (declare (ignore c)) b) a)) sol mult-save))
-
-				(setq sol (reduce #'append sol))
-				(setq mult-save (reduce #'append mult-save))
-				(setq sol (mapcar #'(lambda (q) (take '(mequal) ker q)) sol))
-
-				(dolist (sx sol)
-					(setq q ($solve sx x))
-					(push (cdr q) acc)
-					(setq xxx (pop mult-save))
-					(push (mapcar #'(lambda (q) (mult xxx q)) (cdr $multiplicities)) mult-acc))
-
-				(setq acc (reverse acc))
-				(setq acc (reduce #'append acc))
-				(setq mult-acc (reduce #'append mult-acc))
-				(setq mult-acc (reverse mult-acc))
-
-				(setq $multiplicities (simplifya (cons '(mlist) mult-acc) t))
-				(simplifya (cons '(mlist) acc) t))
-			 (t nil))))
-
-;; True iff e is a kernel. Either e has the form F(X), where F has a known
-;; inverse and X depends on x, or e has the form a^X, X^b, or X^X, where
-;; X depends on x and a & b do not.
-(defun kernel-p (e x)
-   (or
-		 (and ;; e = F(X), where F has a known inverse and X depends on x.
-			 (consp e)
-	  	 (consp (car e))
-			 (gethash (caar e) $solve_inverse_package)
-			 (not ($freeof x e)))
-			(and
-				 (mexptp e) ;; e = a^X, e=X^b, or e=X^X, where X depends on x.
-	 	      	(or
-							  (and ($freeof x (second e)) (not ($freeof x (third e)))) ;; a^X
-								(and (not ($freeof x (second e)))
-									(and ($freeof x (third e)) (not (integerp (third e))))) ;; X^a
-	 							(and (not ($freeof x (second e))) (alike1 (second e) (third e))))))) ;X^X
-
-(defun kernelize (e x &optional (subs nil))
-;;  (mtell "top of kernelize ~M ~M ~%" e x)
-	(let ((g (gensym)) (kn nil) (xop) (eargs))
-		 (cond
-			 (($mapatom e) (list e subs))
-
-			  ((kernel-p e x)
-			   (setq kn (assoc e subs :test #'alike1)) ;is it a known kernel?
-			   (cond (kn
-					       (list (cdr kn) subs)) ; it's a known kernel--use the value from the association list subs
-				   	   (t
-				   	    (list g (acons e g subs))))) ; it's unknown--append a new key/value to subs
-
-			 (t ; map kernelize onto the argument list and build up the association list subs
-			  (setq xop (list (caar e)))
-			  (setq e (cdr e))
-				(setq eargs nil)
-			  (dolist (xk e)
-				  (setq xk (kernelize xk x subs))
-				  (push (first xk) eargs)
-				  (setq subs (second xk)))
-			  (list (simplifya (cons xop (reverse eargs)) t) subs)))))
 
 
 (defun homogeneous-linear-poly-p (e vars)
@@ -826,50 +745,66 @@
 	 consistent
 	 method)
 
-;;; solve ker = a for x, where the kernel ker has the form F(X), where Maxima knows
-;;; the inverse of F and X depends on x.
-(defun $jimmy (ker a x)
-   (let ((fun-inverse) (sol) (alist nil))
+;;; For each member aa of the CL list a, solve ker = aa for x. The kernel ker
+;;; has the form F(x), where Maxima know the inverse of F and X depends on x.
+;;; Once we gather all these solutions, we need to remove the duplicates and
+;;; expunge those solutions that do not satisfy cnd.
+
+;;; The third argument m is a CL list of the multiplicities for each solution
+;;; in the list a. We trust that the lists a and m have the same length!
+(defun solve-by-kernelize-helper (ker a x m cnd)
+   (let ((fun-inverse) (sol) (solx) (mm nil) (alist nil))
   	 (setq fun-inverse (solve-get-inverse (caar ker) ker x))
   	 (setq ker (second fun-inverse)) ;modified kernel
   	 (setq fun-inverse (first fun-inverse)) ;inverse of F
-		 (setq sol (mapcan #'(lambda (q) (apply fun-inverse (list q))) a))
-		 ;; solve X = F^(-1)(a) for x
+
+     (dolist (aa a)
+		    (setq solx (apply fun-inverse (list aa)))
+				(setq mx (pop m))
+				(setq sol (append sol solx))
+				(setq mm (append mm (mapcar #'(lambda (s) mx) solx))))
+
+		 (setq m mm)
+		 ;; For each aa in a, solve X = F^(-1)(aa) for x.  Build an association
+		 ;; list of the form solution.multiplicity for these solutions.
 		 (dolist (sx sol)
-		     (setq solx (solve-single-equation (mm= ker sx) x)) ; solve ker=F^(-1)(sx
-				 (multiplicities-fix-up solx 1) ;if
+		     (setq mx (pop m))
+		     (setq solx (solve-single-equation (mm= ker (keep-float sx)) x mx)) ; solve ker=F^(-1)(sx)
+				 (multiplicities-fix-up solx 1)
 				 (setq alist (append alist (mapcar #'cons (cdr solx) (cdr $multiplicities)))))
+     (setq alist (filter-solution alist cnd))
 		 (setq alist (remove-duplicates alist :test #'alike1 :key #'car :from-end t))
 		 (setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
 		 (simplifya (cons '(mlist) (mapcar #'car alist)) t)))
 
-;; Attempt to find a kernel X such that the expression e is algebraic in X. When sucessful,
-;; first solve for X, then solve each kernel for x.
-(defun $floyd (e x &optional (m 1) (cnd t))
-  (let ((q (kernelize-fn e
-		    #'(lambda (s) (and
-					               (consp s)
-												 (consp (car s)) ; if this fails, s is a bogus expression
-												 (gethash (caar s) $solve_inverse_package)
-												 (not ($freeof x s))))))
-				(ker) (z) (mx) ($solveexplicit t) (sol nil) (ssol nil) (alist nil)
-				(mult-save) (mult-acc) (fun-inverse) (xxx) (acc))
+;; Attempt to find a kernel X such that the expression e has the form F(X)
+;; and the kernel X satisfies the predicate kernel-p. Generally, a kernel
+;; X has the form  X = f(XX), where f has a known inverse. When e has
+;; the form F(X), first attempt to solve for F(X)=0 for X; and second, for each
+;; of these solutions, solve X for x. This second solve process is done by
+;; solve-by-kernelize-helper.
 
-      ;; When there is exactly one kernel and e = algebraic-function(X), we win.
-    	(cond ((and (second q) (null (cdr (second q))) ($freeof q (first q))
-			       (algebraic-p ker (list z)))
-    		 (setq ker (second q))
-    		 (setq e (first q))  ;function of the kernel only
-    		 (setq z (cdar ker)) ;unknown
-    		 (setq ker (caar ker)) ;the kernel
-         (cond ((and ker z (algebraic-p e (list z))) ;second argument of algebraic-p is a CL list!
-                 (mtell "e = ~M ~%" e)
-							   (setq sol (solve-algebraic-equation e z)) ;; sol is a CL list of solutions
-								 (mtell "sol = ~M ~%" sol)
-								 (setq sol (mapcar #'$rhs (cdr sol)))
-								 ($jimmy ker sol x))
-				       (t nil))))))
+;; The optional argument m (default 1) is the multiplicity of the solution so
+;; far, and cnd (default t) is a Maxima logical expression. Solutions that do
+;; not satsify cnd are spurious and are expunged.
 
+;; Locally we set $solveexplicit to true, but I'm not sure this matters.
+;; That is because solve-single-equation returns an empty list for both
+;; equations it cannot solve and for solutions with an empty soltuion set,
+;; I think.
+(defun solve-by-kernelize (e x kernel-p &optional (m 1) (cnd t))
+  (let ((q (kernelize-fn e kernel-p)) (ker) (z) ($solveexplicit t) (sol nil))
+      ;; When there is exactly one kernel X such that e has the form F(X), we win.
+			(setq ker (second q))
+    	(cond ((and ker (null (cdr ker)) ($freeof x (first q)))
+          	 (setq e (first q))  ;function of the kernel only
+          	 (setq z (cdar ker)) ;z is the new unknown
+          	 (setq ker (caar ker)) ;the kernel
+		      	 (setq sol (solve-single-equation e z m t)) ; sol is a Maxima list of solutions
+             (multiplicities-fix-up sol 1)
+						 (setq sol (mapcar #'third (cdr sol))) ;extract the rhs of each solution
+				     (solve-by-kernelize-helper ker sol x (cdr $multiplicities) cnd)) ;for each member of sx sol, solve ker = sx
+		  (t nil))))
 
 (defun new-to-poly-solve (e x cnd)
 

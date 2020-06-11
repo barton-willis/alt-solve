@@ -1853,10 +1853,10 @@ ssolve(cos(x-5) - cos(5-x),x);
 [x = %r0]$
 
 ssolve(cos(x^2-1)=0,x);
-[x=-(sqrt(8*%pi*%z0+2*%pi+4)/2),
-x=sqrt(8*%pi*%z0+2*%pi+4)/2,
-x=-(sqrt(8*%pi*%z1-2*%pi+4)/2),
-x=sqrt(8*%pi*%z1-2*%pi+4)/2]$
+[x=-sqrt(4*%pi*%z0+%pi+2)/sqrt(2),
+x=sqrt(4*%pi*%z0+%pi+2)/sqrt(2),
+x=-sqrt(4*%pi*%z1-%pi+2)/sqrt(2),
+x=sqrt(4*%pi*%z1-%pi+2)/sqrt(2)]$
 
 ssolve(log(x-sqrt(x-1)) = 0,x);
 [x=1,x=2]$
