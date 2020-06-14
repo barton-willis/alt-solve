@@ -1,5 +1,5 @@
 (checked_sol(p,x) := block([sol : solve(p,x)],
-   map(lambda([s], ratsimp(?sqrtdenest(subst(s,p)))), sol)),0);
+   map(lambda([s], ratsimp(sqrtdenest(subst(s,p)))), sol)),0);
 0$
 
 /* degree one */
@@ -362,7 +362,7 @@ multiplicities;
 
 (extra_simp(e) :=
   block([algebraic : true, domain : complex],
-     radcan(expand(rootscontract(ratsimp(?sqrtdenest(e)))))),0);
+     radcan(expand(rootscontract(ratsimp(sqrtdenest(e)))))),0);
 0$
 
 block([domain : real], ratsimp(extra_simp(rectform(block([algebraic : true, domain : complex],
@@ -397,7 +397,7 @@ multiplicities;
 seem to be up to the task. I'll compromise and do a simple-minded numerical check. */
 
 (numerically_checked_sol(p,x, digits,r) := block([sol : solve(p,x),fpprec : digits,slop : 10^r],
-     map(lambda([q], is(q < slop/10^digits)), map(lambda([s], cabs(bfloat(rectform(ratsimp(?sqrtdenest(subst(s, p))))))) , sol))),0);
+     map(lambda([q], is(q < slop/10^digits)), map(lambda([s], cabs(bfloat(rectform(ratsimp(sqrtdenest(subst(s, p))))))) , sol))),0);
 0$
 
 numerically_checked_sol(x^4-2*x^3+x+1,x,25,1);

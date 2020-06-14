@@ -2447,7 +2447,7 @@ algsys(subst(q=sqrt(3),eqs),[x,y]);
 [[x = 1200-800*sqrt(3),y = 400*sqrt(3)-800],
  [x = 800*sqrt(3)-1200,y = 400*sqrt(3)-800]];
 
-block([algebraic : true],  radcan(?sqrtdenest (algsys(subst(q=1-sqrt(3),eqs),[x,y]))));
+block([algebraic : true],  radcan(sqrtdenest (algsys(subst(q=1-sqrt(3),eqs),[x,y]))));
 [[x = -((25*2^(9/2))/3^(1/4)), y = 800/sqrt(3)],
  [x =   (25*2^(9/2))/3^(1/4),  y = 800/sqrt(3)]];
 

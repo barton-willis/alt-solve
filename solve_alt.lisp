@@ -82,6 +82,10 @@
 	($load "solve-mcond.lisp")
 	($load "myalgsys.lisp"))
 
+;; not sure about this!
+	(setq $display2d t)
+	(setq *alt-display2d* 'MYDISPLA )
+
 ;;; This code fixes polynomialp. When polynomialp is fixed, this code should be expunged.
 ;;; To avoid some test failures with rtest_solve_rec, put this definition in
 ;;; linearalgebra/polynomialp.lisp
@@ -101,6 +105,7 @@
     		*defint-assumptions*
 			  xm* xn* mul*))
 
+(defun $sqrtdenest (x) (sqrtdenest x))
 ;; In expression e, convert all floats (binary64) and bigfloats to their exact rational value
 ;; and put that value inside a labeled box. Doing this allows solve to preserve the exact
 ;; value of floats.
@@ -169,30 +174,21 @@
 
   (let ((cntx) (nonatom-subst nil)	(sol) (g) ($domain '$complex) ($negdistrib t)
       	($algebraic t)	($gcd '$subres))
-	   ;; Allow eqlist and varl to be sets.
-	   (when ($setp eqlist)
-		   (setq eqlist ($listify eqlist)))
-
-	   (when ($setp varl)
-		   (setq varl ($listify varl)))
-
 	   ;; When varl is empty, solve for the nonconstant variables. Set varl to a CL list and remove
 	   ;; duplicates. For variable ordering, we take the same order as listofvars.
-
 	   (setq varl
 			 (remove-duplicates
 			 	(cond
 					((null varl) (let (($listconstvars nil)) (cdr ($listofvars eqlist))))
-					(($listp varl) (cdr varl))
+					((or ($listp varl) ($setp varl)) (cdr varl))
 					(t (list varl)))
 			   :test #'alike1 :from-end t))
 
 	 ;; Create the equation list (this is a CL list, not Maxima list). For a inequation that isn't equality,
 	 ;; throw an error.
-	 (setq eqlist (if ($listp eqlist) (cdr eqlist) (list eqlist)))
-
-	 (setq eqlist (mapcar #'$ratdisrep eqlist)) ;new--fixes bugs in rtest_matrixexp.
-
+	 (setq eqlist (if (or ($listp eqlist) ($setp eqlist)) (cdr eqlist) (list eqlist)))
+   (setq eqlist (mapcar #'(lambda (q) (keep-float ($ratdisrep q))) eqlist))
+	 ;(setq eqlist (mapcar #'$ratdisrep eqlist)) ;new--fixes bugs in rtest_matrixexp.
 	 (when (some #'(lambda (q) (and (consp q) (consp (car q))
 									(member (caar q) (list 'mnotequal 'mgreaterp 'mlessp 'mgeqp 'mleqp) :test #'eq))) eqlist)
 		 (merror (intl:gettext "Solve: cannot solve inequalities.~%")))
@@ -233,12 +229,12 @@
 			  ((null varl)
 		  	   (when $solvenullwarn
 			   	    (mtell (intl:gettext "Solve: variable list is empty, continuing anyway.~%")))
-           (cond ((every #'zerop1 eqlist)
+           (cond ((every #'zerop1 (mapcar #'unkeep-float eqlist))
 				           (simplifya (take '(mlist) (take '(mequal) 0 0)) t)) ;was '$all
 						  	 (t (take '(mlist)))))
 
 			  ((and (null (cdr varl)) (null (cdr eqlist))) ; one equation and one unknown
-			   (setq eqlist (keep-float (car eqlist)))
+			   (setq eqlist (car eqlist))
 			   (setq sol ($substitute nonatom-subst (solve-single-equation eqlist (car varl))))
 				 ;; Unfortunate fix up for when multiplicities don't get set correctly
 				 (multiplicities-fix-up sol 1)
@@ -251,8 +247,9 @@
           (unkeep-float sol))
 
         ((null (cdr eqlist)) ;one equation, several unknowns
-				 (mtell "Yes--one equation, several unknows ~%")
-				 (solve-one-equation-several-unknowns eqlist varl))
+				 (setq sol (solve-one-equation-several-unknowns eqlist varl))
+				 (setq sol ($substitute nonatom-subst sol))
+				 (unkeep-float sol))
 
 			  ;; several equations, several unknowns.
 			  (t
@@ -315,6 +312,10 @@
 	(let ((q) ($opsubst t))
 		(setq q ($substitute #'(lambda (s) (take '(mgreaterp) s 0)) '$isnonnegative_p cnd))
 		(setq q ($substitute #'(lambda (a b) (take '(mor) a b)) '%or q))
+
+	;	(setq q ($substitute #'(lambda (a b) (take '($equal) a b)) 'mequal q))
+  ;  (setq q ($substitute #'(lambda (a b) (take '($notequal) a b)) 'mnotequal q))
+
 		($substitute #'(lambda (a b) (take '(mand) a b)) '%and q)))
 
 ;;; True iff the operator of e is mor.
@@ -332,6 +333,8 @@
 
 (defun my-ask-boolean (cnd)
   (setq cnd (to-poly-fixup cnd)) ;convert to-poly style to Maxima predicates
+	;;;(setq cnd (let (($trigexpand t)) ($trigexpand ($expand cnd))))
+
 	(let ((context $context) ;workaround for a bug somewhere?
          (answer (mfuncall '$maybe cnd))) ; not ready for this?
 
@@ -430,11 +433,14 @@
 		(setq $multiplicities (simplifya (cons '(mlist) (mapcar #'cdr alist)) t))
 		(simplifya (cons '(mlist) (mapcar #'car alist)) t)))
 
+;; Remove the members of sol that do not satisfy the Maxima predicate cnd. When
+;; a solution is removed, the multiplicities needs to be adjusted.
 (defun filter-solution-x (sol cnd)
   (let ((alist nil))
 	  (cond
 			((not ($listp sol)) sol) ;pass through for non listp solution (for example nil or $all)
 			(t
+				  ;(mtell "sol = ~M cnd = ~M ~%" sol cnd)
           ;; Unfortunate workaround for bug when multiplicities are not set
 			  	(multiplicities-fix-up sol 1)
        		;; First build an association list of solution.multiplicity. Second call filter-solution.
@@ -738,12 +744,12 @@
 ;; as the reason for an empty solution (inconsistent, unable to solve) and mabye some other
 ;; data as well. Something like:
 
-(defstruct solutions
-	 sol
-	 multiplicities
-	 explicit
-	 consistent
-	 method)
+;;(defstruct solutions
+;;	 sol
+;;	 multiplicities
+;;	 explicit
+;;	 consistent
+;;	 method)
 
 ;;; For each member aa of the CL list a, solve ker = aa for x. The kernel ker
 ;;; has the form F(x), where Maxima know the inverse of F and X depends on x.
@@ -790,8 +796,9 @@
 
 ;; Locally we set $solveexplicit to true, but I'm not sure this matters.
 ;; That is because solve-single-equation returns an empty list for both
-;; equations it cannot solve and for solutions with an empty soltuion set,
+;; equations it cannot solve and for solutions with an empty solution set,
 ;; I think.
+
 (defun solve-by-kernelize (e x kernel-p &optional (m 1) (cnd t))
   (let ((q (kernelize-fn e kernel-p)) (ker) (z) ($solveexplicit t) (sol nil))
       ;; When there is exactly one kernel X such that e has the form F(X), we win.
@@ -801,7 +808,7 @@
           	 (setq z (cdar ker)) ;z is the new unknown
           	 (setq ker (caar ker)) ;the kernel
 		      	 (setq sol (solve-single-equation e z m t)) ; sol is a Maxima list of solutions
-             (multiplicities-fix-up sol 1)
+             (multiplicities-fix-up sol 1) ;workaround when multiplicities aren't set
 						 (setq sol (mapcar #'third (cdr sol))) ;extract the rhs of each solution
 				     (solve-by-kernelize-helper ker sol x (cdr $multiplicities) cnd)) ;for each member of sx sol, solve ker = sx
 		  (t nil))))
@@ -922,7 +929,7 @@
 
 	  (let ((e) ($listconstvars nil) ($solveexplicit t) (sol) (ssol nil) (eqvars))
             (setq eqs (mapcar #'(lambda (q) (try-to-crunch-to-zero q
-							       #'apply-identities-unconditionally  #'sqrtdenest #'fullratsimp)) eqs))
+							       #'apply-identities-unconditionally  #'$sqrtdenest #'fullratsimp)) eqs))
 
 				    (cond
 							((null eqs)

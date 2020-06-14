@@ -6,11 +6,12 @@ load(solve_alt)$
 
 file_search_tests : append(file_search_maxima, file_search_tests)$
 
-push(["rtest_solve2", [14, 15, 16, 19, 22, 30, 46, 66, 69]], testsuite_files)$
+push(["rtest_solve2", [14, 15, 16, 19, 22, 30, 46, 66, 69,
+79,80,83,84,85,86]], testsuite_files)$
 
 push(["rtest_solve",[214, 260, 287, 295, 326, 327, 340, 342, 343,
      376, 395, 396, 397, 398,
-     400, 470, 472, 485,
+     400, 470, 472, 464, 485,
      500, 512, 514, 525, 538, 544, 553, 558, 574, 575, 581, 582, 583,
      584, 585]],testsuite_files)$
 
@@ -27,5 +28,9 @@ push(["rtest_extra_solve", []], testsuite_files)$
 push(["rtest_mcond_solve", [8]], testsuite_files)$
 
 push(["rtest_algebraic_solve", []], testsuite_files)$
+
+share_testsuite_files : delete("rtest_pytranslate", share_testsuite_files);
+
+share_testsuite_files : delete("rtest_solve_rec", share_testsuite_files);
 
 run_testsuite(share_tests = true);

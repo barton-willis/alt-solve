@@ -301,6 +301,15 @@ ssolve(cos(x)+8/(sqrt(cos(x))+1)-20/3,x);
 x=2*%pi*%z2-acos((3*sqrt(105)-31)/6)+%pi,
 x=2*%pi*%z3+acos((3*sqrt(105)-31)/6)-%pi]$
 
+ssolve(x^2+1.2,[x^2,p]);
+[[p=%r0,x^2=-1.2]]$
+
+ssolve(x^2+1.2b0,[x^2,p]);
+[[p=%r0,x^2=-1.2b0]]$
+
+ssolve(x^2+12/10,[x^2,p]);
+[[p=%r0,x^2=-6/5]]$
+
 (print("run time = ",elapsed_run_time() - thyme),0);
 0$
 

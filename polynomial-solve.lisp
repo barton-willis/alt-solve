@@ -9,7 +9,7 @@
 ;;; Make an extra effort to simplify the expression e to zero, but respect principal branch
 ;;; cuts (don't use radcan, for example). We first apply the functions in the &rest parameter
 ;;; fns and finish with a final call to sratsimp. Possible members of fns include
-;;; #'sqrtdenest, #'fullratsimp, and #'apply-identities-conditionally.
+;;; #'$sqrtdenest, #'fullratsimp, and #'apply-identities-conditionally.
 (defun try-to-crunch-to-zero (e &rest fns) "Ratsimp with algebraic = true and domain = complex."
 		(let (($algebraic t) ($domain '$complex))
 		  (dolist (fk fns)
@@ -149,7 +149,7 @@
 			  (setq $multiplicities nil)
 			  (setq m (mapcar #'third (cdr m))) ;remove '(mlist) and extract $rhs
 			  ;;  simplify members of m, remove vanishing members, and sort according to solve-expr-size.
-        (setq m (mapcar #'(lambda (q) (try-to-crunch-to-zero q #'sqrtdenest #'fullratsimp)) m))
+        (setq m (mapcar #'(lambda (q) (try-to-crunch-to-zero q #'$sqrtdenest #'fullratsimp)) m))
 				(setq m (remove-if #'zerop1 m))
 				(setq m (sort m #'(lambda(a b) (< (solve-expr-size a) (solve-expr-size b)))))
 			  (setq m (car m)) ;set m to the "simplest" member of m
