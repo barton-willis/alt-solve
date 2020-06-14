@@ -283,7 +283,7 @@
 ;;; constant.)
 (defun equation-simplify (e &optional (m 1))
   (let ((cnd t))
-   	(setq e ($ratdisrep (meqhk e))) ;do a=b -->a-b & convert to general form
+   	(setq e (meqhk e)) ;do a=b --> a-b (already in general form)
    	(cond
 	   	;; Without this simplifcation, solve((x+1)^(3/2),x) has the wrong multiplicity.
 		  ;; The method solve-by-kernelize sometimes misshandles multiplicities--in part,
