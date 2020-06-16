@@ -188,7 +188,6 @@
 	 ;; throw an error.
 	 (setq eqlist (if (or ($listp eqlist) ($setp eqlist)) (cdr eqlist) (list eqlist)))
    (setq eqlist (mapcar #'(lambda (q) (keep-float ($ratdisrep q))) eqlist))
-	 ;(setq eqlist (mapcar #'$ratdisrep eqlist)) ;new--fixes bugs in rtest_matrixexp.
 	 (when (some #'(lambda (q) (and (consp q) (consp (car q))
 									(member (caar q) (list 'mnotequal 'mgreaterp 'mlessp 'mgeqp 'mleqp) :test #'eq))) eqlist)
 		 (merror (intl:gettext "Solve: cannot solve inequalities.~%")))
@@ -200,26 +199,23 @@
 	 (when (some #'mnump varl)
 	   (merror (intl:gettext "Solve: all variables must not be numbers.~%")))
 
-	 ;(setq eqlist (remove-if #'zerop1 eqlist))
-	 ;;Eliminate duplicate equations.
-	 ;(setq eqlist (delete-duplicates eqlist :test #'alike1 :from-end t))
-	 (setq eqlist (cdr (simplifya (cons '($set) eqlist) t)))
-
+	 ;;Eliminate duplicate equations--jusing delete-duplicates is maybe a tiny bit
+	 ;; more efficient than using (cdr (simplifya (cons '($set) eqlist) t)))
+	 (setq eqlist (delete-duplicates eqlist :test #'alike1 :from-end t))
 	 ;; stuff for solving for nonatoms. Should check for problems such as solve([xxx,yyy],[f(x),x])
 	 (dolist (xxx varl)
 		 (cond (($mapatom xxx)
 			      	(push (take '(mequal) xxx xxx) nonatom-subst))
 		       (t
 		    	    (setq g (gensym))
-			        (push (take '(mequal) xxx g) nonatom-subst)
+			        (push (take '(mequal) g xxx) nonatom-subst)
 			        (setq eqlist (mapcar #'(lambda (q) ($ratsubst g xxx q)) eqlist))
 			        ;; is freeof xxx sufficiently strong?
 			        (when (some #'(lambda (q) (not ($freeof xxx q))) eqlist)
 		      	  	 (merror (intl:gettext "Solve: Cannot solve for non-atom.~%"))))))
 
-	 (setq nonatom-subst (reverse nonatom-subst))
-	 (setq varl (mapcar #'third nonatom-subst))  ;was $rhs
-	 (setq nonatom-subst (mapcar #'$reverse nonatom-subst))
+	 (setq nonatom-subst (reverse nonatom-subst)) ; seems like the thing to do.
+	 (setq varl (mapcar #'second nonatom-subst))  ;from a=b, extract a
 	 (push '(mlist) nonatom-subst)
 
 	 (unwind-protect
@@ -333,8 +329,7 @@
 
 (defun my-ask-boolean (cnd)
   (setq cnd (to-poly-fixup cnd)) ;convert to-poly style to Maxima predicates
-	;;;(setq cnd (let (($trigexpand t)) ($trigexpand ($expand cnd))))
-
+	;(setq cnd (let (($trigexpand t)) ($trigexpand ($expand cnd))))
 	(let ((context $context) ;workaround for a bug somewhere?
          (answer (mfuncall '$maybe cnd))) ; not ready for this?
 
