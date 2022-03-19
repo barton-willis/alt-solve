@@ -10,7 +10,7 @@
 ;;; for general use.
 (defmvar $solveverbose nil)
 
-;;; This option varible is a mistake--it doesn't control what it's name likley
+;;; This option variable is a mistake--it doesn't control what it's name likely
 ;;; implies: it only controls the default generation of %rXXX or %cXXX variables, it
 ;;; does not limit the solution set to the set of reals or complex numbers.
 (defmvar $solve_domain '$complex)
@@ -80,6 +80,7 @@
 	($load "one-to-one-solve.lisp")
 	($load "fourier_elim.lisp")
 	($load "solve-mcond.lisp")
+	($load "lambert-solve.lisp")
 	($load "myalgsys.lisp"))
 
 ;; not sure about this!
@@ -152,7 +153,7 @@
 ;;; especially useful for rtest files. The function sort-solutions (defined
 ;;; in solve_alt_top.lisp) sorts solutions and the multiplicities. The function
 ;;; nicedummies re-indexes %rXXX, %cXXX, and %zXXX variables to start with zero.
-;;; The call to $expand(XXX,0,0) does the simplifcation in the current context.
+;;; The call to $expand(XXX,0,0) does the simplification in the current context.
 (defmfun $ssolve (e x)
 		(let (($%rnum 0)) (sort-solutions ($expand ($nicedummies ($solve e x)) 0 0) nil)))
 
@@ -199,7 +200,7 @@
 	 (when (some #'mnump varl)
 	   (merror (intl:gettext "Solve: all variables must not be numbers.~%")))
 
-	 ;;Eliminate duplicate equations--jusing delete-duplicates is maybe a tiny bit
+	 ;;Eliminate duplicate equations--Using delete-duplicates is maybe a tiny bit
 	 ;; more efficient than using (cdr (simplifya (cons '($set) eqlist) t)))
 	 (setq eqlist (delete-duplicates eqlist :test #'alike1 :from-end t))
 	 ;; stuff for solving for nonatoms. Should check for problems such as solve([xxx,yyy],[f(x),x])
@@ -275,7 +276,7 @@
 ;;; to do that, the solve variables would need to be an argument.
 
 ;;; equation-simplify could do more; for example abs(X) --> X and constant * X --> X
-;;; (well maybe we'd need to give equation-symplify a way to know when a term is
+;;; (well maybe we'd need to give equation-simplify a way to know when a term is
 ;;; constant.)
 (defun equation-simplify (e &optional (m 1))
   (let ((cnd t))
@@ -509,7 +510,7 @@
 			((mtimesp ($factor e))
 			  (product-solver ($factor e) x m use-trigsolve cnd))
 
-		  ((filter-solution-x (lambert-w-solve e x m) cnd))
+		 ;; ((filter-solution-x (lambert-w-solve e x m) cnd))
 
 			((and $use_to_poly (new-to-poly-solve e x cnd)))
 
@@ -639,9 +640,7 @@
      (setq subs (get-algebraic-relations pterms x g))
 
 		 (when $solveverbose
-			  (print `(subs = ,subs))
-				($read))
-
+			  (print `(subs = ,subs)))
 
 		 ;; look for a substitution that is linear in g--call it submin.
 		 (when (cdr subs)
@@ -736,7 +735,7 @@
 
 ;; It would be lovely, I think, if all methods returned solutions as association lists of
 ;; the form solution.multiplicity. Or maybe return a structure that gives information such
-;; as the reason for an empty solution (inconsistent, unable to solve) and mabye some other
+;; as the reason for an empty solution (inconsistent, unable to solve) and maybe some other
 ;; data as well. Something like:
 
 ;;(defstruct solutions
@@ -944,7 +943,7 @@
 											  		(simplifya (cons '($set) vars) t)))
 
 							 (cond (($emptyp eqvars)
-						        	 ;; No unknowns but remaining nontrival equation(s), so return nil
+						        	 ;; No unknowns but remaining nontrivial equation(s), so return nil
 					        		 (mtell (intl:gettext "Unable to show that ~M vanishes; returning the empty list ~%")
 												  (cons '(mlist) eqs))
 					       	 	   nil)
@@ -1026,7 +1025,7 @@
 								   (msetq '$multiplicities (simplifya mx t))
 								   (push '(mlist) sol)
 								   (simplifya sol t))
-								(t ;no dependant variables, but nonvanishing equation
+								(t ;no dependent variables, but nonvanishing equation
 									 (setq mx (push '(mlist) nil))
 									 (msetq '$multiplicities (simplifya mx t))
 									 (push '(mlist) sol)
@@ -1052,8 +1051,8 @@
 ;;; Solve the CL list of equations e for the CL list of variables in x.
 (defun solve-multiple-equations (e x) "Solve the CL list of equations e for the CL list of unknowns x"
 
-  (mtell "top of solve-multiple-equations e  = ~M x = ~M ~%"
-   	(cons '(mlist) e) (cons '(mlist) x))
+  ;;(mtell "top of solve-multiple-equations e  = ~M x = ~M ~%"
+  ;; 	(cons '(mlist) e) (cons '(mlist) x))
 
  (let ((cnd) (sol) (ee nil))
   ;; We don't attempt to determine the multiplicity for multiple equations. Thus we reset
@@ -1091,7 +1090,7 @@
           ;; The check (< (length x) 4) is silly. But the rtest_lsquares test generates
 					;; some huge equations that have no chance at a symbolic solution. For these
 					;; cases, algsys runs for a long time and consumes huge amounts of memory. I'm
-					;; not sure if these tests even finsh.
+					;; not sure if these tests even finish.
 					((and (every #'(lambda (q) (algebraic-p q (cdr x))) (cdr e)) (< (length x) 4))
 					 ; (mtell "Solving algebraic system e = ~M x = ~M ~%" e x)
 					  (solve-algebraic-equation-system e x))
@@ -1191,19 +1190,6 @@
 		   ;(rootsort *roots)  not needed, I think
 		   ; (rootsort *failures)
 		 nil))
-
-;;; This function solves x*exp(x) = constant. The match to x*exp(x) must be explicit; for example,
-;;; lambert-w-solve is unable to solve x*exp(x)/2 = 10. When no solution is found, return nil. Of course,
-;;; this function could be extended to solve more equations in terms of the Lambert W function.
-(defun lambert-w-solve (e x m) "solve x exp(x) = constant where m is the multiplicity so far"
-  (let ((sol) (cnst (sratsimp (sub (mult x (take '(mexpt) '$%e x)) e))))
-		(cond (($freeof x cnst) ; match with x*exp(x) = cnst
-			       (setq $multiplicities (take '(mlist) m))
-			       (setq sol (cond ((eql $solve_inverse_package $multivalued_inverse)
-		   	         		(take '(%generalized_lambert_w) (my-new-variable '$integer) cnst))
-							    	(t (take '(%lambert_w) cnst))))
-						(opcons 'mlist (take '(mequal) x sol)))
-		    	(t nil))))
 
 ;;; Let's make sure that the old functions solvecubic and solvequartic are not called. So, replace the
 ;;; function definitions with a call to merror.

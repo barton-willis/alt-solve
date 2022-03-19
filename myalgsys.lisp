@@ -9,7 +9,7 @@
 ;   ($load "grobner"))
 
 (defun $myalgsys (ee x)
-   (mtell "Top of my algsys; eq = ~M  x = ~M  ~%" ee x)
+   ;(mtell "Top of my algsys; eq = ~M  x = ~M  ~%" ee x)
    (setq ee (unkeep-float ee))
    ;;merror when ee or x isn't a Maxima list.
    (when (or (not ($listp ee)) (not ($listp x)))

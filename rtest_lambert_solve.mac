@@ -1,0 +1,12 @@
+ssolve(x*exp(x) = 107,x);
+[x=generalized_lambert_w(%z0,107)]$
+
+ssolve(x*exp(x)=a,x);
+[x=generalized_lambert_w(%z0,a)]$
+
+ssolve(x*exp(-x) = -107,x);
+[x=generalized_lambert_w(%z0,107)]$
+
+ssolve(x*exp(x) + 19/(2+ x*exp(x)) = 42,x);
+[x=generalized_lambert_w(%z0,20\-sqrt(465)),
+   x=generalized_lambert_w(%z1,sqrt(465)+20)]$

@@ -1530,7 +1530,7 @@ block([ask_mode : false], ssolve(x*exp(x) = a,x));
 block([ask_mode : false],ssolve(exp(x) = a/x,x));
 [x=generalized_lambert_w(%z0,a)]$
 
-block([ask_mode : false],ssolve(56 * %e^(x) * x - a,x));
+ssolve(56 * %e^(x) * x - a,x);
 [x=generalized_lambert_w(%z0,a/56)]$
 
 block([ask_mode : false], ssolve(5^x * x = 42,x));
