@@ -1009,6 +1009,7 @@
 
 (defun solve-one-equation-several-unknowns (e x)
    (let ((freevars nil) (dependvars nil) (sol nil) (mx nil))
+     (print "xxx")
      (setq e (car e))
 	   (dolist (xk x) ;indentify free and nonfree variables
 		    (cond (($freeof xk e)
@@ -1044,6 +1045,7 @@
 							($expand sol 0 0)))))
 
 
+(print "xxx")
 (defun inconsistent-equation-p (eq vars)
    (and (not (zerop1 eq)) ($lfreeof vars eq)))
 
@@ -1191,6 +1193,7 @@
 		   ; (rootsort *failures)
 		 nil))
 
+(print "aaa")
 ;;; Let's make sure that the old functions solvecubic and solvequartic are not called. So, replace the
 ;;; function definitions with a call to merror.
 (defun solvecubic (x) (declare (ignore x)) (merror "solvecubic"))
